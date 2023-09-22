@@ -11,14 +11,14 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 include(CGRAFunctions)
 
 # Project Name
-set(CGRA_PROJECT "base" CACHE STRING "CGRA Project Name")
+set(CGRA_PROJECT "infinite-driver" CACHE STRING "Infinite Driving Simulator")
 
 # Project
 project("CGRA_PROJECT_${CGRA_PROJECT}" CXX C)
 
 # Enable IDE Project Folders
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT base)
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT "infinite-driver")
 
 
 #########################################################
