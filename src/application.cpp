@@ -10,13 +10,13 @@
 
 
 // project
-#include "application.hpp"
-#include "cgra/cgra_geometry.hpp"
-#include "cgra/cgra_gui.hpp"
-#include "cgra/cgra_image.hpp"
-#include "cgra/cgra_shader.hpp"
-#include "cgra/cgra_wavefront.hpp"
-#include <imgui_stdlib.h>
+#include <application.hpp>
+#include <cgra/cgra_geometry.hpp>
+#include <cgra/cgra_gui.hpp>
+#include <cgra/cgra_image.hpp>
+#include <cgra/cgra_shader.hpp>
+#include <cgra/cgra_wavefront.hpp>
+#include <misc/cpp/imgui_stdlib.h>
 
 
 using namespace std;

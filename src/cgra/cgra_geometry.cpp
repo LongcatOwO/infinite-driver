@@ -8,8 +8,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 // project
-#include "cgra_geometry.hpp"
-#include "cgra_shader.hpp"
+#include <cgra/cgra_geometry.hpp>
+#include <cgra/cgra_shader.hpp>
 #include <opengl.hpp>
 
 namespace cgra {
