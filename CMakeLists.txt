@@ -20,7 +20,6 @@ project("CGRA_PROJECT_${CGRA_PROJECT}" CXX C)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT "infinite-driver")
 
-
 #########################################################
 # Force Output Directories
 # In general, this isn't a very friendly thing to do, but
@@ -31,15 +30,13 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
-
-
 #########################################################
 # Find OpenGL
 #########################################################
 
+# silences warning on (my) Linux
+set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL REQUIRED)
-
-
 
 #########################################################
 # Find OpenMP
@@ -52,22 +49,19 @@ if (OPENMP_FOUND)
 	add_definitions(-DCGRA_HAVE_OPENMP)
 endif()
 
-
-
 #########################################################
 # Include Subprojects
 #########################################################
 
-add_subdirectory("${PROJECT_SOURCE_DIR}/ext/glfw")
-include_directories("${PROJECT_SOURCE_DIR}/ext/glfw/include")
-add_subdirectory("${PROJECT_SOURCE_DIR}/ext/glew-1.10.0")
+add_subdirectory("${PROJECT_SOURCE_DIR}/ext/glfw-3.3.8")
+include_directories("${PROJECT_SOURCE_DIR}/ext/glfw-3.3.8/include")
+add_subdirectory("${PROJECT_SOURCE_DIR}/ext/glew-2.2.0/build/cmake")
+include_directories("${PROJECT_SOURCE_DIR}/ext/glew-2.2.0/include")
 add_subdirectory("${PROJECT_SOURCE_DIR}/ext/stb")
 add_subdirectory("${PROJECT_SOURCE_DIR}/ext/imgui")
-add_subdirectory("${PROJECT_SOURCE_DIR}/ext/glm")
+add_subdirectory("${PROJECT_SOURCE_DIR}/ext/glm-0.9.9.8")
 include_directories("${PROJECT_SOURCE_DIR}/ext") # Add ext in order to access glm subfiles (hack)
 include_directories("${PROJECT_SOURCE_DIR}/src") # Add source to include directory
-
-
 
 #########################################################
 # Set Compiler Flags
@@ -112,8 +106,6 @@ elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "^(Apple)?Clang$")
 	# Promote missing return to error
 	add_compile_options(-Werror=return-type)
 endif()
-
-
 
 #########################################################
 # Source Files
