@@ -8,6 +8,7 @@
 #include "application.hpp"
 #include "opengl.hpp"
 #include "cgra/cgra_gui.hpp"
+#include "imgui/backends/imgui_impl_glfw.h"
 
 
 using namespace std;
@@ -21,7 +22,7 @@ namespace {
 	void scrollCallback(GLFWwindow *win, double xoffset, double yoffset);
 	void keyCallback(GLFWwindow *win, int key, int scancode, int action, int mods);
 	void charCallback(GLFWwindow *win, unsigned int c);
-	void APIENTRY debugCallback(GLenum, GLenum, GLuint, GLenum, GLsizei, const GLchar*, GLvoid*);
+	void APIENTRY debugCallback(GLenum, GLenum, GLuint, GLenum, GLsizei, const GLchar*, const GLvoid*);
 
 	// global static pointer to application once we create it
 	// nessesary for interfacing with the GLFW callbacks
@@ -79,6 +80,8 @@ int main() {
 	cout << "Using OpenGL " << glGetString(GL_VERSION) << endl;
 	cout << "Using GLEW " << glewGetString(GLEW_VERSION) << endl;
 	cout << "Using GLFW " << glfwMajor << "." << glfwMinor << "." << glfwRevision << endl;
+    cout << "Using " << GLM_VERSION_MESSAGE << endl;
+    cout << "Using Dear ImGui " << IMGUI_VERSION << endl;
 
 	// enable GL_ARB_debug_output if available (not necessary, just helpful)
 	if (glfwExtensionSupported("GL_ARB_debug_output")) {
@@ -93,20 +96,19 @@ int main() {
 		cout << "GL_ARB_debug_output not available. No worries." << endl;
 	}
 
+    // attach input callbacks to window
+    glfwSetCursorPosCallback(window, cursorPosCallback);
+    glfwSetMouseButtonCallback(window, mouseButtonCallback);
+    glfwSetScrollCallback(window, scrollCallback);
+    glfwSetKeyCallback(window, keyCallback);
+    glfwSetCharCallback(window, charCallback);
+
 	// initialize ImGui
-	if (!cgra::gui::init(window)) {
+	if (!cgra::gui::init(window, true)) {
 		cerr << "Error: Could not initialize ImGui" << endl;
 		abort(); // unrecoverable error
 	}
 
-	// attach input callbacks to window
-	glfwSetCursorPosCallback(window, cursorPosCallback);
-	glfwSetMouseButtonCallback(window, mouseButtonCallback);
-	glfwSetScrollCallback(window, scrollCallback);
-	glfwSetKeyCallback(window, keyCallback);
-	glfwSetCharCallback(window, charCallback);
-
-	
 	// create the application object (and a global pointer to it)
 	Application application(window);
 	application_ptr = &application;
@@ -148,9 +150,6 @@ namespace {
 
 
 	void mouseButtonCallback(GLFWwindow *win, int button, int action, int mods) {
-		// forward callback to ImGui
-		cgra::gui::mouseButtonCallback(win, button, action, mods);
-
 		// if not captured then foward to application
 		ImGuiIO& io = ImGui::GetIO();
 		if (io.WantCaptureMouse) return;
@@ -159,9 +158,6 @@ namespace {
 
 
 	void scrollCallback(GLFWwindow *win, double xoffset, double yoffset) {
-		// forward callback to ImGui
-		cgra::gui::scrollCallback(win, xoffset, yoffset);
-
 		// if not captured then foward to application
 		ImGuiIO& io = ImGui::GetIO();
 		if (io.WantCaptureMouse) return;
@@ -170,9 +166,6 @@ namespace {
 
 
 	void keyCallback(GLFWwindow *win, int key, int scancode, int action, int mods) {
-		// forward callback to ImGui
-		cgra::gui::keyCallback(win, key, scancode, action, mods);
-
 		// if not captured then foward to application
 		ImGuiIO& io = ImGui::GetIO();
 		if (io.WantCaptureKeyboard) return;
@@ -181,9 +174,6 @@ namespace {
 
 
 	void charCallback(GLFWwindow *win, unsigned int c) {
-		// forward callback to ImGui
-		cgra::gui::charCallback(win, c);
-
 		// if not captured then foward to application
 		ImGuiIO& io = ImGui::GetIO();
 		if (io.WantTextInput) return;
@@ -248,7 +238,7 @@ namespace {
 	}
 
 	// actually define the function
-	void APIENTRY debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei, const GLchar* message, GLvoid*) {
+	void APIENTRY debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei, const GLchar* message, const GLvoid*) {
 		// Don't report notification messages
 		if (severity == GL_DEBUG_SEVERITY_NOTIFICATION) return;
 
