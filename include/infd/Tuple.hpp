@@ -1,49 +1,15 @@
 #pragma once
 
-// #include <type_traits>
-
-/**
- * Backing implementation for variadic Tuple type.
- *
- * @tparam index Index of element within tuple
- * @tparam T Type of this tuple frame
- * @tparam Args Types of following tuple frames
- */
-// template <std::size_t index, typename T = void, typename... Args>
-// class TupleImpl : public TupleImpl<index+1, Args...> {
-// protected:
-//     T _contents;
-// 
-//     template <std::size_t indexST, typename ...argsST>
-//     static TupleImpl<indexST, argsST...>* tuple_shift(TupleImpl<indexST, argsST...> *tuple) {
-//         return tuple;
-//     }
-// public:
-//     template<std::size_t Index>
-//     auto& at() {
-//         return std::remove_reference_t<decltype(*tuple_shift<Index>(this))>::_contents;
-//     }
-// };
-
-/**
- * Backing implementation for zero args case.
- * @tparam index Unused
- */
-// template<std::size_t index>
-// class TupleImpl<index, void> {
-// };
-// 
-// // Alias the tuple type to hide the index argument
-// template<typename... Args>
-// using Tuple = TupleImpl<0, Args...>;
-
-
 #include <cstddef>
 #include <type_traits>
 
-
 namespace infd {
 	namespace detail {
+        /**
+         * Backing implementation for a single leaf within a Tuple.
+         * @tparam Index Index of this element within the tuple
+         * @tparam T Type of this element
+         */
 		template <std::size_t Index, typename T>
 		class TupleLeaf {
 		public:
@@ -67,6 +33,12 @@ namespace infd {
 		template <typename IndexSequence, typename ...Ts>
 		class TupleImpl;
 
+        /**
+         * Backing implementation of Tuple, with element indexes baked into the templates.
+         *
+         * @tparam Is Variadic indexes of Tuple elements
+         * @tparam Ts Variadic types of Tuple elements
+         */
 		template <std::size_t ...Is, typename ...Ts>
 		class TupleImpl<std::index_sequence<Is...>, Ts...> : 
 			public TupleLeaf<Is, Ts>... {
@@ -79,6 +51,11 @@ namespace infd {
 		};
 	}
 
+    /**
+     * A const-length type-safe implementation of a Tuple for easy groupings of related data types.
+     *
+     * @tparam Ts Variadic types of Tuple elements
+     */
 	template <typename ...Ts>
 	class Tuple : detail::TupleImpl<std::make_index_sequence<sizeof...(Ts)>, Ts...> {
 		using base = detail::TupleImpl<std::make_index_sequence<sizeof...(Ts)>, Ts...>;
