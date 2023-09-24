@@ -36,7 +36,7 @@ void basic_model::draw(const glm::mat4 &view, const glm::mat4 proj) {
 }
 
 
-Application::Application(GLFWwindow *window) : m_window(window), m_model {infd::load_wavefront_data(CGRA_SRCDIR + std::string("/res//assets//teapot.obj")).build()} {
+Application::Application(GLFWwindow *window) : m_window(window), m_model {infd::loadWavefrontCases(CGRA_SRCDIR + std::string("/res//assets//teapot.obj")).build()} {
 	
 	shader_builder sb;
     sb.set_shader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//color_vert.glsl"));

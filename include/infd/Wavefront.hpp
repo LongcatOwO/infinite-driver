@@ -12,7 +12,7 @@
 
 namespace infd {
 
-	inline infd::GLMeshBuilder load_wavefront_data(const std::string &filename) {
+	inline infd::GLMeshBuilder loadWavefrontCases(const std::string &filename) {
 		using namespace std;
 		using namespace glm;
 
