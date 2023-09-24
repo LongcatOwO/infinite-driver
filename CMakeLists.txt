@@ -172,6 +172,7 @@ PRIVATE
 	"${PROJECT_SOURCE_DIR}/src/cgra/cgra_gui.cpp"
 	"${PROJECT_SOURCE_DIR}/src/cgra/cgra_mesh.cpp"
 	"${PROJECT_SOURCE_DIR}/src/cgra/cgra_shader.cpp"
+	"${PROJECT_SOURCE_DIR}/src/infd/GLMesh.cpp"
 )
 
 
