@@ -7,12 +7,12 @@
 #include <vector>
 
 // project
-#include <cgra/cgra_mesh.hpp>
+#include <infd/GLMesh.hpp>
 
 
-namespace cgra {
+namespace infd {
 
-	inline mesh_builder load_wavefront_data(const std::string &filename) {
+	inline infd::GLMeshBuilder loadWavefrontCases(const std::string &filename) {
 		using namespace std;
 		using namespace glm;
 
@@ -153,15 +153,15 @@ namespace cgra {
 		// todo create spherical UV's if they don't exist
 
 		// create mesh data
-		mesh_builder mb;
+		infd::GLMeshBuilder mb{};
 
 		for (unsigned int i = 0; i < wv_vertices.size(); ++i) {
-			mb.push_index(i);
-			mb.push_vertex(mesh_vertex{
+			mb.indices.emplace_back((GLuint)i);
+			mb.vertices.emplace_back(
 				positions[wv_vertices[i].p],
 				normals[wv_vertices[i].n],
 				uvs[wv_vertices[i].t]
-			});
+			);
 		}
 
 		return mb;

@@ -15,7 +15,7 @@
 #include <cgra/cgra_gui.hpp>
 #include <cgra/cgra_image.hpp>
 #include <cgra/cgra_shader.hpp>
-#include <cgra/cgra_wavefront.hpp>
+#include <infd/Wavefront.hpp>
 #include <misc/cpp/imgui_stdlib.h>
 
 
@@ -36,7 +36,7 @@ void basic_model::draw(const glm::mat4 &view, const glm::mat4 proj) {
 }
 
 
-Application::Application(GLFWwindow *window) : m_window(window) {
+Application::Application(GLFWwindow *window) : m_window(window), m_model {infd::loadWavefrontCases(CGRA_SRCDIR + std::string("/res//assets//teapot.obj")).build()} {
 	
 	shader_builder sb;
     sb.set_shader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//color_vert.glsl"));
@@ -44,7 +44,6 @@ Application::Application(GLFWwindow *window) : m_window(window) {
 	GLuint shader = sb.build();
 
 	m_model.shader = shader;
-	m_model.mesh = load_wavefront_data(CGRA_SRCDIR + std::string("/res//assets//teapot.obj")).build();
 	m_model.color = vec3(1, 0, 0);
 }
 
@@ -159,6 +158,9 @@ void Application::scrollCallback(double xoffset, double yoffset) {
 
 void Application::keyCallback(int key, int scancode, int action, int mods) {
 	(void)key, (void)scancode, (void)action, (void)mods; // currently un-used
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+        std::exit(0);
+    }
 }
 
 
