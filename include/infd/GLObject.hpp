@@ -50,6 +50,7 @@ namespace infd {
 	};
 
 
+
 	/*
 	 * Provide the method construct() and destruct() for 
 	 * constructing and destructing OpenGL objects.
@@ -254,14 +255,10 @@ namespace infd {
 		}
 
 		/*
-		 * Implicit conversion to GLuint. Note that it is intended by design to make 
-		 * this method only callable for non-const instance due to the fact that 
-		 * most OpenGL functions alter the state of the OpenGL object referenced 
-		 * by the handler in some way.
-		 *
+		 * Implicit conversion to GLuint. 		 
 		 * @return the OpenGL object handler of this GLObject.
 		 */
-		operator GLuint() noexcept {
+		operator GLuint() const noexcept {
 			return _id;
 		}
 	};
