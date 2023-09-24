@@ -7,8 +7,7 @@
 
 // project
 #include <opengl.hpp>
-#include <cgra/cgra_mesh.hpp>
-#include <cgra/cgra_wavefront.hpp>
+#include <infd/GLMesh.hpp>
 #include <skeleton_model.hpp>
 
 

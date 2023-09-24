@@ -7,11 +7,10 @@
 #include <vector>
 
 // project
-#include <cgra/cgra_mesh.hpp>
 #include <infd/GLMesh.hpp>
 
 
-namespace cgra {
+namespace infd {
 
 	inline infd::GLMeshBuilder load_wavefront_data(const std::string &filename) {
 		using namespace std;
