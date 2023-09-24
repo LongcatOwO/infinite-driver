@@ -158,6 +158,9 @@ void Application::scrollCallback(double xoffset, double yoffset) {
 
 void Application::keyCallback(int key, int scancode, int action, int mods) {
 	(void)key, (void)scancode, (void)action, (void)mods; // currently un-used
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+        std::exit(0);
+    }
 }
 
 
