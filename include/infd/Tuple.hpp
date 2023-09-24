@@ -2,6 +2,13 @@
 
 #include <type_traits>
 
+/**
+ * Backing implementation for variadic Tuple type.
+ *
+ * @tparam index Index of element within tuple
+ * @tparam T Type of this tuple frame
+ * @tparam Args Types of following tuple frames
+ */
 template <std::size_t index, typename T = void, typename... Args>
 class TupleImpl : public TupleImpl<index+1, Args...> {
 protected:
@@ -18,9 +25,14 @@ public:
     }
 };
 
+/**
+ * Backing implementation for zero args case.
+ * @tparam index Unused
+ */
 template<std::size_t index>
 class TupleImpl<index, void> {
 };
 
+// Alias the tuple type to hide the index argument
 template<typename... Args>
 using Tuple = TupleImpl<0, Args...>;
