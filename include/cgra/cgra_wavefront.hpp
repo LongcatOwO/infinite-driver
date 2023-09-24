@@ -1,5 +1,4 @@
-#ifndef _CGRA_CGRA_WAVEFRONT_HPP_
-#define _CGRA_CGRA_WAVEFRONT_HPP_
+#pragma once
 
 // std
 #include <fstream>
@@ -168,6 +167,3 @@ namespace cgra {
 		return mb;
 	}
 }
-
-
-#endif

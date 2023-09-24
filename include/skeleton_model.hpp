@@ -4,8 +4,9 @@
 #include <glm/glm.hpp>
 
 // project
-#include "opengl.hpp"
-#include "skeleton.hpp"
+#include <opengl.hpp>
+#include <skeleton.hpp>
+
 
 class skeleton_model {
 private:

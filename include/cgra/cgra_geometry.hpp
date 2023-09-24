@@ -1,5 +1,4 @@
-#ifndef _CGRA_CGRA_GEOMETRY_HPP_
-#define _CGRA_CGRA_GEOMETRY_HPP_
+#pragma once
 
 #include <glm/glm.hpp>
 
@@ -23,5 +22,3 @@ namespace cgra {
 	// sets up a shader and draws a grid straight to the current framebuffer
 	void drawGrid(const glm::mat4 &view, const glm::mat4 &proj);
 }
-
-#endif

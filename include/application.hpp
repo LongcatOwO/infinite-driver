@@ -6,9 +6,9 @@
 #include <glm/gtc/type_ptr.hpp>
 
 // project
-#include "opengl.hpp"
-#include "cgra/cgra_mesh.hpp"
-#include "skeleton_model.hpp"
+#include <opengl.hpp>
+#include <cgra/cgra_mesh.hpp>
+#include <skeleton_model.hpp>
 
 
 // Basic model that holds the shader, mesh and transform for drawing.

@@ -1,5 +1,4 @@
-#ifndef _CGRA_CGRA_MESH_HPP_
-#define _CGRA_CGRA_MESH_HPP_
+#pragma once
 
 // std
 #include <iostream>
@@ -91,6 +90,3 @@ namespace cgra {
 	};
 
 }
-
-
-#endif

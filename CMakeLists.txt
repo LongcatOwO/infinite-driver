@@ -162,17 +162,16 @@ PRIVATE
 #########################################################
 # Source files
 #########################################################
-
 target_sources(${CGRA_PROJECT}
 PRIVATE
-	src/application.cpp
-	src/main.cpp
-	src/skeleton.cpp
-	src/skeleton_model.cpp
-	src/cgra/cgra_geometry.cpp
-	src/cgra/cgra_gui.cpp
-	src/cgra/cgra_mesh.cpp
-	src/cgra/cgra_shader.cpp
+	"${PROJECT_SOURCE_DIR}/src/application.cpp"
+	"${PROJECT_SOURCE_DIR}/src/main.cpp"
+	"${PROJECT_SOURCE_DIR}/src/skeleton.cpp"
+	"${PROJECT_SOURCE_DIR}/src/skeleton_model.cpp"
+	"${PROJECT_SOURCE_DIR}/src/cgra/cgra_geometry.cpp"
+	"${PROJECT_SOURCE_DIR}/src/cgra/cgra_gui.cpp"
+	"${PROJECT_SOURCE_DIR}/src/cgra/cgra_mesh.cpp"
+	"${PROJECT_SOURCE_DIR}/src/cgra/cgra_shader.cpp"
 )
 
 

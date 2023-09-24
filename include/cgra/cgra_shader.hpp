@@ -1,5 +1,4 @@
-#ifndef _CGRA_CGRA_SHADER_HPP_
-#define _CGRA_CGRA_SHADER_HPP_
+#pragma once
 
 // std
 #include <map>
@@ -25,5 +24,3 @@ namespace cgra {
 	};
 
 }
-
-#endif

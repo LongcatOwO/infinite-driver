@@ -1,5 +1,4 @@
-#ifndef _CGRA_CGRA_GUI_HPP_
-#define _CGRA_CGRA_GUI_HPP_
+#pragma once
 
 // imgui
 #include <imgui.h>
@@ -15,5 +14,3 @@ namespace cgra::gui {
 	void render();
 	void shutdown();
 }
-
-#endif

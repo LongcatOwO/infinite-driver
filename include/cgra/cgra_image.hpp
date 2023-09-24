@@ -1,5 +1,4 @@
-#ifndef _CGRA_CGRA_IMAGE_HPP_
-#define _CGRA_CGRA_IMAGE_HPP_
+#pragma once
 
 // std
 #include <cassert>
@@ -103,5 +102,3 @@ namespace cgra {
 	};
 
 }
-
-#endif

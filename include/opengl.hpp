@@ -13,7 +13,6 @@
 #include <GLFW/glfw3.h>
 
 
-
 namespace cgra {
 
 	// helper function that draws an empty OpenGL object
