@@ -8,6 +8,7 @@
 // project
 #include <opengl.hpp>
 #include <cgra/cgra_mesh.hpp>
+#include <cgra/cgra_wavefront.hpp>
 #include <skeleton_model.hpp>
 
 
@@ -16,10 +17,12 @@
 // including textures for texture mapping etc.
 struct basic_model {
 	GLuint shader = 0;
-	cgra::gl_mesh mesh;
+	infd::GLMesh mesh;
 	glm::vec3 color{0.7};
 	glm::mat4 modelTransform{1.0};
-	GLuint texture;
+	GLuint texture = 0;
+
+    explicit basic_model(infd::GLMesh _mesh) : mesh{_mesh} {}
 
 	void draw(const glm::mat4 &view, const glm::mat4 proj);
 };
