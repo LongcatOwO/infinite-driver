@@ -1,9 +1,9 @@
 #include <iostream>
-#include "imgui/backends/imgui_impl_opengl3.h"
-#include "imgui/backends/imgui_impl_glfw.h"
+#include <imgui_impl_opengl3.h>
+#include <imgui_impl_glfw.h>
 
 // project
-#include "cgra_gui.hpp"
+#include <cgra/cgra_gui.hpp>
 
 using namespace std;
 

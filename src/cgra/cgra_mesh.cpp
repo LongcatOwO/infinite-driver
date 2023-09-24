@@ -3,7 +3,7 @@
 #include <stdexcept>
 
 // project
-#include "cgra_mesh.hpp"
+#include <cgra/cgra_mesh.hpp>
 
 
 

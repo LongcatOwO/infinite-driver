@@ -7,7 +7,7 @@
 #include <vector>
 
 // project
-#include "cgra_shader.hpp"
+#include <cgra/cgra_shader.hpp>
 #include <opengl.hpp>
 
 

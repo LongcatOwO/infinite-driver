@@ -3,12 +3,10 @@
 #                    Ben Allen & Joshua Scott                  #
 ################################################################
 
-# require new behaviour of: CMP0054
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.15)
 
-# Include Extra CMake capabilities
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
-include(CGRAFunctions)
+# export compile commands
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Project Name
 set(CGRA_PROJECT "infinite-driver" CACHE STRING "Infinite Driving Simulator")
@@ -20,6 +18,7 @@ project("CGRA_PROJECT_${CGRA_PROJECT}" CXX C)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT "infinite-driver")
 
+
 #########################################################
 # Force Output Directories
 # In general, this isn't a very friendly thing to do, but
@@ -30,87 +29,152 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
+
 #########################################################
-# Find OpenGL
+# External Libraries
 #########################################################
 
-# silences warning on (my) Linux
-set(OpenGL_GL_PREFERENCE GLVND)
+set(PROJECT_LIB_DIR "${PROJECT_SOURCE_DIR}/lib")
+
+# OpenGL
 find_package(OpenGL REQUIRED)
 
-#########################################################
-# Find OpenMP
-#########################################################
-
+# OpenMP
 find_package(OpenMP)
-if (OPENMP_FOUND)
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-	add_definitions(-DCGRA_HAVE_OPENMP)
-endif()
+
+# GLEW
+add_subdirectory("${PROJECT_LIB_DIR}/glew-2.1.0/build/cmake")
+
+# GLM
+add_subdirectory("${PROJECT_LIB_DIR}/glm-0.9.9.8")
+
+# GLFW
+add_subdirectory("${PROJECT_LIB_DIR}/glfw-3.3.8")
+
+# ImGUI
+add_subdirectory("${PROJECT_LIB_DIR}/imgui")
+target_link_libraries(imgui PRIVATE glfw)
+
+# STB
+add_subdirectory("${PROJECT_LIB_DIR}/stb")
+
 
 #########################################################
-# Include Subprojects
+# Main project executable
 #########################################################
 
-add_subdirectory("${PROJECT_SOURCE_DIR}/ext/glfw-3.3.8")
-include_directories("${PROJECT_SOURCE_DIR}/ext/glfw-3.3.8/include")
-add_subdirectory("${PROJECT_SOURCE_DIR}/ext/glew-2.2.0/build/cmake")
-include_directories("${PROJECT_SOURCE_DIR}/ext/glew-2.2.0/include")
-add_subdirectory("${PROJECT_SOURCE_DIR}/ext/stb")
-add_subdirectory("${PROJECT_SOURCE_DIR}/ext/imgui")
-add_subdirectory("${PROJECT_SOURCE_DIR}/ext/glm-0.9.9.8")
-include_directories("${PROJECT_SOURCE_DIR}/ext") # Add ext in order to access glm subfiles (hack)
-include_directories("${PROJECT_SOURCE_DIR}/src") # Add source to include directory
+add_executable(${CGRA_PROJECT})
+
+target_compile_definitions(${CGRA_PROJECT} PRIVATE "-DCGRA_SRCDIR=\"${PROJECT_SOURCE_DIR}\"")
+
 
 #########################################################
-# Set Compiler Flags
+# set compiler flags
 #########################################################
 
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-	# # C++ latest
-	add_compile_options(/std:c++latest)
-	# UTF-8 source and execution charsets
-	add_compile_options(/utf-8)
-	# Full normal warnings, multithreaded build
-	add_compile_options(/W4 /MP)
-	# Disable C4800: forcing X to bool (performance warning)
-	add_compile_options(/wd4800)
-elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-	add_compile_options("$<$<NOT:$<CONFIG:Debug>>:-O2>")
-	# # C++20, full normal warnings
-	add_compile_options(-std=c++20 -Wall -Wextra -pedantic)
-	# don't export by default
-	add_compile_options(-fvisibility=hidden)
-	# Threading support, enable SSE2
-	add_compile_options(-pthread -msse2)
-	# Promote missing return to error
-	add_compile_options(-Werror=return-type)
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+	target_compile_options(${CGRA_PROJECT}
+	PRIVATE
+		/std:c++latest
+		/utf-8
+		/W4 					# full normal warnings
+		/MP 					# multithreaded build
+		/wd4800 				# disable c4800: forcing x to bool (performance warning)
+	)
+
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+	target_compile_options(${CGRA_PROJECT}
+	PRIVATE
+		$<$<NOT:$<CONFIG:Debug>>:-O2>
+		-std=c++20
+		-Wall -Wextra -Wpedantic 	# full normal warnings
+		-fvisibility=hidden 		# don't export by default
+		-pthread -msse2 			# threading support, enable sse2
+		-Werror=return-type 		# promote missing return to error
+	)
+
 	# enable coloured output if gcc >= 4.9
 	execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
 	if (GCC_VERSION VERSION_GREATER 4.9 OR GCC_VERSION VERSION_EQUAL 4.9)
 		add_compile_options(-fdiagnostics-color)
 	endif()
-elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "^(Apple)?Clang$")
-	add_compile_options("$<$<NOT:$<CONFIG:Debug>>:-O2>")
-	# # C++20, full normal warnings
-	add_compile_options(-std=c++20 -Wall -Wextra -pedantic)
-	# don't export by default
-	add_compile_options(-fvisibility=hidden)
-	# Threading support, enable SSE2
-	add_compile_options(-pthread)
-	# don't enable msse on processors that don't have it (apple silicon)
-	if(NOT "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "arm64")
-		add_compile_options(-msse2)
+
+elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "^(Apple)?Clang$")
+	target_compile_options(${CGRA_PROJECT}
+	PRIVATE
+		$<$<NOT:$<CONFIG:Debug>>:-O2>
+		-std=c++20
+		-Wall -Wextra -Wpedantic 	# full normal warnings
+		-fvisibility=hidden 		# don't export by default
+		-pthread 					# threading support
+		-Werror=return-type 		# promote missing return to error
+	)
+
+	# enable msse on all processors except those that don't have it (apple silicon)
+	if (NOT "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "ARM64")
+		target_compile_options(${CGRA_PROJECT}
+		PRIVATE
+			-msse2
+		)
 	endif ()
-	# Promote missing return to error
-	add_compile_options(-Werror=return-type)
+
 endif()
 
+
 #########################################################
-# Source Files
+# Link Libraries
 #########################################################
 
-add_subdirectory(src) # Primary source files
-add_subdirectory(res) # Resources like shaders (show up in IDE)
+target_link_libraries(${CGRA_PROJECT}
+PRIVATE
+	OpenGL::GL
+	glew
+	glm::glm
+	glfw
+	imgui
+	stb
+)
+
+if (OPENMP_FOUND)
+	target_compile_options(${CGRA_PROJECT}
+	PRIVATE
+		${OpenMP_C_FLAGS}
+		${OpenMP_CXX_FLAGS}
+	)
+	target_compile_definitions(${CGRA_PROJECT}
+	PRIVATE
+		CGRA_HAVE_OPENMP
+	)
+endif()
+
+
+#########################################################
+# Include directories
+#########################################################
+
+target_include_directories(${CGRA_PROJECT}
+PRIVATE
+	"${PROJECT_LIB_DIR}/glew-2.1.0/include"
+	"${PROJECT_SOURCE_DIR}/include"
+)
+
+
+#########################################################
+# Source files
+#########################################################
+target_sources(${CGRA_PROJECT}
+PRIVATE
+	"${PROJECT_SOURCE_DIR}/src/application.cpp"
+	"${PROJECT_SOURCE_DIR}/src/main.cpp"
+	"${PROJECT_SOURCE_DIR}/src/skeleton.cpp"
+	"${PROJECT_SOURCE_DIR}/src/skeleton_model.cpp"
+	"${PROJECT_SOURCE_DIR}/src/cgra/cgra_geometry.cpp"
+	"${PROJECT_SOURCE_DIR}/src/cgra/cgra_gui.cpp"
+	"${PROJECT_SOURCE_DIR}/src/cgra/cgra_mesh.cpp"
+	"${PROJECT_SOURCE_DIR}/src/cgra/cgra_shader.cpp"
+)
+
+
+add_subdirectory(res) # add the resource folder to make it appear in IDE
+
 set_property(TARGET ${CGRA_PROJECT} PROPERTY FOLDER "CGRA")

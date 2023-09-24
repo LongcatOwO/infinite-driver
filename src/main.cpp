@@ -5,10 +5,10 @@
 #include <stdexcept>
 
 // project
-#include "application.hpp"
-#include "opengl.hpp"
-#include "cgra/cgra_gui.hpp"
-#include "imgui/backends/imgui_impl_glfw.h"
+#include <application.hpp>
+#include <opengl.hpp>
+#include <cgra/cgra_gui.hpp>
+#include <imgui_impl_glfw.h>
 
 
 using namespace std;
