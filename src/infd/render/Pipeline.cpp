@@ -14,8 +14,8 @@
 
 infd::render::Pipeline::Pipeline() {
     ShaderBuilder main_shader_build;
-    main_shader_build.setShader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//color_vert.glsl"));
-    main_shader_build.setShader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//color_frag.glsl"));
+    main_shader_build.setShader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//phong_vert.glsl"));
+    main_shader_build.setShader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//phong_frag.glsl"));
     _main_shader = main_shader_build.build();
 }
 
@@ -24,12 +24,14 @@ void infd::render::Pipeline::render(std::vector<RenderItem> items, const infd::r
     {
         auto program_guard = scopedProgram(_main_shader);
 
-        glUniform3fv(glGetUniformLocation(_main_shader, "uColor"), 1, glm::value_ptr(vec3{1, 0, 1}));
+        glUniform3fv(glGetUniformLocation(_main_shader, "uColour"), 1, glm::value_ptr(vec3{1, 0, 1}));
+        glUniform3fv(glGetUniformLocation(_main_shader, "uLightPos"), 1, glm::value_ptr(vec3{10}));
         glUniformMatrix4fv(glGetUniformLocation(_main_shader, "uProjectionMatrix"), 1, false, value_ptr(settings.temp_proj));
+        glUniformMatrix4fv(glGetUniformLocation(_main_shader, "uViewMatrix"), 1, false, value_ptr(settings.temp_view));
 
         for (auto& item : items) {
-            auto model_view = settings.temp_view * item.transform;
-            glUniformMatrix4fv(glGetUniformLocation(_main_shader, "uModelViewMatrix"), 1, false, value_ptr(model_view));
+            glUniformMatrix4fv(glGetUniformLocation(_main_shader, "uModelMatrix"), 1, false, value_ptr(item.transform));
+            glUniform1f(glGetUniformLocation(_main_shader, "uShininess"), item.material.shininess);
             item.mesh.draw();
         }
     }

@@ -14,10 +14,10 @@ namespace infd::render {
     // component system gets worked out
     struct RenderItem {
         GLMesh mesh;
-        glm::mat4 transform;
+        glm::mat4 transform {1};
 
         struct {
-            float shinyness = 0.5;
+            float shininess = 0.5;
             // etc
         } material;
     };
