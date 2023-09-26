@@ -10,9 +10,10 @@
 namespace infd::render {
     Renderer::Renderer() {
         _test_items = {
-                {loadWavefrontCases(CGRA_SRCDIR + std::string("/res//assets//plane.obj")).build(), glm::mat4 {1}, {}},
-                {loadWavefrontCases(CGRA_SRCDIR + std::string("/res//assets//teapot.obj")).build(), glm::translate(glm::mat4 {1}, {0, 3, 2}), {}},
-//                {loadWavefrontCases(CGRA_SRCDIR + std::string("/res//assets//better_bunny.obj")).build(), glm::translate(glm::mat4 {1}, {0, 2, -1.5}), {}}
+                {loadWavefrontCases(CGRA_SRCDIR + std::string("/res//assets//plane.obj")).build(), glm::scale(glm::mat4 {1}, {5, 0, 5}), {}},
+                {loadWavefrontCases(CGRA_SRCDIR + std::string("/res//assets//teapot.obj")).build(), glm::translate(glm::mat4 {1}, {-5, 3, 2}), {}},
+                {loadWavefrontCases(CGRA_SRCDIR + std::string("/res//assets//better_bunny.obj")).build(),
+                    glm::translate(glm::mat4 {1}, {8, 4, -1.5}) * glm::scale(glm::mat4 {1}, glm::vec3 {75}), {}}
         };
     }
 
