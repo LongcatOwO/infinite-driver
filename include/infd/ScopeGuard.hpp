@@ -95,4 +95,15 @@ namespace infd {
 			[=] { glDetachShader(program, shader); }
 		);
 	}
+
+    /*
+	 * @return 	a ScopeGuard which will immediately call glUseProgram(program) upon this function call.
+	 * 			The returned ScopeGuard will call glUseProgram(0) when it gets destroyed.
+	 */
+    inline auto scopedProgram(const GLObject<GLObjectType::Program> &program) noexcept {
+        return ScopeGuard(
+                [=] { glUseProgram(program); },
+                [ ] { glUseProgram(0); }
+        );
+    }
 }
