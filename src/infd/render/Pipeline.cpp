@@ -13,10 +13,7 @@
 
 
 infd::render::Pipeline::Pipeline() {
-    ShaderBuilder main_shader_build;
-    main_shader_build.setShader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//phong_vert.glsl"));
-    main_shader_build.setShader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//phong_frag.glsl"));
-    _main_shader = main_shader_build.build();
+    loadShaders();
 }
 
 void infd::render::Pipeline::render(std::vector<RenderItem> items, const infd::render::RenderSettings& settings) {
@@ -35,6 +32,13 @@ void infd::render::Pipeline::render(std::vector<RenderItem> items, const infd::r
             item.mesh.draw();
         }
     }
+}
+
+void infd::render::Pipeline::loadShaders() {
+    ShaderBuilder main_shader_build;
+    main_shader_build.setShader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//phong_vert.glsl"));
+    main_shader_build.setShader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//phong_frag.glsl"));
+    _main_shader = main_shader_build.build();
 }
 
 

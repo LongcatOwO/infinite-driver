@@ -25,4 +25,8 @@ namespace infd::render {
         render(_test_items);
     }
 
+    void Renderer::reloadShaders() {
+        _pipeline.loadShaders();
+    }
+
 }

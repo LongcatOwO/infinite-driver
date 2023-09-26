@@ -16,5 +16,6 @@ namespace infd::render {
      public:
         Pipeline();
         void render(std::vector<RenderItem> items, const RenderSettings& settings);
+        void loadShaders();
     };
 }

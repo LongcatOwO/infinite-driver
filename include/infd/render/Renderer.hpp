@@ -17,7 +17,7 @@ namespace infd::render {
         glm::mat4 transform {1};
 
         struct {
-            float shininess = 0.5;
+            float shininess = 20;
             // etc
         } material;
     };
@@ -45,5 +45,6 @@ namespace infd::render {
         void setRenderSettings(RenderSettings settings) {
             _render_settings = settings;
         };
+        void reloadShaders();
     };
 }

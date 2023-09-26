@@ -117,11 +117,9 @@ void Application::renderGUI() {
 	
 	ImGui::Separator();
 
-	// example of how to use input boxes
-	std::string exampleInput;
-	if (ImGui::InputText("example input", &exampleInput)) {
-		cout << "example input changed to " << exampleInput << endl;
-	}
+	if (ImGui::Button("Reload shaders")) {
+        _renderer.reloadShaders();
+    }
 
 	// finish creating window
 	ImGui::End();
