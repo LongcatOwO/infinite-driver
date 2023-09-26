@@ -226,6 +226,16 @@ namespace infd {
 		}
 
 		/*
+		 * Constructs a new instance sharing the same OpenGL object handler.
+		 * This constructor has exactly the same effect as copy constructor
+		 *
+		 * @param other the GLObject whose handler will be shared.
+		 */
+		GLObject(GLObject &&other) noexcept : _id(other._id), _counter(other._counter) {
+			++*_counter;
+		}
+
+		/*
 		 * Shares the OpenGL object handler with other.
 		 * Destroy the old handler if it is no longer being referenced after this assignment.
 		 *
@@ -240,8 +250,21 @@ namespace infd {
 			return *this;
 		}
 
-		GLObject(GLObject &&other) 					= delete;
-		GLObject& operator=(GLObject &&other) 		= delete;
+		/*
+		 * Shares the OpenGL object handler with other.
+		 * Destroy the old handler if it is no longer being referenced after this assignment.
+		 * This assignment operator has exactly the same effect as copy assignment.
+		 *
+		 * @param other the GLObject whose handler will be shared.
+		 */
+		GLObject& operator=(GLObject &&other) noexcept {
+			if (*this == other) return *this;
+			destruct();
+			_id = other._id;
+			_counter = other._counter;
+			++*_counter;
+			return *this;
+		}
 
 		~GLObject() {
 			destruct();
