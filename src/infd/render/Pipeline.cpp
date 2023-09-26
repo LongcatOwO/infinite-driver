@@ -41,4 +41,8 @@ void infd::render::Pipeline::loadShaders() {
     _main_shader = main_shader_build.build();
 }
 
+void infd::render::Pipeline::screenSizeChanged(std::pair<int, int> new_size) {
+
+}
+
 

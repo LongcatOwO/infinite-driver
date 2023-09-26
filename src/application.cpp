@@ -44,6 +44,11 @@ Application::Application(GLFWwindow *window) : m_window(window), m_model {infd::
 
 	m_model.shader = sb.build();
 	m_model.color = vec3(1, 0, 0);
+
+    int width, height;
+    glfwGetFramebufferSize(m_window, &width, &height);
+    _render_settings.screen_size = {width, height};
+    _renderer.setRenderSettings(_render_settings);
 }
 
 
@@ -81,7 +86,7 @@ void Application::render() {
 
 	// draw the model
     if (_use_render_pipeline) {
-        _render_settings.screen = {width, height};
+        _render_settings.screen_size = {width, height};
         _render_settings.temp_view = view;
         _render_settings.temp_proj = proj;
         _renderer.setRenderSettings(_render_settings);

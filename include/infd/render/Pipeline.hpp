@@ -17,5 +17,6 @@ namespace infd::render {
         Pipeline();
         void render(std::vector<RenderItem> items, const RenderSettings& settings);
         void loadShaders();
+        void screenSizeChanged(std::pair<int, int> new_size);
     };
 }
