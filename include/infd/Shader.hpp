@@ -15,7 +15,7 @@ namespace infd {
 
 	class ShaderBuilder {
 	private:
-		std::map<GLenum, GLShader> m_shaders;
+		std::map<GLenum, GLShader> _shaders;
 
 	public:
 		ShaderBuilder() { }

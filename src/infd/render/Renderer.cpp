@@ -8,11 +8,13 @@
 #include "infd/Wavefront.hpp"
 
 namespace infd::render {
-    std::vector<RenderItem> Renderer::_test_items {
-            {loadWavefrontCases(CGRA_SRCDIR + std::string("/res//assets//plane.obj")).build(), glm::mat4 {1}, {}},
-            {loadWavefrontCases(CGRA_SRCDIR + std::string("/res//assets//teapot.obj")).build(), glm::translate(glm::mat4 {1}, {0, 3, 2}), {}},
-            {loadWavefrontCases(CGRA_SRCDIR + std::string("/res//assets//bunny.obj")).build(), glm::translate(glm::mat4 {1}, {0, 2, -1.5}), {}}
-    };
+    Renderer::Renderer() {
+        _test_items = {
+                {loadWavefrontCases(CGRA_SRCDIR + std::string("/res//assets//plane.obj")).build(), glm::mat4 {1}, {}},
+                {loadWavefrontCases(CGRA_SRCDIR + std::string("/res//assets//teapot.obj")).build(), glm::translate(glm::mat4 {1}, {0, 3, 2}), {}},
+                {loadWavefrontCases(CGRA_SRCDIR + std::string("/res//assets//bunny.obj")).build(), glm::translate(glm::mat4 {1}, {0, 2, -1.5}), {}}
+        };
+    }
 
     void Renderer::render(std::vector<RenderItem> items) {
         _pipeline.render(std::move(items), _render_settings);
@@ -21,5 +23,7 @@ namespace infd::render {
     void Renderer::render() {
         render(_test_items);
     }
+
+
 
 }

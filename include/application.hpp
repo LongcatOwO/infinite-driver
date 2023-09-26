@@ -8,6 +8,7 @@
 // project
 #include <opengl.hpp>
 #include <infd/GLMesh.hpp>
+#include <infd/GLObject.hpp>
 #include <skeleton_model.hpp>
 
 
@@ -15,7 +16,7 @@
 // Can be copied and modified for adding in extra information for drawing
 // including textures for texture mapping etc.
 struct basic_model {
-	GLuint shader = 0;
+	infd::GLProgram shader;
 	infd::GLMesh mesh;
 	glm::vec3 color{0.7};
 	glm::mat4 modelTransform{1.0};

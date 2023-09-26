@@ -14,8 +14,8 @@
 #include <cgra/cgra_geometry.hpp>
 #include <cgra/cgra_gui.hpp>
 #include <cgra/cgra_image.hpp>
-#include <cgra/cgra_shader.hpp>
 #include <infd/Wavefront.hpp>
+#include <infd/Shader.hpp>
 #include <misc/cpp/imgui_stdlib.h>
 
 
@@ -38,12 +38,11 @@ void basic_model::draw(const glm::mat4 &view, const glm::mat4 proj) {
 
 Application::Application(GLFWwindow *window) : m_window(window), m_model {infd::loadWavefrontCases(CGRA_SRCDIR + std::string("/res//assets//teapot.obj")).build()} {
 	
-	shader_builder sb;
-    sb.set_shader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//color_vert.glsl"));
-	sb.set_shader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//color_frag.glsl"));
-	GLuint shader = sb.build();
+	infd::ShaderBuilder sb;
+    sb.setShader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//color_vert.glsl"));
+	sb.setShader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//color_frag.glsl"));
 
-	m_model.shader = shader;
+	m_model.shader = sb.build();
 	m_model.color = vec3(1, 0, 0);
 }
 

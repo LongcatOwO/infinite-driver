@@ -35,8 +35,9 @@ namespace infd::render {
     class Renderer {
         Pipeline _pipeline;
         RenderSettings _render_settings;
-        static std::vector<RenderItem> _test_items;
+        std::vector<RenderItem> _test_items;
      public:
+        Renderer();
         // (or later takes/finds scene tree and walks that itself
         void render(std::vector<RenderItem> items);
         // temp for testing, uses dummy info
