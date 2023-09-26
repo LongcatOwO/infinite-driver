@@ -14,7 +14,7 @@ namespace infd::render {
     // component system gets worked out
     struct RenderItem {
         GLMesh mesh;
-        glm::mat4 transform_option_1;
+        glm::mat4 transform;
 
         struct {
             float shinyness = 0.5;

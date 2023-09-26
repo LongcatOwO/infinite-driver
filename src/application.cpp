@@ -80,7 +80,15 @@ void Application::render() {
 
 
 	// draw the model
-	m_model.draw(view, proj);
+    if (_use_render_pipeline) {
+        _render_settings.screen = {width, height};
+        _render_settings.temp_view = view;
+        _render_settings.temp_proj = proj;
+        _renderer.setRenderSettings(_render_settings);
+        _renderer.render();
+    } else {
+        m_model.draw(view, proj);
+    }
 }
 
 
@@ -104,6 +112,7 @@ void Application::renderGUI() {
 	ImGui::Checkbox("Wireframe", &m_showWireframe);
 	ImGui::SameLine();
 	if (ImGui::Button("Screenshot")) rgba_image::screenshot(true);
+    ImGui::Checkbox("Use render pipeline", &_use_render_pipeline);
 
 	
 	ImGui::Separator();

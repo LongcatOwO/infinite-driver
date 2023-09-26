@@ -9,7 +9,8 @@
 #include <opengl.hpp>
 #include <infd/GLMesh.hpp>
 #include <infd/GLObject.hpp>
-#include <skeleton_model.hpp>
+#include <infd/render/Renderer.hpp>
+//#include <skeleton_model.hpp>
 
 
 // Basic model that holds the shader, mesh and transform for drawing.
@@ -49,9 +50,12 @@ private:
 	bool m_show_axis = false;
 	bool m_show_grid = false;
 	bool m_showWireframe = false;
+    bool _use_render_pipeline = true;
 
 	// geometry
 	basic_model m_model;
+    infd::render::RenderSettings _render_settings;
+    infd::render::Renderer _renderer;
 
 public:
 	// setup
