@@ -5,44 +5,44 @@
 #pragma once
 #include <glm/glm.hpp>
 #include <infd/GLMesh.hpp>
-
-// include/infd/render/renderer.hpp draft
-// this is the "public" "interface" of the renderer system
-// ideally the only header file for it that stuff outside the renderer needs/uses
+#include <infd/render/Pipeline.hpp>
 
 namespace infd::render {
     // every item that gets rendered in the scene tree has one of these,
     // and they all get collected and passed to the Renderer
     // may change shape _somewhat_ as the architecture of the scene tree/
     // component system gets worked out
-    struct RenderInfo {
+    struct RenderItem {
         GLMesh mesh;
-
         glm::mat4 transform_option_1;
-        // or...
-        struct {
-            glm::vec3 pos;
-            glm::vec3 scale;
-            glm::vec3 rotate;
-        } transform_option_2;
 
         struct {
-            float shinyness;
+            float shinyness = 0.5;
             // etc
         } material;
     };
     // other things to consider - how lights/cameras/etc work in the scene
 
-    struct RenderSettings; // tba, interface with gui probably
+    struct RenderSettings {
+        struct {
+            int width;
+            int height;
+        } screen;
+        glm::mat4 temp_view;
+        glm::mat4 temp_proj;
+    };
     // class that does all the rendering - the application class has one of it and calls it to draw
     class Renderer {
-        // tempted to have a Pipeline object that does all the actual work and this serves as an interface for that
-        // to keep this class neat
+        Pipeline _pipeline;
+        RenderSettings _render_settings;
+        static std::vector<RenderItem> _test_items;
      public:
         // (or later takes/finds scene tree and walks that itself
-        void render(std::vector<RenderInfo>);
+        void render(std::vector<RenderItem> items);
         // temp for testing, uses dummy info
         void render();
-        void setRenderSettings(RenderSettings settings);
+        void setRenderSettings(RenderSettings settings) {
+            _render_settings = settings;
+        };
     };
 }
