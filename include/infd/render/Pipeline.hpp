@@ -4,7 +4,7 @@
 
 #pragma once
 #include <vector>
-//#include <infd/render/Renderer.hpp>
+#include "infd/GLObject.hpp"
 
 namespace infd::render {
     // forward declare to avoid recursive inclusion hellscape
@@ -12,7 +12,9 @@ namespace infd::render {
     struct RenderSettings;
 
     class Pipeline {
+        GLProgram _main_shader;
      public:
+        Pipeline();
         void render(std::vector<RenderItem> items, const RenderSettings& settings);
     };
 }
