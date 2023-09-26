@@ -22,7 +22,8 @@ infd::render::Pipeline::Pipeline() {
 void infd::render::Pipeline::render(std::vector<RenderItem> items, const infd::render::RenderSettings& settings) {
     using namespace glm;
     {
-        scopedProgram(_main_shader);
+        auto program_guard = scopedProgram(_main_shader);
+
         glUniform3fv(glGetUniformLocation(_main_shader, "uColor"), 1, glm::value_ptr(vec3{1, 0, 1}));
         glUniformMatrix4fv(glGetUniformLocation(_main_shader, "uProjectionMatrix"), 1, false, value_ptr(settings.temp_proj));
 
