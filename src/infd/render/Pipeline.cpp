@@ -20,7 +20,8 @@ infd::render::Pipeline::Pipeline() {
     {
         auto texture_guard = scopedBind(_dither_texture, GL_TEXTURE_2D);
 
-        auto tex = cgra::rgba_image {CGRA_SRCDIR + std::string("/res/textures/dithers/16x16-ordered-dither.png")};
+//        auto tex = cgra::rgba_image {CGRA_SRCDIR + std::string("/res/textures/dithers/16x16-ordered-dither.png")};
+        auto tex = cgra::rgba_image {CGRA_SRCDIR + std::string("/res/textures/dithers/64x64-blue-noise.png")};
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
