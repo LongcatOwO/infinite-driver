@@ -63,7 +63,8 @@ add_subdirectory("${PROJECT_LIB_DIR}/stb")
 # Main project executable
 #########################################################
 
-add_executable(${CGRA_PROJECT})
+add_executable(${CGRA_PROJECT}
+        include/infd/render/Utils.hpp)
 
 target_compile_definitions(${CGRA_PROJECT} PRIVATE "-DCGRA_SRCDIR=\"${PROJECT_SOURCE_DIR}\"")
 
@@ -176,6 +177,7 @@ PRIVATE
 	"${PROJECT_SOURCE_DIR}/src/infd/Shader.cpp"
 	"${PROJECT_SOURCE_DIR}/src/infd/render/Renderer.cpp"
 	"${PROJECT_SOURCE_DIR}/src/infd/render/Pipeline.cpp"
+	"${PROJECT_SOURCE_DIR}/src/infd/render/Utils.cpp"
 )
 
 
