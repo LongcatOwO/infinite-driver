@@ -45,7 +45,7 @@ void infd::render::Pipeline::render(std::vector<RenderItem> items, const infd::r
 
         glViewport(0, 0, width, height); // set the viewport to draw to the entire window
 
-        glClearColor(0.3f, 0.3f, 0.4f, 1.0f);
+        glClearColor(0, 0, 0, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
@@ -66,8 +66,14 @@ void infd::render::Pipeline::render(std::vector<RenderItem> items, const infd::r
     {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         auto program_guard = scopedProgram(_fullscreen_texture_shader);
+
         glActiveTexture(GL_TEXTURE0);
         auto texture_guard = scopedBind(_fb.colour, GL_TEXTURE_2D);
+        glUniform1i(glGetUniformLocation(_fullscreen_texture_shader, "uFramebuffer"), 0);
+
+        glActiveTexture(GL_TEXTURE1);
+        auto dither_texture_guard = scopedBind(_dither_texture, GL_TEXTURE_2D);
+        glUniform1i(glGetUniformLocation(_fullscreen_texture_shader, "uDitherPattern"), 1);
 
         glViewport(0, 0, width, height);
         glClearColor(1, 1, 1, 1.0f);
@@ -86,7 +92,7 @@ void infd::render::Pipeline::loadShaders() {
 
     ShaderBuilder fullscreen_texture_build;
     fullscreen_texture_build.setShader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//fullscreen_texture_vert.glsl"));
-    fullscreen_texture_build.setShader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//fullscreen_texture_frag.glsl"));
+    fullscreen_texture_build.setShader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//dither_frag.glsl"));
     _fullscreen_texture_shader = fullscreen_texture_build.build();
 }
 
