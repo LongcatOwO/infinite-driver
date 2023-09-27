@@ -8,10 +8,10 @@ namespace infd::render {
         GLMeshBuilder mb;
 
         mb.vertices = {
-                {glm::vec3{0, 0, 0}, glm::vec3{0}, glm::vec2{0}},
-                {glm::vec3{0, 1, 0}, glm::vec3{0}, glm::vec2{0}},
-                {glm::vec3{1, 1, 0}, glm::vec3{0}, glm::vec2{0}},
-                {glm::vec3{1, 0, 0}, glm::vec3{0}, glm::vec2{0}}
+                {glm::vec3{-1, -1, 0}, glm::vec3{0}, glm::vec2{0}},
+                {glm::vec3{-1,  1, 0}, glm::vec3{0}, glm::vec2{0}},
+                {glm::vec3{ 1,  1, 0}, glm::vec3{0}, glm::vec2{0}},
+                {glm::vec3{ 1, -1, 0}, glm::vec3{0}, glm::vec2{0}}
         };
         mb.indices = {
                 0, 1, 2,
