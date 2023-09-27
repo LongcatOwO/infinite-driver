@@ -4,6 +4,7 @@
 # Project Specifics
 cmake-build-*
 imgui.ini
+screenshot_*.png
 # is machine-specific
 lib/glew-2.1.0/glew.pc
 
