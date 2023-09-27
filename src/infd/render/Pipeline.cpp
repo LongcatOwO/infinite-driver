@@ -51,12 +51,14 @@ void infd::render::Pipeline::render(std::vector<RenderItem> items, const infd::r
 
     // draw to screen from buffer
     {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
         auto program_guard = scopedProgram(_fullscreen_texture_shader);
+        glActiveTexture(GL_TEXTURE0);
         auto texture_guard = scopedBind(_fb.colour, GL_TEXTURE_2D);
-//        glDisable(GL_DEPTH_TEST);
-        glViewport(0, 0, width, height); // set the viewport to draw to the entire window
-        glClearColor(0, 0, 0, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glViewport(0, 0, width, height);
+        glClearColor(1, 1, 1, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
         glDisable(GL_DEPTH_TEST);
 
         _fullscreen_mesh.draw();
