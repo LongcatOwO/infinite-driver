@@ -1,3 +1,8 @@
+# Infinite Driver Things
+
+Dither pattern generated in https://seansleblanc.itch.io/ordered-dither-maker
+
+
 # CGRA OpenGL Base Project
 
 # Requirements

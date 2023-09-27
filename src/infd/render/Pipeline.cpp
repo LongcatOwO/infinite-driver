@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <glm/glm.hpp>
+#include <cgra/cgra_image.hpp>
 
 #include <infd/Shader.hpp>
 #include <infd/ScopeGuard.hpp>
@@ -15,6 +16,18 @@
 
 infd::render::Pipeline::Pipeline() {
     loadShaders();
+    // load dither texture
+    {
+        auto texture_guard = scopedBind(_dither_texture, GL_TEXTURE_2D);
+
+        auto tex = cgra::rgba_image {CGRA_SRCDIR + std::string("/res/textures/dithers/16x16-ordered-dither.png")};
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, tex.size.x, tex.size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex.data.data());
+    }
 }
 
 void infd::render::Pipeline::render(std::vector<RenderItem> items, const infd::render::RenderSettings& settings) {

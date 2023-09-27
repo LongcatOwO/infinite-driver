@@ -22,6 +22,7 @@ namespace infd::render {
             GLTexture colour;
             GlRenderBuffer depth;
         } _fb;
+        GLTexture _dither_texture;
      public:
         Pipeline();
         void render(std::vector<RenderItem> items, const RenderSettings& settings);
