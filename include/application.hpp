@@ -11,6 +11,7 @@
 #include <infd/GLObject.hpp>
 #include <infd/render/Renderer.hpp>
 //#include <skeleton_model.hpp>
+#include <infd/util/Event.hpp>
 
 
 // Basic model that holds the shader, mesh and transform for drawing.
@@ -32,10 +33,26 @@ struct basic_model {
 // Main application class
 //
 class Application {
+public:
+
 private:
+	// typedefs
+	template <typename FunctionSignature>
+	using Event = infd::util::Event<FunctionSignature>;
+
+	template <typename FunctionSignature>
+	using PublicEvent = infd::util::PublicEvent<FunctionSignature>;
+
 	// window
 	glm::vec2 m_windowsize;
 	GLFWwindow *m_window;
+
+	// input callback events
+	Event<void (double x_pos, double y_pos)> _cursorPosCallbackEvent;
+	Event<void (int button, int action, int mods)> _mouseButtonCallbackEvent;
+	Event<void (double x_offset, double y_offset)> _scrollCallbackEvent;
+	Event<void (int key, int scancode, int action, int mods)> _keyCallbackEvent;
+	Event<void (unsigned int c)> _charCallbackEvent;
 
 	// oribital camera
 	float m_pitch = .86;
@@ -57,6 +74,8 @@ private:
     infd::render::RenderSettings _render_settings;
     infd::render::Renderer _renderer;
 
+	void initializeInputCallbacks();
+
 public:
 	// setup
 	Application(GLFWwindow *);
@@ -70,9 +89,42 @@ public:
 	void renderGUI();
 
 	// input callbacks
-	void cursorPosCallback(double xpos, double ypos);
-	void mouseButtonCallback(int button, int action, int mods);
-	void scrollCallback(double xoffset, double yoffset);
-	void keyCallback(int key, int scancode, int action, int mods);
-	void charCallback(unsigned int c);
+	void cursorPosCallback(double x_pos, double y_pos) {
+		_cursorPosCallbackEvent(x_pos, y_pos);
+	}
+	void mouseButtonCallback(int button, int action, int mods) {
+		_mouseButtonCallbackEvent(button, action, mods);
+	}
+
+	void scrollCallback(double x_offset, double y_offset) {
+		_scrollCallbackEvent(x_offset, y_offset);
+	}
+
+	void keyCallback(int key, int scancode, int action, int mods) {
+		_keyCallbackEvent(key, scancode, action, mods);
+	}
+
+	void charCallback(unsigned int c) {
+		_charCallbackEvent(c);
+	}
+
+	PublicEvent<void (double x_pos, double y_pos)>& cursorPosCallbackEvent() {
+		return _cursorPosCallbackEvent;
+	}
+
+	PublicEvent<void (int button, int action, int mods)>& mouseButtonCallbackEvent() {
+		return _mouseButtonCallbackEvent;
+	}
+
+	PublicEvent<void (double x_offset, double y_offset)>& scrollCallbackEvent() {
+		return _scrollCallbackEvent;
+	}
+
+	PublicEvent<void (int key, int scancode, int action, int mods)>& keyCallbackEvent() {
+		return _keyCallbackEvent;
+	}
+
+	PublicEvent<void (unsigned int c)>& charCallbackEvent() {
+		return _charCallbackEvent;
+	}
 };

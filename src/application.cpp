@@ -37,6 +37,8 @@ void basic_model::draw(const glm::mat4 &view, const glm::mat4 proj) {
 
 
 Application::Application(GLFWwindow *window) : m_window(window), m_model {infd::loadWavefrontCases(CGRA_SRCDIR + std::string("/res//assets//teapot.obj")).build()} {
+
+	initializeInputCallbacks();
 	
 	infd::ShaderBuilder sb;
     sb.setShader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//color_vert.glsl"));
@@ -128,50 +130,47 @@ void Application::renderGUI() {
 }
 
 
-void Application::cursorPosCallback(double xpos, double ypos) {
-	if (m_leftMouseDown) {
-		vec2 whsize = m_windowsize / 2.0f;
+void Application::initializeInputCallbacks() {
+	_cursorPosCallbackEvent += [this](double x_pos, double y_pos) {
+		if (m_leftMouseDown) {
+			vec2 whsize = m_windowsize / 2.0f;
 
-		// clamp the pitch to [-pi/2, pi/2]
-		m_pitch += float(acos(glm::clamp((m_mousePosition.y - whsize.y) / whsize.y, -1.0f, 1.0f))
-			- acos(glm::clamp((float(ypos) - whsize.y) / whsize.y, -1.0f, 1.0f)));
-		m_pitch = float(glm::clamp(m_pitch, -pi<float>() / 2, pi<float>() / 2));
+			// clamp the pitch to [-pi/2, pi/2]
+			m_pitch += float(acos(glm::clamp((m_mousePosition.y - whsize.y) / whsize.y, -1.0f, 1.0f))
+				- acos(glm::clamp((float(y_pos) - whsize.y) / whsize.y, -1.0f, 1.0f)));
+			m_pitch = float(glm::clamp(m_pitch, -pi<float>() / 2, pi<float>() / 2));
 
-		// wrap the yaw to [-pi, pi]
-		m_yaw += float(acos(glm::clamp((m_mousePosition.x - whsize.x) / whsize.x, -1.0f, 1.0f))
-			- acos(glm::clamp((float(xpos) - whsize.x) / whsize.x, -1.0f, 1.0f)));
-		if (m_yaw > pi<float>()) m_yaw -= float(2 * pi<float>());
-		else if (m_yaw < -pi<float>()) m_yaw += float(2 * pi<float>());
-	}
+			// wrap the yaw to [-pi, pi]
+			m_yaw += float(acos(glm::clamp((m_mousePosition.x - whsize.x) / whsize.x, -1.0f, 1.0f))
+				- acos(glm::clamp((float(x_pos) - whsize.x) / whsize.x, -1.0f, 1.0f)));
+			if (m_yaw > pi<float>()) m_yaw -= float(2 * pi<float>());
+			else if (m_yaw < -pi<float>()) m_yaw += float(2 * pi<float>());
+		}
 
-	// updated mouse position
-	m_mousePosition = vec2(xpos, ypos);
-}
+		// updated mouse position
+		m_mousePosition = vec2(x_pos, y_pos);
+	};
 
+	_mouseButtonCallbackEvent += [this](int button, int action, int mods) {
+		(void)mods;
+		// capture is left-mouse down
+		if (button == GLFW_MOUSE_BUTTON_LEFT)
+			m_leftMouseDown = (action == GLFW_PRESS); // only other option is GLFW_RELEASE
+	};
 
-void Application::mouseButtonCallback(int button, int action, int mods) {
-	(void)mods; // currently un-used
+	_scrollCallbackEvent += [this](double x_offset, double y_offset) {
+		(void)x_offset;
 
-	// capture is left-mouse down
-	if (button == GLFW_MOUSE_BUTTON_LEFT)
-		m_leftMouseDown = (action == GLFW_PRESS); // only other option is GLFW_RELEASE
-}
+		m_distance *= pow(1.1f, -y_offset);
+	};
 
+	_keyCallbackEvent += [](int key, int scancode, int action, int mods) {
+		(void)scancode, (void)mods;
 
-void Application::scrollCallback(double xoffset, double yoffset) {
-	(void)xoffset; // currently un-used
-	m_distance *= pow(1.1f, -yoffset);
-}
+		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+			std::exit(0);
+		}
+	};
 
-
-void Application::keyCallback(int key, int scancode, int action, int mods) {
-	(void)key, (void)scancode, (void)action, (void)mods; // currently un-used
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-        std::exit(0);
-    }
-}
-
-
-void Application::charCallback(unsigned int c) {
-	(void)c; // currently un-used
+	// _charCallbackEvent += [this](unsigned int c) {};
 }

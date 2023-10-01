@@ -58,14 +58,38 @@ target_link_libraries(imgui PRIVATE glfw)
 # STB
 add_subdirectory("${PROJECT_LIB_DIR}/stb")
 
+# Bullet3
+set(BUILD_UNIT_TESTS OFF CACHE BOOL "Build Unit Tests for Bullet3")
+set(BUILD_CPU_DEMOS OFF CACHE BOOL "Build CPU Demos for Bullet3")
+set(BUILD_EXTRAS OFF CACHE BOOL "Build Extras for Bullet3")
+set(BUILD_BULLET3 OFF CACHE BOOL "Build Bullet3 for Bullet3")
+set(BUILD_SHARED_LIBS_TEMP "${BUILD_SHARED_LIBS}")
+set(BUILD_SHARED_LIBS OFF)
+add_subdirectory("${PROJECT_LIB_DIR}/bullet3")
+set(BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS_TEMP}")
+add_library(Bullet INTERFACE)
+target_link_libraries(Bullet
+INTERFACE
+	BulletCollision
+	BulletDynamics
+	BulletInverseDynamics
+	BulletSoftBody
+	LinearMath
+)
+
+target_include_directories(Bullet
+INTERFACE
+	"${PROJECT_SOURCE_DIR}/lib/bullet3/src"
+)
+
 
 #########################################################
-# Main project executable
+# Project Compile Settings Aggregate
 #########################################################
 
-add_executable(${CGRA_PROJECT})
+add_library(${CGRA_PROJECT}_aggregate INTERFACE)
 
-target_compile_definitions(${CGRA_PROJECT} PRIVATE "-DCGRA_SRCDIR=\"${PROJECT_SOURCE_DIR}\"")
+target_compile_definitions(${CGRA_PROJECT}_aggregate INTERFACE "-DCGRA_SRCDIR=\"${PROJECT_SOURCE_DIR}\"")
 
 
 #########################################################
@@ -73,8 +97,8 @@ target_compile_definitions(${CGRA_PROJECT} PRIVATE "-DCGRA_SRCDIR=\"${PROJECT_SO
 #########################################################
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-	target_compile_options(${CGRA_PROJECT}
-	PRIVATE
+	target_compile_options(${CGRA_PROJECT}_aggregate
+	INTERFACE
 		/std:c++latest
 		/utf-8
 		/W4 					# full normal warnings
@@ -83,8 +107,8 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 	)
 
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-	target_compile_options(${CGRA_PROJECT}
-	PRIVATE
+	target_compile_options(${CGRA_PROJECT}_aggregate
+	INTERFACE
 		$<$<NOT:$<CONFIG:Debug>>:-O2>
 		-std=c++20
 		-Wall -Wextra -Wpedantic 	# full normal warnings
@@ -96,12 +120,15 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 	# enable coloured output if gcc >= 4.9
 	execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
 	if (GCC_VERSION VERSION_GREATER 4.9 OR GCC_VERSION VERSION_EQUAL 4.9)
-		add_compile_options(-fdiagnostics-color)
+		target_compile_options(${CGRA_PROJECT}_aggregate
+		INTERFACE
+			-fdiagnostics-color
+		)
 	endif()
 
 elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "^(Apple)?Clang$")
-	target_compile_options(${CGRA_PROJECT}
-	PRIVATE
+	target_compile_options(${CGRA_PROJECT}_aggregate
+	INTERFACE
 		$<$<NOT:$<CONFIG:Debug>>:-O2>
 		-std=c++20
 		-Wall -Wextra -Wpedantic 	# full normal warnings
@@ -111,38 +138,48 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "^(Apple)?Clang$")
 	)
 
 	# enable msse on all processors except those that don't have it (apple silicon)
-	if (NOT "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "ARM64")
-		target_compile_options(${CGRA_PROJECT}
-		PRIVATE
+	if (NOT "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "arm64")
+		target_compile_options(${CGRA_PROJECT}_aggregate
+		INTERFACE
 			-msse2
+		)
+	endif ()
+	# on mac
+	if ( "${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+		# use homebrew c++ stdlib (for std::format et al)
+		target_link_options(${CGRA_PROJECT}_aggregate
+		INTERFACE
+			-L /opt/homebrew/opt/llvm/lib/c++
 		)
 	endif ()
 
 endif()
 
 
+
 #########################################################
 # Link Libraries
 #########################################################
 
-target_link_libraries(${CGRA_PROJECT}
-PRIVATE
+target_link_libraries(${CGRA_PROJECT}_aggregate
+INTERFACE
 	OpenGL::GL
 	glew
 	glm::glm
 	glfw
 	imgui
 	stb
+	Bullet
 )
 
 if (OPENMP_FOUND)
-	target_compile_options(${CGRA_PROJECT}
-	PRIVATE
+	target_compile_options(${CGRA_PROJECT}_aggregate
+	INTERFACE
 		${OpenMP_C_FLAGS}
 		${OpenMP_CXX_FLAGS}
 	)
-	target_compile_definitions(${CGRA_PROJECT}
-	PRIVATE
+	target_compile_definitions(${CGRA_PROJECT}_aggregate
+	INTERFACE
 		CGRA_HAVE_OPENMP
 	)
 endif()
@@ -152,34 +189,15 @@ endif()
 # Include directories
 #########################################################
 
-target_include_directories(${CGRA_PROJECT}
-PRIVATE
+target_include_directories(${CGRA_PROJECT}_aggregate
+INTERFACE
 	"${PROJECT_LIB_DIR}/glew-2.1.0/include"
 	"${PROJECT_SOURCE_DIR}/include"
 )
 
 
-#########################################################
-# Source files
-#########################################################
-target_sources(${CGRA_PROJECT}
-PRIVATE
-	"${PROJECT_SOURCE_DIR}/src/application.cpp"
-	"${PROJECT_SOURCE_DIR}/src/main.cpp"
-	"${PROJECT_SOURCE_DIR}/src/skeleton.cpp"
-	"${PROJECT_SOURCE_DIR}/src/skeleton_model.cpp"
-	"${PROJECT_SOURCE_DIR}/src/cgra/cgra_geometry.cpp"
-	"${PROJECT_SOURCE_DIR}/src/cgra/cgra_gui.cpp"
-	"${PROJECT_SOURCE_DIR}/src/cgra/cgra_mesh.cpp"
-	"${PROJECT_SOURCE_DIR}/src/cgra/cgra_shader.cpp"
-	"${PROJECT_SOURCE_DIR}/src/infd/GLMesh.cpp"
-	"${PROJECT_SOURCE_DIR}/src/infd/Shader.cpp"
-	"${PROJECT_SOURCE_DIR}/src/infd/render/Renderer.cpp"
-	"${PROJECT_SOURCE_DIR}/src/infd/render/Pipeline.cpp"
-	"${PROJECT_SOURCE_DIR}/src/infd/render/Utils.cpp"
-)
-
-
+add_subdirectory(src)
 add_subdirectory(res) # add the resource folder to make it appear in IDE
+add_subdirectory(test)
 
 set_property(TARGET ${CGRA_PROJECT} PROPERTY FOLDER "CGRA")
