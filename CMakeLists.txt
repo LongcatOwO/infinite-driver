@@ -138,10 +138,18 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "^(Apple)?Clang$")
 	)
 
 	# enable msse on all processors except those that don't have it (apple silicon)
-	if (NOT "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "ARM64")
+	if (NOT "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "arm64")
 		target_compile_options(${CGRA_PROJECT}_aggregate
 		INTERFACE
 			-msse2
+		)
+	endif ()
+	# on mac
+	if ( "${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+		# use homebrew c++ stdlib (for std::format et al)
+		target_link_options(${CGRA_PROJECT}_aggregate
+		INTERFACE
+			-L /opt/homebrew/opt/llvm/lib/c++
 		)
 	endif ()
 
