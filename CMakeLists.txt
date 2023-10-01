@@ -68,7 +68,7 @@ set(BUILD_SHARED_LIBS OFF)
 add_subdirectory("${PROJECT_LIB_DIR}/bullet3")
 set(BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS_TEMP}")
 add_library(Bullet INTERFACE)
-target_link_libraries(Bullet 
+target_link_libraries(Bullet
 INTERFACE
 	BulletCollision
 	BulletDynamics
@@ -77,7 +77,7 @@ INTERFACE
 	LinearMath
 )
 
-target_include_directories(Bullet 
+target_include_directories(Bullet
 INTERFACE
 	"${PROJECT_SOURCE_DIR}/lib/bullet3/src"
 )

@@ -106,4 +106,15 @@ namespace infd {
                 [ ] { glUseProgram(0); }
         );
     }
+
+    /*
+	 * @return 	a ScopeGuard which will immediately call glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer); upon this function call.
+	 * 			The returned ScopeGuard will call glBindRenderbuffer(GL_RENDERBUFFER, 0); when it gets destroyed.
+	 */
+    inline auto scopedRenderbuffer(const GLObject<GLObjectType::Renderbuffer> &renderbuffer) noexcept {
+        return ScopeGuard(
+                [=] { glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer); },
+                [ ] { glBindRenderbuffer(GL_RENDERBUFFER, 0); }
+        );
+    }
 }

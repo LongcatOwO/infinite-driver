@@ -17,17 +17,14 @@ namespace infd::render {
         glm::mat4 transform {1};
 
         struct {
-            float shininess = 0.5;
+            float shininess = 20;
             // etc
         } material;
     };
     // other things to consider - how lights/cameras/etc work in the scene
 
     struct RenderSettings {
-        struct {
-            int width;
-            int height;
-        } screen;
+        std::pair<int, int> screen_size;
         glm::mat4 temp_view;
         glm::mat4 temp_proj;
     };
@@ -42,8 +39,7 @@ namespace infd::render {
         void render(std::vector<RenderItem> items);
         // temp for testing, uses dummy info
         void render();
-        void setRenderSettings(RenderSettings settings) {
-            _render_settings = settings;
-        };
+        void setRenderSettings(RenderSettings settings);
+        void reloadShaders();
     };
 }

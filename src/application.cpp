@@ -46,6 +46,11 @@ Application::Application(GLFWwindow *window) : m_window(window), m_model {infd::
 
 	m_model.shader = sb.build();
 	m_model.color = vec3(1, 0, 0);
+
+    int width, height;
+    glfwGetFramebufferSize(m_window, &width, &height);
+    _render_settings.screen_size = {width, height};
+    _renderer.setRenderSettings(_render_settings);
 }
 
 
@@ -53,18 +58,8 @@ void Application::render() {
 	
 	// retrieve the window hieght
 	int width, height;
-	glfwGetFramebufferSize(m_window, &width, &height); 
-
+	glfwGetFramebufferSize(m_window, &width, &height);
 	m_windowsize = vec2(width, height); // update window size
-	glViewport(0, 0, width, height); // set the viewport to draw to the entire window
-
-	// clear the back-buffer
-	glClearColor(0.3f, 0.3f, 0.4f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
-
-	// enable flags for normal/forward rendering
-	glEnable(GL_DEPTH_TEST); 
-	glDepthFunc(GL_LESS);
 
 	// projection matrix
 	mat4 proj = perspective(1.f, float(width) / height, 0.1f, 1000.f);
@@ -74,21 +69,28 @@ void Application::render() {
 		* rotate(mat4(1), m_pitch, vec3(1, 0, 0))
 		* rotate(mat4(1), m_yaw,   vec3(0, 1, 0));
 
-
-	// helpful draw options
-	if (m_show_grid) drawGrid(view, proj);
-	if (m_show_axis) drawAxis(view, proj);
-	glPolygonMode(GL_FRONT_AND_BACK, (m_showWireframe) ? GL_LINE : GL_FILL);
-
-
 	// draw the model
     if (_use_render_pipeline) {
-        _render_settings.screen = {width, height};
+        _render_settings.screen_size = {width, height};
         _render_settings.temp_view = view;
         _render_settings.temp_proj = proj;
         _renderer.setRenderSettings(_render_settings);
         _renderer.render();
     } else {
+        glViewport(0, 0, width, height); // set the viewport to draw to the entire window
+
+        // clear the back-buffer
+        glClearColor(0.3f, 0.3f, 0.4f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // enable flags for normal/forward rendering
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LESS);
+
+        if (m_show_grid) drawGrid(view, proj);
+        if (m_show_axis) drawAxis(view, proj);
+        glPolygonMode(GL_FRONT_AND_BACK, (m_showWireframe) ? GL_LINE : GL_FILL);
+
         m_model.draw(view, proj);
     }
 }
@@ -98,7 +100,7 @@ void Application::renderGUI() {
 
 	// setup window
 	ImGui::SetNextWindowPos(ImVec2(5, 5), ImGuiCond_Once);
-	ImGui::SetNextWindowSize(ImVec2(300, 200), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(300, 220), ImGuiCond_Once);
 	ImGui::Begin("Options", 0);
 
 	// display current camera parameters
@@ -119,11 +121,9 @@ void Application::renderGUI() {
 	
 	ImGui::Separator();
 
-	// example of how to use input boxes
-	std::string exampleInput;
-	if (ImGui::InputText("example input", &exampleInput)) {
-		cout << "example input changed to " << exampleInput << endl;
-	}
+	if (ImGui::Button("Reload shaders")) {
+        _renderer.reloadShaders();
+    }
 
 	// finish creating window
 	ImGui::End();

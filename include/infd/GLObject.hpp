@@ -35,6 +35,7 @@ namespace infd {
 		Framebuffer 		= GL_FRAMEBUFFER,
 		Shader 				= GL_SHADER,
 		Program 			= GL_PROGRAM,
+        Renderbuffer        = GL_RENDERBUFFER
 	};
 	
 	/*
@@ -142,6 +143,19 @@ namespace infd {
 			glDeleteProgram(*out_id);
 		}
 	};
+
+    template <>
+    class GLObjectTraits<GLObjectType::Renderbuffer> {
+     public:
+        static void construct(GLuint *out_id) noexcept {
+            glGenRenderbuffers(1, out_id);
+        }
+
+        static void destruct(GLuint *out_id) noexcept {
+            glDeleteRenderbuffers(1, out_id);
+            *out_id = 0;
+        }
+    };
 
 	/*
 	 * Used to disambiguate constructor overload for GLObject.
@@ -312,4 +326,7 @@ namespace infd {
 
 	// Alias to GLObject<GLObjectType::Program>
 	using GLProgram 			= GLObject<GLObjectType::Program>;
+
+    // Alias to GLObject<GLObjectType::Renderbuffer>
+    using GlRenderBuffer		= GLObject<GLObjectType::Renderbuffer>;
 }

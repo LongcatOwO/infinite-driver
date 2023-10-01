@@ -1,3 +1,9 @@
+# Infinite Driver Things
+
+Dither pattern generated in https://seansleblanc.itch.io/ordered-dither-maker
+Blue noise from http://momentsingraphics.de/BlueNoise.html
+
+
 # CGRA OpenGL Base Project
 
 # Requirements

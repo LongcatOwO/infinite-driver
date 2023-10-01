@@ -25,4 +25,15 @@ namespace infd::render {
         render(_test_items);
     }
 
+    void Renderer::reloadShaders() {
+        _pipeline.loadShaders();
+    }
+
+    void Renderer::setRenderSettings(RenderSettings settings) {
+        if (settings.screen_size != _render_settings.screen_size) {
+            _pipeline.screenSizeChanged(settings.screen_size);
+        }
+        _render_settings = settings;
+    }
+
 }
