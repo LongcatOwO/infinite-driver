@@ -63,8 +63,7 @@ add_subdirectory("${PROJECT_LIB_DIR}/stb")
 # Main project executable
 #########################################################
 
-add_executable(${CGRA_PROJECT}
-        include/infd/render/Utils.hpp)
+add_executable(${CGRA_PROJECT})
 
 target_compile_definitions(${CGRA_PROJECT} PRIVATE "-DCGRA_SRCDIR=\"${PROJECT_SOURCE_DIR}\"")
 
