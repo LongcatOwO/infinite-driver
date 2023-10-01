@@ -1,6 +1,7 @@
 #pragma once
 
 #include <concepts>
+#include <functional>
 #include <memory>
 #include <type_traits>
 #include <utility>
@@ -37,9 +38,23 @@ namespace infd::util {
 		};
 	}
 
+	/*
+	 * Equals to pointer to an artificially created static function which invokes
+	 * the given FuncPtr.
+	 * Maps argument directly to FuncPtr for regular function pointer
+	 * Maps the first argument as "this" binding to FuncPtr for member function pointer.
+	 * 
+	 * Useful for turning a member function pointer into a regular function pointer.
+	 * Note that for regular function pointer, the value is NOT equal to the original function pointer.
+	 */
 	template <auto FuncPtr>
 	constexpr auto invoke = detail::InvokeImpl<FuncPtr>::invoke;
 
+	/*
+	 * Represents a type erased callable type with the given function signature.
+	 * FunctionSignature can be provided as following: Function<ReturnType (ArgumentTypes...)>.
+	 * Function is equality comparable. See description on operator== for more info.
+	 */
 	template <typename FunctionSignature>
 	class Function;
 
@@ -49,7 +64,6 @@ namespace infd::util {
 		public:
 			virtual R operator()(Args...) const = 0;
 			virtual std::unique_ptr<Interface> clone() const = 0;
-			virtual std::unique_ptr<Interface> moveClone() = 0;
 			virtual bool operator==(const Interface &other) const = 0;
 			virtual ~Interface() {}
 		};
@@ -67,10 +81,6 @@ namespace infd::util {
 			}
 			std::unique_ptr<Interface> clone() const override {
 				return std::make_unique<Impl>(*this);
-			}
-
-			std::unique_ptr<Interface> moveClone() override {
-				return std::make_unique<Impl>(std::move(*this));
 			}
 
 			bool operator==(const Interface &other) const override {
@@ -110,10 +120,6 @@ namespace infd::util {
 				return std::make_unique<MemberFunctionImpl>(*this);
 			}
 
-			std::unique_ptr<Interface> moveClone() override {
-				return std::make_unique<MemberFunctionImpl>(std::move(*this));
-			}
-
 			const void *getSelf() const noexcept override { 
 				return reinterpret_cast<const void *>(_self); 
 			}
@@ -148,10 +154,6 @@ namespace infd::util {
 				return std::make_unique<MemberFunctionImpl>(*this);
 			}
 
-			std::unique_ptr<Interface> moveClone() override {
-				return std::make_unique<MemberFunctionImpl>(std::move(*this));
-			}
-
 			const void *getSelf() const noexcept override {
 				return reinterpret_cast<const void *>(_self);
 			}
@@ -179,30 +181,75 @@ namespace infd::util {
 		Impl(Fn fn) -> Impl<Fn>;
 
 	public:
+		/*
+		 * Constructs a function using the given functor as the underlying object.
+		 */
 		template <typename Fn> requires (!std::same_as<Function, std::remove_cvref_t<Fn>>)
 		Function(Fn &&fn) : _ptr(new Impl(std::forward<Fn>(fn))) {}
 
+		/*
+		 * Constructs a Function binding the self pointer to the first argument of invoker.
+		 * Two Functions constructed with this constructor are considered equal if 
+		 * they refer to the same invoker and self.
+		 */
 		template <typename C>
 		Function(R (*invoker)(C*, Args...), C *self) : _ptr(new MemberFunctionImpl(invoker, self)) {}
 
+		/*
+		 * Copy constructs this Function.
+		 */
 		Function(const Function &other) : _ptr(other._ptr->clone()) {}
-		Function(Function &&other) : _ptr(other._ptr->moveClone()) {}
+		/*
+		 * Move constructs this Function.
+		 */
+		Function(Function &&other) : _ptr(std::move(other._ptr)) {}
 
 		Function& operator=(const Function &other) {
-			_ptr = other._ptr->clone();
+			if (other._ptr)
+				_ptr = other._ptr->clone();
+			else
+				_ptr = nullptr;
 			return *this;
 		}
 
 		Function& operator=(Function &&other) {
-			_ptr = other._ptr->moveClone();
+			_ptr = std::move(other._ptr);
 			return *this;
 		}
 
+		/*
+		 * Invoke the underlying functor with the given arguments.
+		 * If this Function is empty as a result of move operation,
+		 * then std::bad_function_call si thrown.
+		 * One should never attempt to call a Function after it has been moved.
+		 */
 		R operator()(Args ...args) const {
+			if (!_ptr) throw std::bad_function_call{};
 			return (*_ptr)(std::forward<Args>(args)...);
 		}
 
+		/*
+		 * Tests equality with another Function. 
+		 * Always return false if either of the operand is an empty
+		 * Function as a result of move operation, even if both Functions are empty.
+		 *
+		 * Otherwise, the two is considered equal if they refer to the same 
+		 * exact Function object. 
+		 *
+		 * Or if both Functions have the same underlying 
+		 * object type and the underlying object is equality comparable,
+		 * then return the result of comparing the underlying object.
+		 *
+		 * Or if both Function are constructed using the invoker constructor,
+		 * and both the invoker and self pointers has the same exact values 
+		 * between two Functions.
+		 *
+		 * Copy constructed Functions may not be considered equal 
+		 * if the underlying object does not support equality comparison, 
+		 * or if the equality comparison results in not equal.
+		 */
 		bool operator==(const Function &other) const {
+			if (!_ptr || !other._ptr) return false;
 			return *_ptr == *other._ptr;
 		}
 	};
