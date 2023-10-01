@@ -10,10 +10,10 @@
 #include <cgra/cgra_gui.hpp>
 #include <imgui_impl_glfw.h>
 
+#include <infd/util/Function.hpp>
 
 using namespace std;
 using namespace cgra;
-
 
 // forward decleration for cleanliness
 namespace {
@@ -29,11 +29,9 @@ namespace {
 	Application *application_ptr = nullptr;
 }
 
-
 // main program
 // 
 int main() {
-
 	// initialize the GLFW library
 	if (!glfwInit()) {
 		cerr << "Error: Could not initialize GLFW" << endl;
