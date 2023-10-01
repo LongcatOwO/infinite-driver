@@ -5,6 +5,8 @@
 
 #include <utility>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <imgui.h>
 #include "infd/Wavefront.hpp"
 
 namespace infd::render {
@@ -18,6 +20,8 @@ namespace infd::render {
     }
 
     void Renderer::render(std::vector<RenderItem> items) {
+        auto view_target = _test_camera.pos + glm::vec3 {_test_camera.angle, 0, -1};
+        _render_settings.temp_view = glm::lookAt(_test_camera.pos, view_target, {0, 1, 0});
         _pipeline.render(std::move(items), _render_settings);
     }
 
@@ -34,6 +38,11 @@ namespace infd::render {
             _pipeline.screenSizeChanged(settings.screen_size);
         }
         _render_settings = settings;
+    }
+
+    void Renderer::gui() {
+        ImGui::SliderFloat3("Camera pos", glm::value_ptr(_test_camera.pos), -100, 100);
+        ImGui::SliderFloat("View angle", &_test_camera.angle, -1, 1);
     }
 
 }

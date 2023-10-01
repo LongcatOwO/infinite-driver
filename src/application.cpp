@@ -100,7 +100,7 @@ void Application::renderGUI() {
 
 	// setup window
 	ImGui::SetNextWindowPos(ImVec2(5, 5), ImGuiCond_Once);
-	ImGui::SetNextWindowSize(ImVec2(300, 220), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(300, 260), ImGuiCond_Once);
 	ImGui::Begin("Options", 0);
 
 	// display current camera parameters
@@ -124,6 +124,7 @@ void Application::renderGUI() {
 	if (ImGui::Button("Reload shaders")) {
         _renderer.reloadShaders();
     }
+    _renderer.gui();
 
 	// finish creating window
 	ImGui::End();

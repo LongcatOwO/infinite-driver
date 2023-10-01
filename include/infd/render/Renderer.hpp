@@ -33,6 +33,11 @@ namespace infd::render {
         Pipeline _pipeline;
         RenderSettings _render_settings;
         std::vector<RenderItem> _test_items;
+        struct {
+            glm::vec3 pos {0, 15, 30};
+            glm::vec3 dir;
+            float angle;
+        } _test_camera;
      public:
         Renderer();
         // (or later takes/finds scene tree and walks that itself
@@ -41,5 +46,6 @@ namespace infd::render {
         void render();
         void setRenderSettings(RenderSettings settings);
         void reloadShaders();
+        void gui();
     };
 }
