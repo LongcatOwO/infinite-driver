@@ -58,6 +58,30 @@ target_link_libraries(imgui PRIVATE glfw)
 # STB
 add_subdirectory("${PROJECT_LIB_DIR}/stb")
 
+# Bullet3
+set(BUILD_UNIT_TESTS OFF CACHE BOOL "Build Unit Tests for Bullet3")
+set(BUILD_CPU_DEMOS OFF CACHE BOOL "Build CPU Demos for Bullet3")
+set(BUILD_EXTRAS OFF CACHE BOOL "Build Extras for Bullet3")
+set(BUILD_BULLET3 OFF CACHE BOOL "Build Bullet3 for Bullet3")
+set(BUILD_SHARED_LIBS_TEMP "${BUILD_SHARED_LIBS}")
+set(BUILD_SHARED_LIBS OFF)
+add_subdirectory("${PROJECT_LIB_DIR}/bullet3")
+set(BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS_TEMP}")
+add_library(Bullet INTERFACE)
+target_link_libraries(Bullet 
+INTERFACE
+	BulletCollision
+	BulletDynamics
+	BulletInverseDynamics
+	BulletSoftBody
+	LinearMath
+)
+
+target_include_directories(Bullet 
+INTERFACE
+	"${PROJECT_SOURCE_DIR}/lib/bullet3/src"
+)
+
 
 #########################################################
 # Main project executable
@@ -133,6 +157,7 @@ PRIVATE
 	glfw
 	imgui
 	stb
+	Bullet
 )
 
 if (OPENMP_FOUND)
