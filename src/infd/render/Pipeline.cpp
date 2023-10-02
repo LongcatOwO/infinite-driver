@@ -12,22 +12,40 @@
 #include <infd/Shader.hpp>
 #include <infd/ScopeGuard.hpp>
 #include <infd/render/Renderer.hpp>
+#include <infd/Wavefront.hpp>
 
 
-infd::render::Pipeline::Pipeline() {
+infd::render::Pipeline::Pipeline() : _sky_sphere{loadWavefrontCases(CGRA_SRCDIR + std::string("/res/assets/sky_sphere.obj")).build()} {
     loadShaders();
     // load dither texture
     {
-        auto texture_guard = scopedBind(_dither_texture, GL_TEXTURE_2D);
+        {
+            auto texture_guard = scopedBind(_dither_texture, GL_TEXTURE_2D);
 
-        auto tex = cgra::rgba_image {CGRA_SRCDIR + std::string("/res/textures/dithers/16x16-ordered-dither.png")};
+            auto tex = cgra::rgba_image{CGRA_SRCDIR + std::string("/res/textures/dithers/16x16-ordered-dither.png")};
 //        auto tex = cgra::rgba_image {CGRA_SRCDIR + std::string("/res/textures/dithers/64x64-blue-noise.png")};
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, tex.size.x, tex.size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex.data.data());
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, tex.size.x, tex.size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                         tex.data.data());
+        }
+
+        {
+            auto texture_guard = scopedBind(_temp_sphere_texture, GL_TEXTURE_2D);
+
+            auto tex = cgra::rgba_image{CGRA_SRCDIR + std::string("/res/textures/uv_texture.jpg")};
+
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, tex.size.x, tex.size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                         tex.data.data());
+        }
+
     }
 }
 
@@ -57,14 +75,28 @@ void infd::render::Pipeline::render(std::vector<RenderItem> items, const infd::r
     }
 
     // draw dither from fx -> final buf
+//    {
+//        auto program_guard = scopedProgram(_dither_shader);
+//
+//        glActiveTexture(GL_TEXTURE1);
+//        auto dither_texture_guard = scopedBind(_dither_texture, GL_TEXTURE_2D);
+//        glUniform1i(glGetUniformLocation(_dither_shader, "uDitherPattern"), 1);
+//
+//        _fx_buf.renderToOther(_dither_shader, _final_buf, _fullscreen_mesh);
+//    }
+
     {
-        auto program_guard = scopedProgram(_dither_shader);
+        auto program_guard = scopedProgram(_sky_shader);
 
         glActiveTexture(GL_TEXTURE1);
-        auto dither_texture_guard = scopedBind(_dither_texture, GL_TEXTURE_2D);
-        glUniform1i(glGetUniformLocation(_dither_shader, "uDitherPattern"), 1);
+        auto sky_texture_guard = scopedBind(_temp_sphere_texture, GL_TEXTURE_2D);
+        glUniform1i(glGetUniformLocation(_sky_shader, "uTex"), 1);
 
-        _fx_buf.renderToOther(_dither_shader, _final_buf, _fullscreen_mesh);
+        glUniformMatrix4fv(glGetUniformLocation(_sky_shader, "uProjectionMatrix"), 1, false, value_ptr(settings.temp_proj));
+        glUniformMatrix4fv(glGetUniformLocation(_sky_shader, "uViewMatrix"), 1, false, value_ptr(glm::mat4 {1}));
+
+        glUniformMatrix4fv(glGetUniformLocation(_sky_shader, "uModelMatrix"), 1, false, value_ptr(glm::mat4 {1}));
+        _sky_sphere.draw();
     }
 
     // draw to screen from final buffer
@@ -91,6 +123,11 @@ void infd::render::Pipeline::loadShaders() {
     blit_build.setShader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//fullscreen_vert.glsl"));
     blit_build.setShader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//blit_frag.glsl"));
     _blit_shader = blit_build.build();
+
+    ShaderBuilder sky_build;
+    sky_build.setShader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//phong_vert.glsl"));
+    sky_build.setShader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//obj_texture_frag.glsl"));
+    _sky_shader = sky_build.build();
 }
 
 void infd::render::Pipeline::screenSizeChanged(std::pair<int, int> new_size) {

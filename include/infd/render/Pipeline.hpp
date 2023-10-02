@@ -17,12 +17,16 @@ namespace infd::render {
         GLProgram _main_shader;
         GLProgram _dither_shader;
         GLProgram _blit_shader;
+        GLProgram _sky_shader;
 
         Framebuffer _fx_buf;
+        Framebuffer _sky_buf;
         Framebuffer _final_buf;
 
         GLMesh _fullscreen_mesh = build_fullscreen_texture_mesh();
+        GLMesh _sky_sphere;
         GLTexture _dither_texture;
+        GLTexture _temp_sphere_texture;
      public:
         Pipeline();
         void render(std::vector<RenderItem> items, const RenderSettings& settings);
