@@ -8,7 +8,6 @@
 #include "infd/GLMesh.hpp"
 
 namespace infd::render {
-
     class Framebuffer {
         bool _valid = false;
         std::pair<int, int> _size;
@@ -25,11 +24,6 @@ namespace infd::render {
         void renderToOther(const GLProgram& shader, const Framebuffer& other, const GLMesh& display) const;
         // call after framebuffer is bound
         void setupDraw() const;
-//        [[nodiscard]] auto scopedFramebuffer() const {
-//            auto guard = scopedBind(buffer, GL_FRAMEBUFFER);
-//
-//            return guard;
-//        }
     };
 
 }

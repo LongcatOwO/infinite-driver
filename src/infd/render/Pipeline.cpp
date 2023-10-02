@@ -36,7 +36,6 @@ void infd::render::Pipeline::render(std::vector<RenderItem> items, const infd::r
         std::cerr << "Error: Buffers not initialised before render called (screen size not set?)" << std::endl;
         abort();
     }
-    auto [width, height] = settings.screen_size;
 
     using namespace glm;
     // draw scene to buffer
@@ -60,7 +59,6 @@ void infd::render::Pipeline::render(std::vector<RenderItem> items, const infd::r
     // draw dither from fx -> final buf
     {
         auto program_guard = scopedProgram(_dither_shader);
-//        auto fb_guard = scopedBind(_final_buf.buffer, GL_FRAMEBUFFER);
 
         glActiveTexture(GL_TEXTURE1);
         auto dither_texture_guard = scopedBind(_dither_texture, GL_TEXTURE_2D);
@@ -73,10 +71,6 @@ void infd::render::Pipeline::render(std::vector<RenderItem> items, const infd::r
     {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         auto program_guard = scopedProgram(_blit_shader);
-
-//        glActiveTexture(GL_TEXTURE1);
-//        auto dither_texture_guard = scopedBind(_dither_texture, GL_TEXTURE_2D);
-//        glUniform1i(glGetUniformLocation(_dither_shader, "uDitherPattern"), 1);
 
         _final_buf.renderToScreen(_blit_shader, _fullscreen_mesh);
     }
@@ -94,9 +88,9 @@ void infd::render::Pipeline::loadShaders() {
     _dither_shader = dither_build.build();
 
     ShaderBuilder blit_build;
-    dither_build.setShader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//fullscreen_vert.glsl"));
-    dither_build.setShader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//blit_frag.glsl"));
-    _blit_shader = dither_build.build();
+    blit_build.setShader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//fullscreen_vert.glsl"));
+    blit_build.setShader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//blit_frag.glsl"));
+    _blit_shader = blit_build.build();
 }
 
 void infd::render::Pipeline::screenSizeChanged(std::pair<int, int> new_size) {

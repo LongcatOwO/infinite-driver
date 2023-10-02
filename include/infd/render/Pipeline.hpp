@@ -17,9 +17,11 @@ namespace infd::render {
         GLProgram _main_shader;
         GLProgram _dither_shader;
         GLProgram _blit_shader;
-        GLMesh _fullscreen_mesh = build_fullscreen_texture_mesh();
+
         Framebuffer _fx_buf;
         Framebuffer _final_buf;
+
+        GLMesh _fullscreen_mesh = build_fullscreen_texture_mesh();
         GLTexture _dither_texture;
      public:
         Pipeline();

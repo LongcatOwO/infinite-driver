@@ -27,7 +27,6 @@ namespace infd::render {
             }
         }
         _size = new_size;
-
         _valid = true;
     }
 
@@ -46,7 +45,7 @@ namespace infd::render {
     }
 
     void Framebuffer::renderToOther(const GLProgram& shader, const Framebuffer& other, const GLMesh& display) const {
-        auto buffer_handle = scopedBind(other.colour, GL_FRAMEBUFFER);
+        auto buffer_handle = scopedBind(other.buffer, GL_FRAMEBUFFER);
         glActiveTexture(GL_TEXTURE0);
         auto texture_guard = scopedBind(colour, GL_TEXTURE_2D);
         glUniform1i(glGetUniformLocation(shader, "uFramebuffer"), 0);
