@@ -15,15 +15,11 @@ namespace infd::render {
 
     class Pipeline {
         GLProgram _main_shader;
-        GLProgram _fullscreen_texture_shader;
-        bool _buffers_ready = false;
+        GLProgram _dither_shader;
+        GLProgram _blit_shader;
         GLMesh _fullscreen_mesh = build_fullscreen_texture_mesh();
-//        struct {
-//            GLFramebuffer buffer;
-//            GLTexture colour;
-//            GlRenderBuffer depth;
-//        } _fb;
-        Framebuffer _fb;
+        Framebuffer _fx_buf;
+        Framebuffer _final_buf;
         GLTexture _dither_texture;
      public:
         Pipeline();

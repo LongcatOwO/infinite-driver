@@ -26,20 +26,41 @@ namespace infd::render {
                 abort();
             }
         }
+        _size = new_size;
 
         _valid = true;
     }
 
-    void Framebuffer::renderToScreen() {
+    void Framebuffer::renderToScreen(const GLProgram& shader, const GLMesh& display) const {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glActiveTexture(GL_TEXTURE0);
+        auto texture_guard = scopedBind(colour, GL_TEXTURE_2D);
+        glUniform1i(glGetUniformLocation(shader, "uFramebuffer"), 0);
 
+        glViewport(0, 0, _size.first, _size.second);
+        glClearColor(1, 1, 1, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glDisable(GL_DEPTH_TEST);
+
+        display.draw();
     }
 
-    void Framebuffer::renderToOther(const GLProgram& shader, const Framebuffer& other) {
+    void Framebuffer::renderToOther(const GLProgram& shader, const Framebuffer& other, const GLMesh& display) const {
+        auto buffer_handle = scopedBind(other.colour, GL_FRAMEBUFFER);
+        glActiveTexture(GL_TEXTURE0);
+        auto texture_guard = scopedBind(colour, GL_TEXTURE_2D);
+        glUniform1i(glGetUniformLocation(shader, "uFramebuffer"), 0);
 
+        glViewport(0, 0, other._size.first, other._size.second);
+        glClearColor(1, 1, 1, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glDisable(GL_DEPTH_TEST);
+
+        display.draw();
     }
 
     void Framebuffer::setupDraw() const {
-        glViewport(0, 0, size.first, size.second); // set the viewport to draw to the entire window
+        glViewport(0, 0, _size.first, _size.second); // set the viewport to draw to the entire window
 
         glClearColor(0, 0, 0, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

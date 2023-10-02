@@ -5,12 +5,13 @@
 #pragma once
 #include "infd/GLObject.hpp"
 #include "infd/ScopeGuard.hpp"
+#include "infd/GLMesh.hpp"
 
 namespace infd::render {
 
     class Framebuffer {
         bool _valid = false;
-        std::pair<int, int> size;
+        std::pair<int, int> _size;
      public:
         GLFramebuffer buffer;
         GLTexture colour;
@@ -19,8 +20,9 @@ namespace infd::render {
             return _valid;
         }
         void setSize(std::pair<int, int> new_size);
-        void renderToScreen();
-        void renderToOther(const GLProgram& shader, const Framebuffer& other);
+        // bind shader program BEFORE calling these
+        void renderToScreen(const GLProgram& shader, const GLMesh& display) const;
+        void renderToOther(const GLProgram& shader, const Framebuffer& other, const GLMesh& display) const;
         // call after framebuffer is bound
         void setupDraw() const;
 //        [[nodiscard]] auto scopedFramebuffer() const {

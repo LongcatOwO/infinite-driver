@@ -32,7 +32,7 @@ infd::render::Pipeline::Pipeline() {
 }
 
 void infd::render::Pipeline::render(std::vector<RenderItem> items, const infd::render::RenderSettings& settings) {
-    if (!_fb.valid()) {
+    if (!(_fx_buf.valid() && _final_buf.valid())) {
         std::cerr << "Error: Buffers not initialised before render called (screen size not set?)" << std::endl;
         abort();
     }
@@ -41,52 +41,44 @@ void infd::render::Pipeline::render(std::vector<RenderItem> items, const infd::r
     using namespace glm;
     // draw scene to buffer
     {
-//        std::cout << "Start draw" << std::endl;
         auto program_guard = scopedProgram(_main_shader);
-        auto fb_guard = scopedBind(_fb.buffer, GL_FRAMEBUFFER);
-        _fb.setupDraw();
-//        auto fb_guard = _fb.scopedFramebuffer();
-
-//        glViewport(0, 0, width, height); // set the viewport to draw to the entire window
-//
-//        glClearColor(0, 0, 0, 1.0f);
-//        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//        glEnable(GL_DEPTH_TEST);
-//        glDepthFunc(GL_LESS);
+        auto fb_guard = scopedBind(_fx_buf.buffer, GL_FRAMEBUFFER);
+        _fx_buf.setupDraw();
 
         glUniform3fv(glGetUniformLocation(_main_shader, "uColour"), 1, glm::value_ptr(vec3{1, 0, 1}));
         glUniform3fv(glGetUniformLocation(_main_shader, "uLightPos"), 1, glm::value_ptr(vec3{10}));
         glUniformMatrix4fv(glGetUniformLocation(_main_shader, "uProjectionMatrix"), 1, false, value_ptr(settings.temp_proj));
         glUniformMatrix4fv(glGetUniformLocation(_main_shader, "uViewMatrix"), 1, false, value_ptr(settings.temp_view));
 
-//        std::cout << "Draw items" << std::endl;
         for (auto& item : items) {
             glUniformMatrix4fv(glGetUniformLocation(_main_shader, "uModelMatrix"), 1, false, value_ptr(item.transform));
             glUniform1f(glGetUniformLocation(_main_shader, "uShininess"), item.material.shininess);
             item.mesh.draw();
         }
-//        std::cout << "End draw " << std::endl;
     }
 
-    // draw to screen from buffer
+    // draw dither from fx -> final buf
     {
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        auto program_guard = scopedProgram(_fullscreen_texture_shader);
-
-        glActiveTexture(GL_TEXTURE0);
-        auto texture_guard = scopedBind(_fb.colour, GL_TEXTURE_2D);
-        glUniform1i(glGetUniformLocation(_fullscreen_texture_shader, "uFramebuffer"), 0);
+        auto program_guard = scopedProgram(_dither_shader);
+//        auto fb_guard = scopedBind(_final_buf.buffer, GL_FRAMEBUFFER);
 
         glActiveTexture(GL_TEXTURE1);
         auto dither_texture_guard = scopedBind(_dither_texture, GL_TEXTURE_2D);
-        glUniform1i(glGetUniformLocation(_fullscreen_texture_shader, "uDitherPattern"), 1);
+        glUniform1i(glGetUniformLocation(_dither_shader, "uDitherPattern"), 1);
 
-        glViewport(0, 0, width, height);
-        glClearColor(1, 1, 1, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-        glDisable(GL_DEPTH_TEST);
+        _fx_buf.renderToOther(_dither_shader, _final_buf, _fullscreen_mesh);
+    }
 
-        _fullscreen_mesh.draw();
+    // draw to screen from final buffer
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        auto program_guard = scopedProgram(_blit_shader);
+
+//        glActiveTexture(GL_TEXTURE1);
+//        auto dither_texture_guard = scopedBind(_dither_texture, GL_TEXTURE_2D);
+//        glUniform1i(glGetUniformLocation(_dither_shader, "uDitherPattern"), 1);
+
+        _final_buf.renderToScreen(_blit_shader, _fullscreen_mesh);
     }
 }
 
@@ -96,35 +88,20 @@ void infd::render::Pipeline::loadShaders() {
     main_shader_build.setShader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//phong_frag.glsl"));
     _main_shader = main_shader_build.build();
 
-    ShaderBuilder fullscreen_texture_build;
-    fullscreen_texture_build.setShader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//fullscreen_texture_vert.glsl"));
-    fullscreen_texture_build.setShader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//dither_frag.glsl"));
-    _fullscreen_texture_shader = fullscreen_texture_build.build();
+    ShaderBuilder dither_build;
+    dither_build.setShader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//fullscreen_vert.glsl"));
+    dither_build.setShader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//dither_frag.glsl"));
+    _dither_shader = dither_build.build();
+
+    ShaderBuilder blit_build;
+    dither_build.setShader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//fullscreen_vert.glsl"));
+    dither_build.setShader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//blit_frag.glsl"));
+    _blit_shader = dither_build.build();
 }
 
 void infd::render::Pipeline::screenSizeChanged(std::pair<int, int> new_size) {
-    _fb.setSize(new_size);
-//    auto [width, height] = new_size;
-//    {
-//        auto fb_guard       = scopedBind(_fb.buffer, GL_FRAMEBUFFER);
-//        auto colour_guard   = scopedBind(_fb.colour, GL_TEXTURE_2D);
-//        auto depth_guard    = scopedRenderbuffer(_fb.depth);
-//
-//        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-//        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-//        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-//        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _fb.colour, 0);
-//
-//        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
-//        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _fb.depth);
-//
-//        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-//            std::cerr << "Error: Framebuffer not complete" << std::endl;
-//            abort();
-//        }
-//    }
-//
-//    _buffers_ready = true;
+    _fx_buf.setSize(new_size);
+    _final_buf.setSize(new_size);
 }
 
 
