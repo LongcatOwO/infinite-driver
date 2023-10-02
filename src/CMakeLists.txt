@@ -14,6 +14,7 @@ add_executable(${PROJECT_NAME}
 	"${PROJECT_SOURCE_DIR}/infd/render/Renderer.cpp"
 	"${PROJECT_SOURCE_DIR}/infd/render/Pipeline.cpp"
 	"${PROJECT_SOURCE_DIR}/infd/render/Utils.cpp"
+	"${PROJECT_SOURCE_DIR}/infd/render/Framebuffer.cpp"
 )
 
 target_link_libraries(${PROJECT_NAME}

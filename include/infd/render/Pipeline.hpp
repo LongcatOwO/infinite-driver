@@ -6,6 +6,7 @@
 #include <vector>
 #include "infd/render/Utils.hpp"
 #include "infd/GLObject.hpp"
+#include "infd/render/Framebuffer.hpp"
 
 namespace infd::render {
     // forward declare to avoid recursive inclusion hellscape
@@ -17,11 +18,12 @@ namespace infd::render {
         GLProgram _fullscreen_texture_shader;
         bool _buffers_ready = false;
         GLMesh _fullscreen_mesh = build_fullscreen_texture_mesh();
-        struct {
-            GLFramebuffer buffer;
-            GLTexture colour;
-            GlRenderBuffer depth;
-        } _fb;
+//        struct {
+//            GLFramebuffer buffer;
+//            GLTexture colour;
+//            GlRenderBuffer depth;
+//        } _fb;
+        Framebuffer _fb;
         GLTexture _dither_texture;
      public:
         Pipeline();
