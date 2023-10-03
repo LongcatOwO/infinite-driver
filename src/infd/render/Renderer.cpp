@@ -20,7 +20,8 @@ namespace infd::render {
     }
 
     void Renderer::render(std::vector<RenderItem> items) {
-        auto view_target = _test_camera.pos + glm::vec3 {_test_camera.angle, 0, -1};
+        _render_settings.camera_dir = {_test_camera.angle_x, _test_camera.angle_y, -1};
+        auto view_target = _test_camera.pos + _render_settings.camera_dir;
         _render_settings.temp_view = glm::lookAt(_test_camera.pos, view_target, {0, 1, 0});
         _pipeline.render(std::move(items), _render_settings);
     }
@@ -42,7 +43,8 @@ namespace infd::render {
 
     void Renderer::gui() {
         ImGui::SliderFloat3("Camera pos", glm::value_ptr(_test_camera.pos), -100, 100);
-        ImGui::SliderFloat("View angle", &_test_camera.angle, -1, 1);
+        ImGui::SliderFloat("View angle X", &_test_camera.angle_x, -1, 1);
+        ImGui::SliderFloat("View angle Y", &_test_camera.angle_y, -1, 1);
     }
 
 }
