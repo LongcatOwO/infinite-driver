@@ -86,15 +86,19 @@ void infd::render::Pipeline::render(std::vector<RenderItem> items, const infd::r
 //    }
 
     {
+        auto fb_guard = scopedBind(_final_buf.buffer, GL_FRAMEBUFFER);
+        _final_buf.setupDraw();
         auto program_guard = scopedProgram(_sky_shader);
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_CULL_FACE);
+        glDisable(GL_DEPTH_CLAMP);
 
         glActiveTexture(GL_TEXTURE1);
         auto sky_texture_guard = scopedBind(_temp_sphere_texture, GL_TEXTURE_2D);
         glUniform1i(glGetUniformLocation(_sky_shader, "uTex"), 1);
 
         glUniformMatrix4fv(glGetUniformLocation(_sky_shader, "uProjectionMatrix"), 1, false, value_ptr(settings.temp_proj));
-        glUniformMatrix4fv(glGetUniformLocation(_sky_shader, "uViewMatrix"), 1, false, value_ptr(glm::mat4 {1}));
-
+        glUniformMatrix4fv(glGetUniformLocation(_sky_shader, "uViewMatrix"), 1, false, value_ptr(glm::scale(glm::mat4{1}, glm::vec3{1})));
         glUniformMatrix4fv(glGetUniformLocation(_sky_shader, "uModelMatrix"), 1, false, value_ptr(glm::mat4 {1}));
         _sky_sphere.draw();
     }
