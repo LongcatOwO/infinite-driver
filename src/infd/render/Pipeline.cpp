@@ -27,8 +27,8 @@ infd::render::Pipeline::Pipeline() : _sky_sphere{loadWavefrontCases(CGRA_SRCDIR 
 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, tex.size.x, tex.size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE,
                          tex.data.data());
         }
@@ -101,6 +101,7 @@ void infd::render::Pipeline::render(std::vector<RenderItem> items, const infd::r
         auto sky_texture_guard = scopedBind(_dither_texture, GL_TEXTURE_2D);
         glUniform1i(glGetUniformLocation(_sky_shader, "uTex"), 1);
         glUniform2fv(glGetUniformLocation(_sky_shader, "uScreenSize"), 1, value_ptr(vec2 {width, height}));
+        glUniform1f(glGetUniformLocation(_sky_shader, "uPatternAngle"), settings.pattern_angle);
         glUniformMatrix4fv(glGetUniformLocation(_sky_shader, "uProjectionMatrix"), 1, false, value_ptr(settings.temp_proj));
         glUniformMatrix4fv(glGetUniformLocation(_sky_shader, "uViewMatrix"), 1, false, value_ptr(view));
         glUniformMatrix4fv(glGetUniformLocation(_sky_shader, "uModelMatrix"), 1, false, value_ptr(glm::mat4 {1}));

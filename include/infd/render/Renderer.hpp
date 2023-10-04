@@ -25,6 +25,7 @@ namespace infd::render {
 
     struct RenderSettings {
         std::pair<int, int> screen_size;
+        float pattern_angle;
         glm::vec3 camera_dir;
         glm::mat4 temp_view;
         glm::mat4 temp_proj;
@@ -39,6 +40,7 @@ namespace infd::render {
             glm::vec3 dir;
             float angle_x;
             float angle_y;
+            float pattern_angle = 0;
         } _test_camera;
      public:
         Renderer();

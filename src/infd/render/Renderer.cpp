@@ -23,6 +23,7 @@ namespace infd::render {
         _render_settings.camera_dir = {_test_camera.angle_x, _test_camera.angle_y, -1};
         auto view_target = _test_camera.pos + _render_settings.camera_dir;
         _render_settings.temp_view = glm::lookAt(_test_camera.pos, view_target, {0, 1, 0});
+        _render_settings.pattern_angle = _test_camera.pattern_angle;
         _pipeline.render(std::move(items), _render_settings);
     }
 
@@ -45,6 +46,7 @@ namespace infd::render {
         ImGui::SliderFloat3("Camera pos", glm::value_ptr(_test_camera.pos), -100, 100);
         ImGui::SliderFloat("View angle X", &_test_camera.angle_x, -1, 1);
         ImGui::SliderFloat("View angle Y", &_test_camera.angle_y, -1, 1);
+        ImGui::SliderFloat("Pattern angle", &_test_camera.pattern_angle, 0, glm::pi<float>());
     }
 
 }

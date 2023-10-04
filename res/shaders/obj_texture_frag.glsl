@@ -7,6 +7,7 @@ uniform mat4 uViewMatrix;
 
 uniform sampler2D uTex;
 uniform vec2 uScreenSize;
+uniform float uPatternAngle;
 
 // viewspace data (this must match the output of the fragment shader)
 in VertexData {
@@ -25,12 +26,19 @@ void main() {
 //    float reps = (uScreenSize.x / tex_size.x);
 //    vec2 scale = vec2(reps * aspect_ratio, reps/ aspect_ratio);
 
+    vec2 uv = f_in.textureCoord;
+    float c = cos(uPatternAngle), s = sin(uPatternAngle);
+    uv = uv * mat2(
+        c, -s,
+        s,  c
+    );
+
     // assumes fov == 1rad, R-TR p.549
     vec2 wanted_res = uScreenSize / 0.54630248984;
     vec2 reps = wanted_res / tex_size;
     vec2 scale = reps * 2;
 
-    vec4 colour = texture(uTex, f_in.textureCoord * scale);
+    vec4 colour = texture(uTex, uv * scale);
 
 
     // output to the frambuffer
