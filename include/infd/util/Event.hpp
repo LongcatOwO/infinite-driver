@@ -15,6 +15,7 @@ namespace infd::util {
 
 	template <typename R, typename ...Args>
 	class PublicEvent<R (Args...)> {
+	public:
 		virtual PublicEvent& addListener 	(const Function<R (Args...)>&  listener) & = 0;
 		virtual PublicEvent& addListener 	( 	   Function<R (Args...)>&& listener) & = 0;
 		virtual PublicEvent& removeListener (const Function<R (Args...)>&  listener) & = 0;

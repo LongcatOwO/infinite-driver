@@ -2,9 +2,13 @@
 #include <format>
 #include <iostream>
 #include <memory>
+#include <vector>
 
 // bullet
 #include <btBulletDynamicsCommon.h>
+
+// project
+#include <infd/scene/SceneObject.hpp>
 
 int main() {
 	std::unique_ptr<btCollisionConfiguration> collision_configuration = 
