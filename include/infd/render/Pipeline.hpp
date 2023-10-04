@@ -20,6 +20,7 @@ namespace infd::render {
         GLProgram _sky_shader;
 
         Framebuffer _fx_buf;
+        Framebuffer _dither_dome_buf;
         Framebuffer _sky_buf;
         Framebuffer _final_buf;
 

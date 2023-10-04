@@ -27,8 +27,8 @@ infd::render::Pipeline::Pipeline() : _sky_sphere{loadWavefrontCases(CGRA_SRCDIR 
 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, tex.size.x, tex.size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE,
                          tex.data.data());
         }
@@ -76,20 +76,10 @@ void infd::render::Pipeline::render(std::vector<RenderItem> items, const infd::r
         }
     }
 
-    // draw dither from fx -> final buf
-//    {
-//        auto program_guard = scopedProgram(_dither_shader);
-//
-//        glActiveTexture(GL_TEXTURE1);
-//        auto dither_texture_guard = scopedBind(_dither_texture, GL_TEXTURE_2D);
-//        glUniform1i(glGetUniformLocation(_dither_shader, "uDitherPattern"), 1);
-//
-//        _fx_buf.renderToOther(_dither_shader, _final_buf, _fullscreen_mesh);
-//    }
-
+    // draw dither texture onto skydome
     {
-        auto fb_guard = scopedBind(_final_buf.buffer, GL_FRAMEBUFFER);
-        _final_buf.setupDraw();
+        auto fb_guard = scopedBind(_dither_dome_buf.buffer, GL_FRAMEBUFFER);
+        _dither_dome_buf.setupDraw();
         auto program_guard = scopedProgram(_sky_shader);
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_CULL_FACE);
@@ -108,12 +98,24 @@ void infd::render::Pipeline::render(std::vector<RenderItem> items, const infd::r
         _sky_sphere.draw();
     }
 
+    //draw dither from fx -> final buf
+    {
+        auto program_guard = scopedProgram(_dither_shader);
+
+        glActiveTexture(GL_TEXTURE1);
+        auto dither_texture_guard = scopedBind(_dither_dome_buf.colour, GL_TEXTURE_2D);
+        glUniform1i(glGetUniformLocation(_dither_shader, "uDitherPattern"), 1);
+
+        _fx_buf.renderToOther(_dither_shader, _final_buf, _fullscreen_mesh);
+    }
+
     // draw to screen from final buffer
     {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         auto program_guard = scopedProgram(_blit_shader);
 
         _final_buf.renderToScreen(_blit_shader, _fullscreen_mesh);
+//        _dither_dome_buf.renderToScreen(_blit_shader, _fullscreen_mesh);
     }
 }
 
@@ -142,6 +144,7 @@ void infd::render::Pipeline::loadShaders() {
 void infd::render::Pipeline::screenSizeChanged(std::pair<int, int> new_size) {
     _fx_buf.setSize(new_size);
     _final_buf.setSize(new_size);
+    _dither_dome_buf.setSize(new_size);
 }
 
 
