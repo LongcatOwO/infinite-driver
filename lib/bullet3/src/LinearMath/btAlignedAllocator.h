@@ -92,7 +92,7 @@ public:
 		return reinterpret_cast<pointer>(btAlignedAlloc(sizeof(value_type) * n, Alignment));
 	}
 	void construct(pointer ptr, const value_type& value) { new (ptr) value_type(value); }
-	void deallocate(pointer ptr)
+	void deallocate(pointer ptr, unsigned long = 0)
 	{
 		btAlignedFree(reinterpret_cast<void*>(ptr));
 	}
