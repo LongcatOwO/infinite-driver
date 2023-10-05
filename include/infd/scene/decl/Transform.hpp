@@ -6,9 +6,9 @@
 #include <vector>
 
 // glm
-#include <glm/vec3.hpp>
-#include <glm/mat4x4.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <glm/mat4x4.hpp>
+#include <glm/vec3.hpp>
 
 // project - scene
 #include <infd/scene/definitions.hpp>
@@ -30,6 +30,15 @@ namespace infd::scene {
 		glm::qua<Float> _local_rotation;
 		glm::vec<3, Float> _local_scale;
 
+		mutable bool _parent_global_transform_updated = false;
+		mutable glm::mat<4, 4, Float> _parent_global_transform_cache;
+
+		void onAttach() noexcept override;
+		void onDetach() noexcept override;
+		void internalOnParentAssigned(SceneObject &) noexcept;
+
+		const glm::mat<4, 4, Float>& internalParentGlobalTransform() const noexcept;
+
 	public:
 		[[nodiscard]] Transform() noexcept;
 
@@ -45,8 +54,8 @@ namespace infd::scene {
 		[[nodiscard]] bool hasChildren() const noexcept;
 		[[nodiscard]] std::size_t numChildren() const noexcept;
 
-		[[nodiscard]] util::random_access_view_of<Transform *> auto childPointersView() noexcept;
-		[[nodiscard]] util::random_access_view_of<const Transform *> auto childPointersView() const noexcept;
+		[[nodiscard]] util::random_access_view_of<Transform &> auto childrenView() noexcept;
+		[[nodiscard]] util::random_access_view_of<const Transform &> auto childrenView() const noexcept;
 
 		[[nodiscard]] std::vector<Transform *> childPointers() noexcept;
 		[[nodiscard]] std::vector<const Transform *> childPointers() const noexcept;
@@ -57,6 +66,18 @@ namespace infd::scene {
 		[[nodiscard]] util::random_access_move_only_range_of<const Transform &> auto children() const noexcept;
 		[[nodiscard]] util::random_access_move_only_range_of<Transform &> auto allChildren() noexcept;
 		[[nodiscard]] util::random_access_move_only_range_of<const Transform &> auto allChildren() const noexcept;
+
+		template <util::consumer_of<Transform &> V>
+		void visitChildren(V &&visitor);
+
+		template <util::consumer_of<const Transform &> V>
+		void visitChildren(V &&visitor) const;
+
+		template <util::consumer_of<Transform &> V>
+		void visitAllChildren(V &&visitor);
+
+		template <util::consumer_of<const Transform &> V>
+		void visitAllChildren(V &&visitor) const;
 
 		Transform& addChild(std::string name) noexcept;
 
@@ -80,25 +101,35 @@ namespace infd::scene {
 		void detachFromParent(Transform &new_parent);
 
 		[[nodiscard]] const glm::vec<3, Float>& localPosition() const noexcept;
-		void localPosition(const glm::vec<3, Float> &value) noexcept;
-
 		[[nodiscard]] const glm::qua<Float>& localRotation() const noexcept;
-		void localRotation(const glm::qua<Float> &value) noexcept;
-
 		[[nodiscard]] const glm::vec<3, Float>& localScale() const noexcept;
-		void localScale(const glm::vec<3, Float> &value) noexcept;
-
 		[[nodiscard]] glm::mat<4, 4, Float> localTransform() const noexcept;
-		void localTransform(const glm::mat<4, 4, Float> &value) noexcept;
+
+		void localPosition(const glm::vec<3, Float> &value) noexcept;
+		void localRotation(const glm::qua<Float> &value) noexcept;
+		void localScale(const glm::vec<3, Float> &value) noexcept;
+		void localTransform(
+			const glm::vec<3, Float> &position, 
+			const glm::qua<Float> &rotation  		= glm::qua<Float>{ 1, 0, 0, 0 }, 
+			const glm::vec<3, Float> &scale 		= glm::vec<3, Float>{1}
+		) noexcept;
 
 		[[nodiscard]] glm::vec<3, Float> globalPosition() const noexcept;
-		void globalPosition(const glm::vec<3, Float> &value) noexcept;
-
 		[[nodiscard]] glm::qua<Float> globalRotation() const noexcept;
-		void globalRotation(const glm::qua<Float> &value) noexcept;
-
 		[[nodiscard]] glm::vec<3, Float> globalScale() const noexcept;
-		void globalScale(const glm::vec<3, Float> &value) noexcept;
+		[[nodiscard]] glm::mat<4, 4, Float> globalTransform() const noexcept;
+
+		void globalTransform(
+			const glm::vec<3, Float> &position,
+			const glm::qua<Float> &rotation 		= glm::qua<Float>{1, 0, 0, 0},
+			const glm::vec<3, Float> &scale 		= glm::vec<3, Float>{1}
+		) noexcept;
+
+		void decomposeGlobalTransform(
+			glm::vec<3, Float> &out_position,
+			glm::qua<Float> &out_rotation,
+			glm::vec<3, Float> &out_scale
+		) const noexcept;
 
 	}; // class Transform
 } // namespace infd::scene

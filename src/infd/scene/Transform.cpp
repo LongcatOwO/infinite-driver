@@ -15,8 +15,9 @@ namespace infd::scene {
 		auto end = result.end();
 		while (begin != end) {
 			auto next_gen = rng::subrange(begin, end)
-				| vw::transform([](Transform *so) { return so->childPointersView(); })
+				| vw::transform([](Transform *t) { return t->childrenView(); })
 				| vw::join
+				| vw::transform([](Transform &t) -> Transform* { return &t; })
 				| vw::common;
 			result.insert(end, next_gen.begin(), next_gen.end());
 			begin = end;
@@ -33,8 +34,9 @@ namespace infd::scene {
 		auto end = result.end();
 		while (begin != end) {
 			auto next_gen = rng::subrange(begin, end)
-				| vw::transform([](const Transform *so) { return so->childPointersView(); })
+				| vw::transform([](const Transform *t) { return t->childrenView(); })
 				| vw::join
+				| vw::transform([](const Transform &t) -> const Transform* { return &t; })
 				| vw::common;
 			result.insert(end, next_gen.begin(), next_gen.end());
 			begin = end;
