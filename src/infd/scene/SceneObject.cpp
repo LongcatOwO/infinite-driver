@@ -1,7 +1,15 @@
 // std
 #include <format>
+#include <memory>
 #include <ranges>
+#include <string>
+#include <utility>
 #include <vector>
+
+// glm
+#include <glm/gtc/quaternion.hpp>
+#include <glm/mat4x4.hpp>
+#include <glm/vec3.hpp>
 
 // project - util
 #include <infd/util/exceptions.hpp>
@@ -18,8 +26,9 @@ namespace infd::scene {
 		auto end = result.end();
 		while (begin != end) {
 			auto next_gen = rng::subrange(begin, end)
-				| vw::transform([](SceneObject *so) { return so->childPointersView(); })
+				| vw::transform([](SceneObject *so) { return so->childrenView(); })
 				| vw::join
+				| vw::transform([](SceneObject &so) -> SceneObject* { return &so; })
 				| vw::common;
 			result.insert(end, next_gen.begin(), next_gen.end());
 			begin = end;
@@ -36,8 +45,9 @@ namespace infd::scene {
 		auto end = result.end();
 		while (begin != end) {
 			auto next_gen = rng::subrange(begin, end)
-				| vw::transform([](const SceneObject *so) { return so->childPointersView(); })
+				| vw::transform([](const SceneObject *so) { return so->childrenView(); })
 				| vw::join
+				| vw::transform([](const SceneObject &so) -> const SceneObject* { return &so; })
 				| vw::common;
 			result.insert(end, next_gen.begin(), next_gen.end());
 			begin = end;
@@ -48,8 +58,7 @@ namespace infd::scene {
 
 	SceneObject& SceneObject::addChild(std::string name) noexcept {
 		SceneObject *new_child = new SceneObject(std::move(name));
-		_children.push_back(std::unique_ptr<SceneObject>{new_child});
-		new_child->internalUncheckedSetParent(this);
+		internalUncheckedAddChild(std::unique_ptr<SceneObject>{new_child});
 		return *new_child;
 	}
 
@@ -69,8 +78,7 @@ namespace infd::scene {
 					std::format("[SceneObject(\"{}\")::addChild(std::unique_ptr<SceneObject> child)]: child(\"{}\") is parent in the heirarchy.", _name, child_ptr->_name)
 				);
 
-		_children.push_back(std::move(child));
-		child_ptr->internalUncheckedSetParent(this);
+		internalUncheckedAddChild(std::move(child));
 		return *child_ptr;
 	}
 
@@ -80,17 +88,7 @@ namespace infd::scene {
 					std::format("[SceneObject(\"{}\")::removeFromParent()]: parent is null.", _name)
 				);
 
-		auto it = std::find_if(_parent->_children.begin(), _parent->_children.end(),
-				[this] (std::unique_ptr<SceneObject> &ptr) {
-					return this == ptr.get();
-				}
-			);
-
-		std::unique_ptr<SceneObject> owning_self{std::move(*it)};
-		_parent->_children.erase(it);
-
-		internalUncheckedSetParent(nullptr);
-		return owning_self;
+		return _parent->internalUncheckedRemoveChild(*this);
 	}
 
 	void SceneObject::removeFromParent(SceneObject &new_parent) {
@@ -109,17 +107,7 @@ namespace infd::scene {
 				);
 		}
 
-		auto it = std::find_if(_parent->_children.begin(), _parent->_children.end(),
-				[this] (std::unique_ptr<SceneObject> &ptr) {
-					return this == ptr.get();
-				}
-			);
-
-		std::unique_ptr<SceneObject> owning_self{std::move(*it)};
-		_parent->_children.erase(it);
-
-		new_parent._children.push_back(std::move(owning_self));
-		internalUncheckedSetParent(&new_parent);
+		new_parent.internalUncheckedAddChild(_parent->internalUncheckedRemoveChild(*this));
 	}
 
 	std::unique_ptr<SceneObject> SceneObject::removeFromScene() {
@@ -134,4 +122,86 @@ namespace infd::scene {
 
 		return _scene->internalUncheckedRemoveSceneObject(*this);
 	}
+
+	SceneObject& SceneObject::attachChild(std::string name) noexcept {
+		SceneObject &child = addChild(std::move(name));
+		child.transform().globalTransform(glm::vec<3, Float>{0});
+		return child;
+	}
+
+	SceneObject& SceneObject::attachChild(std::unique_ptr<SceneObject> child) {
+		if (!child)
+			throw util::NullPointerException(
+					std::format("[SceneObject(\"{}\")::attachChild(std::unique_ptr<SceneObject> child)]: child is null.", _name)
+				);
+
+		glm::vec<3, Float> position;
+		glm::qua<Float> rotation;
+		glm::vec<3, Float> scale;
+		child->transform().decomposeGlobalTransform(position, rotation, scale);
+		SceneObject &child_ref = addChild(std::move(child));
+		child_ref.transform().globalTransform(position, rotation, scale);
+		return child_ref;
+	}
+
+	std::unique_ptr<SceneObject> SceneObject::detachFromParent() {
+		glm::vec<3, Float> position;
+		glm::qua<Float> rotation;
+		glm::vec<3, Float> scale;
+		transform().decomposeGlobalTransform(position, rotation, scale);
+		std::unique_ptr<SceneObject> owning_self = removeFromParent();
+		transform().globalTransform(position, rotation, scale);
+		return owning_self;
+	}
+
+	void SceneObject::detachFromParent(SceneObject &new_parent) {
+		glm::vec<3, Float> position;
+		glm::qua<Float> rotation;
+		glm::vec<3, Float> scale;
+		transform().decomposeGlobalTransform(position, rotation, scale);
+		removeFromParent(new_parent);
+		transform().globalTransform(position, rotation, scale);
+	}
+
+	void SceneObject::internalSetScene(Scene *scene) noexcept {
+		_on_scene_unassigned(*this);
+		_scene = scene;
+		_on_scene_assigned(*this);
+
+		for (SceneObject &child : childrenView()) {
+			child.internalSetScene(_scene);
+		}
+	}
+
+	void SceneObject::internalUncheckedSetParent(SceneObject *parent) noexcept {
+		_on_parent_unassigned(*this);
+		_parent = parent;
+		_on_parent_assigned(*this);
+
+		if (parent) 
+			internalSetScene(parent->_scene);
+		else
+			internalSetScene(nullptr);
+	}
+
+	void SceneObject::internalUncheckedAddChild(std::unique_ptr<SceneObject> child) noexcept {
+		SceneObject *child_ptr = child.get();
+		_children.push_back(std::move(child));
+		child_ptr->internalUncheckedSetParent(this);
+		_on_child_added(*this, *child_ptr);
+	}
+
+	std::unique_ptr<SceneObject> SceneObject::internalUncheckedRemoveChild(SceneObject &child) noexcept {
+		auto it = std::find_if(
+				_children.begin(), _children.end(), 
+				[&child](std::unique_ptr<SceneObject> &ptr) {
+					return &child == ptr.get();
+				}
+			);
+		std::unique_ptr<SceneObject> owning_child{std::move(*it)};
+		_children.erase(it);
+		child.internalUncheckedSetParent(nullptr);
+		_on_child_removed(*this, child);
+	}
+
 }

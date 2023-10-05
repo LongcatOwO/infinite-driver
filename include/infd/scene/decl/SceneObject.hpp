@@ -7,6 +7,7 @@
 
 // project - util
 #include <infd/util/concepts.hpp>
+#include <infd/util/Event.hpp>
 #include <infd/util/exceptions.hpp>
 
 // forward declarations
@@ -29,12 +30,49 @@ namespace infd::scene {
 		std::vector<std::unique_ptr<Component>> _components;
 		Transform *_transform;
 
+		// called after scene assigned
+		util::Event<void (SceneObject &self)> _on_scene_assigned;
+		
+		// called before scene unassigned
+		util::Event<void (SceneObject &self)> _on_scene_unassigned;
+
+		// called after scene assigned
+		util::Event<void (SceneObject &self)> _on_parent_assigned;
+
+		// called before scene unassigned
+		util::Event<void (SceneObject &self)> _on_parent_unassigned;
+
+		// called after child added
+		util::Event<void (SceneObject &self, SceneObject &child)> _on_child_added;
+
+		// called before child removed
+		util::Event<void (SceneObject &self, SceneObject &child)> _on_child_removed;
+
 		void internalAttachComponentRoutine(Component &component);
+
 	public:
 		[[nodiscard]] SceneObject(std::string name) noexcept;
 
 		[[nodiscard]] std::string& name() noexcept;
 		[[nodiscard]] const std::string& name() const noexcept;
+
+		// called after scene is assigned
+		[[nodiscard]] util::PublicEvent<void (SceneObject &self)>& onSceneAssigned() noexcept;
+
+		// called before scene is assigned a new value
+		[[nodiscard]] util::PublicEvent<void (SceneObject &self)>& onSceneUnassigned() noexcept;
+
+		// called after parent is assigned
+		[[nodiscard]] util::PublicEvent<void (SceneObject &self)>& onParentAssigned() noexcept;
+		
+		// called before parent is assigned a new value
+		[[nodiscard]] util::PublicEvent<void (SceneObject &self)>& onParentUnassigned() noexcept;
+
+		// called after the child is added
+		[[nodiscard]] util::PublicEvent<void (SceneObject &self, SceneObject &child)>& onChildAdded() noexcept;
+
+		// called before the child is removed
+		[[nodiscard]] util::PublicEvent<void (SceneObject &self, SceneObject &child)>& onChildRemoved() noexcept;
 
 		[[nodiscard]] bool isRoot() const noexcept;
 		[[nodiscard]] bool hasParent() const noexcept;
@@ -45,8 +83,8 @@ namespace infd::scene {
 		[[nodiscard]] bool hasChildren() const noexcept;
 		[[nodiscard]] std::size_t numChildren() const noexcept;
 
-		[[nodiscard]] util::random_access_view_of<SceneObject *> auto childPointersView() noexcept;
-		[[nodiscard]] util::random_access_view_of<const SceneObject *> auto childPointersView() const noexcept;
+		[[nodiscard]] util::random_access_view_of<SceneObject &> auto childrenView() noexcept;
+		[[nodiscard]] util::random_access_view_of<const SceneObject &> auto childrenView() const noexcept;
 
 		[[nodiscard]] std::vector<SceneObject *> childPointers() noexcept;
 		[[nodiscard]] std::vector<const SceneObject *> childPointers() const noexcept;
@@ -57,6 +95,18 @@ namespace infd::scene {
 		[[nodiscard]] util::random_access_move_only_range_of<const SceneObject &> auto children() const noexcept;
 		[[nodiscard]] util::random_access_move_only_range_of<SceneObject &> auto allChildren() noexcept;
 		[[nodiscard]] util::random_access_move_only_range_of<const SceneObject &> auto allChildren() const noexcept;
+
+		template <util::consumer_of<SceneObject &> V>
+		void visitChildren(V &&visitor);
+
+		template <util::consumer_of<const SceneObject &> V>
+		void visitChildren(V &&visitor) const;
+
+		template <util::consumer_of<SceneObject &> V>
+		void visitAllChildren(V &&visitor);
+
+		template <util::consumer_of<const SceneObject &> V>
+		void visitAllChildren(V &&visitor) const;
 
 		SceneObject& addChild(std::string name) noexcept;
 
@@ -135,15 +185,54 @@ namespace infd::scene {
 		template <std::derived_from<Component> T, typename ...Args>
 		T& emplaceComponent(Args &&...args);
 
+
 		template <typename T>
 		[[nodiscard]] T* getComponent() noexcept;
 
 		template <typename T>
 		[[nodiscard]] const T* getComponent() const noexcept;
 
+		template <typename T>
+		[[nodiscard]] util::view_of<T &> auto getComponentsView() noexcept;
+
+		template <typename T>
+		[[nodiscard]] util::view_of<const T &> auto getComponentsView() const noexcept;
+
+		template <typename T>
+		[[nodiscard]] std::vector<T *> getComponentPointers() noexcept;
+
+		template <typename T>
+		[[nodiscard]] std::vector<const T *> getComponentPointers() const noexcept;
+
+		template <typename T>
+		[[nodiscard]] util::random_access_move_only_range_of<T &> auto getComponents() noexcept;
+
+		template <typename T>
+		[[nodiscard]] util::random_access_move_only_range_of<const T &> auto getComponents() const noexcept;
+
+
+		template <typename T>
+		[[nodiscard]] T* getComponentInChildren(bool include_self = true) noexcept;
+
+		template <typename T>
+		[[nodiscard]] const T* getComponentInChildren(bool include_self = true) const noexcept;
+
+		template <typename T>
+		[[nodiscard]] std::vector<T *> getComponentPointersInChildren(bool include_self = true) noexcept;
+
+		template <typename T>
+		[[nodiscard]] std::vector<const T *> getComponentPointersInChildren(bool include_self = true) const noexcept;
+
+		template <typename T>
+		[[nodiscard]] util::random_access_move_only_range_of<T &> auto getComponentsInChildren(bool include_self = true) noexcept;
+
+		template <typename T>
+		[[nodiscard]] util::random_access_move_only_range_of<const T &> auto getComponentsInChildren(bool include_self = true) const noexcept;
+
 	private:
 		void internalSetScene(Scene *scene) noexcept;
 		void internalUncheckedSetParent(SceneObject *parent) noexcept;
-
+		void internalUncheckedAddChild(std::unique_ptr<SceneObject> child) noexcept;
+		std::unique_ptr<SceneObject> internalUncheckedRemoveChild(SceneObject &child) noexcept;
 	}; // class SceneObject
 } // namespace infd::scene

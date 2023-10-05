@@ -10,10 +10,10 @@ namespace infd::util {
 
 	namespace detail {
 		template <auto FuncPtr>
-		class InvokeImpl {};
+		class FuncPtrInvokerImpl {};
 
 		template <typename R, typename ...Args, R (*FuncPtr)(Args...)>
-		class InvokeImpl<FuncPtr> {
+		class FuncPtrInvokerImpl<FuncPtr> {
 		public:
 			static R invoke(Args ...args) {
 				return FuncPtr(std::forward<Args>(args)...);
@@ -21,7 +21,7 @@ namespace infd::util {
 		};
 
 		template <typename C, typename R, typename ...Args, R (C::*FuncPtr)(Args...)>
-		class InvokeImpl<FuncPtr> {
+		class FuncPtrInvokerImpl<FuncPtr> {
 		public:
 			static R invoke(C *self, Args ...args) {
 				return (self->*FuncPtr)(std::forward<Args>(args)...);
@@ -29,7 +29,7 @@ namespace infd::util {
 		};
 
 		template <typename C, typename R, typename ...Args, R (C::*FuncPtr)(Args...) const>
-		class InvokeImpl<FuncPtr> {
+		class FuncPtrInvokerImpl<FuncPtr> {
 		public:
 			static R invoke(const C *self, Args ...args) {
 				return (self->*FuncPtr)(std::forward<Args>(args)...);
@@ -38,7 +38,7 @@ namespace infd::util {
 	}
 
 	template <auto FuncPtr>
-	constexpr auto invoke = detail::InvokeImpl<FuncPtr>::invoke;
+	constexpr auto func_ptr_invoker = detail::FuncPtrInvokerImpl<FuncPtr>::invoke;
 
 	template <typename FunctionSignature>
 	class Function;

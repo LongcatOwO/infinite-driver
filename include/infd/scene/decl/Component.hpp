@@ -21,8 +21,13 @@ namespace infd::scene {
 
 	protected:
 		// TODO call these functions properly
+
+		// called after attached
 		virtual void onAttach() {}
+
+		// called before detached
 		virtual void onDetach() {}
+
 		virtual void onAwake() {}
 		virtual void onFrameUpdate() {}
 		virtual void onPhysicsUpdate() {}
@@ -55,5 +60,6 @@ namespace infd::scene {
 
 		template <typename T>
 		[[nodiscard]] const T* getComponent() const noexcept;
+
 	}; // class Component
 } // namespace infd::scene
