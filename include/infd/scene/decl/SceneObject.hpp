@@ -234,5 +234,18 @@ namespace infd::scene {
 		void internalUncheckedSetParent(SceneObject *parent) noexcept;
 		void internalUncheckedAddChild(std::unique_ptr<SceneObject> child) noexcept;
 		std::unique_ptr<SceneObject> internalUncheckedRemoveChild(SceneObject &child) noexcept;
+
+		/* 
+		 * calls Component.onFrameUpdate() on all components in this object and all its children
+		 * recursively.
+		 */
+		void internalFrameUpdate();
+
+		/*
+		 * calls Component.onPhysicsUpdate() on all components in this object and all its children
+		 * recursively.
+		 */
+		void internalPhysicsUpdate();
+
 	}; // class SceneObject
 } // namespace infd::scene

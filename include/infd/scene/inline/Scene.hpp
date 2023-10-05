@@ -14,6 +14,7 @@
 // project - scene
 #include <infd/scene/definitions.hpp>
 #include <infd/util/Event.hpp>
+#include <infd/util/Function.hpp>
 #include <infd/scene/PhysicsContext.hpp>
 #include <infd/scene/Timer.hpp>
 
@@ -25,14 +26,12 @@
 namespace infd::scene {
 
 	inline Scene::Scene(std::string name) noexcept : _name(std::move(name)) {
-		_frame_timer.onIntervalComplete() += [this](Timer &) {
-			frameUpdate();
-			_on_frame_update(*this);
+		_frame_timer.onIntervalComplete() += {
+			util::func_ptr_invoker<&Scene::frameUpdate>, this
 		};
 
-		_physics_timer.onIntervalComplete() += [this](Timer &) {
-			physicsUpdate();
-			_on_physics_update(*this);
+		_physics_timer.onIntervalComplete() += {
+			util::func_ptr_invoker<&Scene::physicsUpdate>, this
 		};
 	}
 
