@@ -418,4 +418,20 @@ namespace infd::scene {
 			| std::views::transform([](const T *ptr) -> const T& { return *ptr; });
 	}
 
+	inline void SceneObject::internalFrameUpdate() {
+		for (Component &comp : getComponentsView<Component>())
+			comp.onFrameUpdate();
+
+		for (SceneObject &child : childrenView())
+			child.internalFrameUpdate();
+	}
+
+	inline void SceneObject::internalPhysicsUpdate() {
+		for (Component &comp : getComponentsView<Component>())
+			comp.onPhysicsUpdate();
+		
+		for (SceneObject &child : childrenView())
+			child.internalPhysicsUpdate();
+	}
+
 } // namespace infd::scene

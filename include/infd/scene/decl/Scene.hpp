@@ -45,8 +45,9 @@ namespace infd::scene {
 		// TODO faster object identity lookup
 		// std::unordered_map<SceneObject *, std::size_t> _scene_objects_index;
 
-		void frameUpdate();
-		void physicsUpdate();
+		void frameUpdate(Timer &);
+		void physicsUpdate(Timer &);
+
 	public:
 		Scene(std::string name) noexcept;
 

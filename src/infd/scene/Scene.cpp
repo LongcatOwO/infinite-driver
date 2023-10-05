@@ -2,10 +2,28 @@
 #include <algorithm>
 #include <memory>
 
+// project - util
+#include <infd/scene/Timer.hpp>
+
+// project - scene
 #include <infd/scene/Scene.hpp>
 #include <infd/scene/SceneObject.hpp>
 
 namespace infd::scene {
+
+	void Scene::frameUpdate(Timer &) {
+		for (std::unique_ptr<SceneObject> &so : _scene_objects)
+			so->internalFrameUpdate();
+
+		_on_frame_update(*this);
+	}
+
+	void Scene::physicsUpdate(Timer &) {
+		for (std::unique_ptr<SceneObject> &so : _scene_objects)
+			so->internalPhysicsUpdate();
+
+		_on_physics_update(*this);
+	}
 
 	SceneObject& Scene::addSceneObject(std::unique_ptr<SceneObject> so) {
 		if (!so)
