@@ -28,7 +28,10 @@ namespace infd::scene {
 		// called before detached
 		virtual void onDetach() {}
 
+		// not working
 		virtual void onAwake() {}
+
+
 		virtual void onFrameUpdate() {}
 		virtual void onPhysicsUpdate() {}
 		// virtual void onEnable() {}
