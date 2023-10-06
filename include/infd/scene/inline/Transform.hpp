@@ -36,17 +36,13 @@ namespace infd::scene {
 	inline void Transform::onAttach() noexcept {
 		_parent_global_transform_updated = false;
 		visitAllChildren([](Transform &child) { child._parent_global_transform_updated = false; });
-		sceneObject().onParentAssigned() += { 
-			util::func_ptr_invoker<&Transform::internalOnParentAssigned>, this 
-		};
+		sceneObject().onParentAssigned() += util::BindedMemberFunc(&Transform::internalOnParentAssigned, *this);
 	}
 
 	inline void Transform::onDetach() noexcept {
 		_parent_global_transform_updated = false;
 		visitAllChildren([](Transform &child) { child._parent_global_transform_updated = false; });
-		sceneObject().onParentAssigned() -= { 
-			util::func_ptr_invoker<&Transform::internalOnParentAssigned>, this 
-		};
+		sceneObject().onParentAssigned() -= util::BindedMemberFunc(&Transform::internalOnParentAssigned, *this);
 	}
 
 	inline void Transform::internalOnParentAssigned(SceneObject &) noexcept {

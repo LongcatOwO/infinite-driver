@@ -1,60 +1,478 @@
 #pragma once
 
+// std
 #include <concepts>
 #include <functional>
 #include <memory>
-#include <type_traits>
 #include <utility>
-
 
 namespace infd::util {
 
-	namespace detail {
-		template <auto FuncPtr>
-		class FuncPtrInvokerImpl {};
+	template <typename MemFnPtrT>
+	class MemberFunc {};
 
-		template <typename R, typename ...Args, R (*FuncPtr)(Args...)>
-		class FuncPtrInvokerImpl<FuncPtr> {
-		public:
-			static R invoke(Args ...args) {
-				return FuncPtr(std::forward<Args>(args)...);
-			}
-		};
+	template <typename R, typename ...Args>
+	class MemberFunc<R (*)(Args...)> {
+		R (*_fn)(Args...);
 
-		template <typename C, typename R, typename ...Args, R (C::*FuncPtr)(Args...)>
-		class FuncPtrInvokerImpl<FuncPtr> {
-		public:
-			static R invoke(C *self, Args ...args) {
-				return (self->*FuncPtr)(std::forward<Args>(args)...);
-			}
-		};
+	public:
+		constexpr MemberFunc(R (*fn)(Args...)) noexcept : _fn(fn) {}
 
-		template <typename C, typename R, typename ...Args, R (C::*FuncPtr)(Args...) const>
-		class FuncPtrInvokerImpl<FuncPtr> {
-		public:
-			static R invoke(const C *self, Args ...args) {
-				return (self->*FuncPtr)(std::forward<Args>(args)...);
-			}
-		};
+		constexpr R operator()(Args ...args) const {
+			return _fn(std::forward<Args>(args)...);
+		}
+
+		constexpr bool operator==(const MemberFunc &other) const noexcept = default;
+	};
+
+	template <typename R, typename ...Args>
+	class MemberFunc<R (*)(Args...) noexcept> {
+		R (*_fn)(Args...) noexcept;
+
+	public:
+		constexpr MemberFunc(R (*fn)(Args...) noexcept) noexcept : _fn(fn) {}
+
+		constexpr R operator()(Args ...args) const noexcept {
+			return _fn(std::forward<Args>(args)...);
+		}
+
+		constexpr bool operator==(const MemberFunc &other) const noexcept = default;
+	};
+
+	template <typename C, typename R, typename ...Args>
+	class MemberFunc<R (C::*)(Args...)> {
+		R (C::*_fn)(Args...);
+
+	public:
+		constexpr MemberFunc(R (C::*fn)(Args...)) noexcept : _fn(fn) {}
+
+		constexpr R operator()(C &self, Args ...args) const {
+			return (self.*_fn)(std::forward<Args>(args)...);
+		}
+
+		constexpr R operator()(C &&self, Args ...args) const {
+			return (self.*_fn)(std::forward<Args>(args)...);
+		}
+
+		constexpr bool operator==(const MemberFunc &other) const noexcept = default;
+	};
+
+	template <typename C, typename R, typename ...Args>
+	class MemberFunc<R (C::*)(Args...) const> {
+		R (C::*_fn)(Args...) const;
+
+	public:
+		constexpr MemberFunc(R (C::*fn)(Args...) const) noexcept : _fn(fn) {}
+
+		constexpr R operator()(const C &self, Args ...args) const {
+			return (self.*_fn)(std::forward<Args>(args)...);
+		}
+
+		constexpr R operator()(const C &&self, Args ...args) const {
+			return (self.*_fn)(std::forward<Args>(args)...);
+		}
+
+		constexpr bool operator==(const MemberFunc &other) const noexcept = default;
+	};
+
+	template <typename C, typename R, typename ...Args>
+	class MemberFunc<R (C::*)(Args...) volatile> {
+		R (C::*_fn)(Args...) volatile;
+
+	public:
+		constexpr MemberFunc(R (C::*fn)(Args...) volatile) noexcept : _fn(fn) {}
+
+		constexpr R operator()(volatile C &self, Args ...args) const {
+			return (self.*_fn)(std::forward<Args>(args)...);
+		}
+
+		constexpr R operator()(volatile C &&self, Args ...args) const {
+			return (self.*_fn)(std::forward<Args>(args)...);
+		}
+
+		constexpr bool operator==(const MemberFunc &other) const noexcept = default;
+	};
+
+	template <typename C, typename R, typename ...Args>
+	class MemberFunc<R (C::*)(Args...) const volatile> {
+		R (C::*_fn)(Args...) const volatile;
+
+	public:
+		constexpr MemberFunc(R (C::*fn)(Args...) const volatile) noexcept : _fn(fn) {}
+
+		constexpr R operator()(const volatile C &self, Args ...args) const {
+			return (self.*_fn)(std::forward<Args>(args)...);
+		}
+
+		constexpr R operator()(const volatile C &&self, Args ...args) const {
+			return (self.*_fn)(std::forward<Args>(args)...);
+		}
+
+		constexpr bool operator==(const MemberFunc &other) const noexcept = default;
+	};
+
+	template <typename C, typename R, typename ...Args>
+	class MemberFunc<R (C::*)(Args...) &> {
+		R (C::*_fn)(Args...) &;
+
+	public:
+		constexpr MemberFunc(R (C::*fn)(Args...) &) noexcept : _fn(fn) {}
+
+		constexpr R operator()(C &self, Args ...args) const {
+			return (self.*_fn)(std::forward<Args>(args)...);
+		}
+
+		constexpr bool operator==(const MemberFunc &other) const noexcept = default;
+	};
+
+	template <typename C, typename R, typename ...Args>
+	class MemberFunc<R (C::*)(Args...) const &> {
+		R (C::*_fn)(Args...) const &;
+
+	public:
+		constexpr MemberFunc(R (C::*fn)(Args...) const &) noexcept : _fn(fn) {}
+
+		constexpr R operator()(const C &self, Args ...args) const {
+			return (self.*_fn)(std::forward<Args>(args)...);
+		}
+
+		constexpr bool operator==(const MemberFunc &other) const noexcept = default;
+	};
+
+	template <typename C, typename R, typename ...Args>
+	class MemberFunc<R (C::*)(Args...) volatile &> {
+		R (C::*_fn)(Args...) volatile &;
+
+	public:
+		constexpr MemberFunc(R (C::*fn)(Args...) volatile &) noexcept : _fn(fn) {}
+
+		constexpr R operator()(volatile C &self, Args ...args) const {
+			return (self.*_fn)(std::forward<Args>(args)...);
+		}
+
+		constexpr bool operator==(const MemberFunc &other) const noexcept = default;
+	};
+
+	template <typename C, typename R, typename ...Args>
+	class MemberFunc<R (C::*)(Args...) const volatile &> {
+		R (C::*_fn)(Args...) const volatile &;
+
+	public:
+		constexpr MemberFunc(R (C::*fn)(Args...) const volatile &) noexcept : _fn(fn) {}
+
+		constexpr R operator()(const volatile C &self, Args ...args) const {
+			return (self.*_fn)(std::forward<Args>(args)...);
+		}
+
+		constexpr bool operator==(const MemberFunc &other) const noexcept = default;
+	};
+
+	template <typename C, typename R, typename ...Args>
+	class MemberFunc<R (C::*)(Args...) &&> {
+		R (C::*_fn)(Args...) &&;
+
+	public:
+		constexpr MemberFunc(R (C::*fn)(Args...) &&) noexcept : _fn(fn) {}
+
+		constexpr R operator()(C &&self, Args ...args) const {
+			return (std::move(self).*_fn)(std::forward<Args>(args)...);
+		}
+
+		constexpr bool operator==(const MemberFunc &other) const noexcept = default;
+	};
+
+	template <typename C, typename R, typename ...Args>
+	class MemberFunc<R (C::*)(Args...) const &&> {
+		R (C::*_fn)(Args...) const &&;
+
+	public:
+		constexpr MemberFunc(R (C::*fn)(Args...) const &&) noexcept : _fn(fn) {}
+
+		constexpr R operator()(const C &&self, Args ...args) const {
+			return (std::move(self).*_fn)(std::forward<Args>(args)...);
+		}
+
+		constexpr bool operator==(const MemberFunc &other) const noexcept = default;
+	};
+
+	template <typename C, typename R, typename ...Args>
+	class MemberFunc<R (C::*)(Args...) volatile &&> {
+		R (C::*_fn)(Args...) volatile &&;
+
+	public:
+		constexpr MemberFunc(R (C::*fn)(Args...) volatile &&) noexcept : _fn(fn) {}
+
+		constexpr R operator()(volatile C &&self, Args ...args) const {
+			return (std::move(self).*_fn)(std::forward<Args>(args)...);
+		}
+
+		constexpr bool operator==(const MemberFunc &other) const noexcept = default;
+	};
+
+	template <typename C, typename R, typename ...Args>
+	class MemberFunc<R (C::*)(Args...) const volatile &&> {
+		R (C::*_fn)(Args...) const volatile &&;
+
+	public:
+		constexpr MemberFunc(R (C::*fn)(Args...) const volatile &&) noexcept : _fn(fn) {}
+
+		constexpr R operator()(const volatile C &&self, Args ...args) const {
+			return (std::move(self).*_fn)(std::forward<Args>(args)...);
+		}
+
+		constexpr bool operator==(const MemberFunc &other) const noexcept = default;
+	};
+
+	template <typename C, typename R, typename ...Args>
+	class MemberFunc<R (C::*)(Args...) noexcept> {
+		R (C::*_fn)(Args...);
+
+	public:
+		constexpr MemberFunc(R (C::*fn)(Args...)) noexcept : _fn(fn) {}
+
+		constexpr R operator()(C &self, Args ...args) const noexcept {
+			return (self.*_fn)(std::forward<Args>(args)...);
+		}
+
+		constexpr R operator()(C &&self, Args ...args) const noexcept {
+			return (self.*_fn)(std::forward<Args>(args)...);
+		}
+
+		constexpr bool operator==(const MemberFunc &other) const noexcept = default;
+	};
+
+	template <typename C, typename R, typename ...Args>
+	class MemberFunc<R (C::*)(Args...) const noexcept> {
+		R (C::*_fn)(Args...) const;
+
+	public:
+		constexpr MemberFunc(R (C::*fn)(Args...) const) noexcept : _fn(fn) {}
+
+		constexpr R operator()(const C &self, Args ...args) const noexcept {
+			return (self.*_fn)(std::forward<Args>(args)...);
+		}
+
+		constexpr R operator()(const C &&self, Args ...args) const noexcept {
+			return (self.*_fn)(std::forward<Args>(args)...);
+		}
+
+		constexpr bool operator==(const MemberFunc &other) const noexcept = default;
+	};
+
+	template <typename C, typename R, typename ...Args>
+	class MemberFunc<R (C::*)(Args...) volatile noexcept> {
+		R (C::*_fn)(Args...) volatile;
+
+	public:
+		constexpr MemberFunc(R (C::*fn)(Args...) volatile) noexcept : _fn(fn) {}
+
+		constexpr R operator()(volatile C &self, Args ...args) const noexcept {
+			return (self.*_fn)(std::forward<Args>(args)...);
+		}
+
+		constexpr R operator()(volatile C &&self, Args ...args) const noexcept {
+			return (self.*_fn)(std::forward<Args>(args)...);
+		}
+
+		constexpr bool operator==(const MemberFunc &other) const noexcept = default;
+	};
+
+	template <typename C, typename R, typename ...Args>
+	class MemberFunc<R (C::*)(Args...) const volatile noexcept> {
+		R (C::*_fn)(Args...) const volatile;
+
+	public:
+		constexpr MemberFunc(R (C::*fn)(Args...) const volatile) noexcept : _fn(fn) {}
+
+		constexpr R operator()(const volatile C &self, Args ...args) const noexcept {
+			return (self.*_fn)(std::forward<Args>(args)...);
+		}
+
+		constexpr R operator()(const volatile C &&self, Args ...args) const noexcept {
+			return (self.*_fn)(std::forward<Args>(args)...);
+		}
+
+		constexpr bool operator==(const MemberFunc &other) const noexcept = default;
+	};
+
+	template <typename C, typename R, typename ...Args>
+	class MemberFunc<R (C::*)(Args...) & noexcept> {
+		R (C::*_fn)(Args...) &;
+
+	public:
+		constexpr MemberFunc(R (C::*fn)(Args...) &) noexcept : _fn(fn) {}
+
+		constexpr R operator()(C &self, Args ...args) const noexcept {
+			return (self.*_fn)(std::forward<Args>(args)...);
+		}
+
+		constexpr bool operator==(const MemberFunc &other) const noexcept = default;
+	};
+
+	template <typename C, typename R, typename ...Args>
+	class MemberFunc<R (C::*)(Args...) const & noexcept> {
+		R (C::*_fn)(Args...) const &;
+
+	public:
+		constexpr MemberFunc(R (C::*fn)(Args...) const &) noexcept : _fn(fn) {}
+
+		constexpr R operator()(const C &self, Args ...args) const noexcept {
+			return (self.*_fn)(std::forward<Args>(args)...);
+		}
+
+		constexpr bool operator==(const MemberFunc &other) const noexcept = default;
+	};
+
+	template <typename C, typename R, typename ...Args>
+	class MemberFunc<R (C::*)(Args...) volatile & noexcept> {
+		R (C::*_fn)(Args...) volatile &;
+
+	public:
+		constexpr MemberFunc(R (C::*fn)(Args...) volatile &) noexcept : _fn(fn) {}
+
+		constexpr R operator()(volatile C &self, Args ...args) const noexcept {
+			return (self.*_fn)(std::forward<Args>(args)...);
+		}
+
+		constexpr bool operator==(const MemberFunc &other) const noexcept = default;
+	};
+
+	template <typename C, typename R, typename ...Args>
+	class MemberFunc<R (C::*)(Args...) const volatile & noexcept> {
+		R (C::*_fn)(Args...) const volatile &;
+
+	public:
+		constexpr MemberFunc(R (C::*fn)(Args...) const volatile &) noexcept : _fn(fn) {}
+
+		constexpr R operator()(const volatile C &self, Args ...args) const noexcept {
+			return (self.*_fn)(std::forward<Args>(args)...);
+		}
+
+		constexpr bool operator==(const MemberFunc &other) const noexcept = default;
+	};
+
+	template <typename C, typename R, typename ...Args>
+	class MemberFunc<R (C::*)(Args...) && noexcept> {
+		R (C::*_fn)(Args...) &&;
+
+	public:
+		constexpr MemberFunc(R (C::*fn)(Args...) &&) noexcept : _fn(fn) {}
+
+		constexpr R operator()(C &&self, Args ...args) const noexcept {
+			return (std::move(self).*_fn)(std::forward<Args>(args)...);
+		}
+
+		constexpr bool operator==(const MemberFunc &other) const noexcept = default;
+	};
+
+	template <typename C, typename R, typename ...Args>
+	class MemberFunc<R (C::*)(Args...) const && noexcept> {
+		R (C::*_fn)(Args...) const &&;
+
+	public:
+		constexpr MemberFunc(R (C::*fn)(Args...) const &&) noexcept : _fn(fn) {}
+
+		constexpr R operator()(const C &&self, Args ...args) const noexcept {
+			return (std::move(self).*_fn)(std::forward<Args>(args)...);
+		}
+
+		constexpr bool operator==(const MemberFunc &other) const noexcept = default;
+	};
+
+	template <typename C, typename R, typename ...Args>
+	class MemberFunc<R (C::*)(Args...) volatile && noexcept> {
+		R (C::*_fn)(Args...) volatile &&;
+
+	public:
+		constexpr MemberFunc(R (C::*fn)(Args...) volatile &&) noexcept : _fn(fn) {}
+
+		constexpr R operator()(volatile C &&self, Args ...args) const noexcept {
+			return (std::move(self).*_fn)(std::forward<Args>(args)...);
+		}
+
+		constexpr bool operator==(const MemberFunc &other) const noexcept = default;
+	};
+
+	template <typename C, typename R, typename ...Args>
+	class MemberFunc<R (C::*)(Args...) const volatile && noexcept> {
+		R (C::*_fn)(Args...) const volatile &&;
+
+	public:
+		constexpr MemberFunc(R (C::*fn)(Args...) const volatile &&) noexcept : _fn(fn) {}
+
+		constexpr R operator()(const volatile C &&self, Args ...args) const noexcept {
+			return (std::move(self).*_fn)(std::forward<Args>(args)...);
+		}
+
+		constexpr bool operator==(const MemberFunc &other) const noexcept = default;
+	};
+
+	template <typename MemFnPtrT>
+	MemberFunc(MemFnPtrT) -> MemberFunc<MemFnPtrT>;
+
+
+	template <typename MemFnPtrT, typename BindedSelfType>
+	class BindedMemberFunc {
+		MemberFunc<MemFnPtrT> _fn;
+		BindedSelfType _self;
+
+	public:
+		constexpr BindedMemberFunc(MemberFunc<MemFnPtrT> fn, BindedSelfType &&self)
+		noexcept(noexcept(BindedSelfType(std::forward<BindedSelfType>(self)))) : 
+			_fn(fn), _self(std::forward<BindedSelfType>(self)) {}
+
+		template <typename ...Args>
+		constexpr decltype(auto) operator()(Args &&...args) 
+		noexcept(noexcept(_fn(_self, std::forward<Args>(args)...))) {
+			return _fn(_self, std::forward<Args>(args)...);
+		}
+
+		template <typename ...Args>
+		constexpr decltype(auto) operator()(Args &&...args) const
+		noexcept(noexcept(_fn(_self, std::forward<Args>(args)...))) {
+			return _fn(_self, std::forward<Args>(args)...);
+		}
+
+		constexpr bool operator==(const BindedMemberFunc &other) const noexcept {
+			return _fn == other._fn && &_self == &other._self;
+		}
+	};
+
+	template <typename MemFnPtrT, typename BindedSelfType>
+	class BindedMemberFunc<MemFnPtrT, BindedSelfType &&> {
+		MemberFunc<MemFnPtrT> _fn;
+		BindedSelfType &&_self;
+
+	public:
+		constexpr BindedMemberFunc(MemberFunc<MemFnPtrT> fn, BindedSelfType &&self) noexcept :
+			_fn(fn), _self(std::move(self)) {}
+
+		template <typename ...Args>
+		constexpr decltype(auto) operator()(Args &&...args) 
+		noexcept(noexcept(_fn(std::move(_self), std::forward<Args>(args)...))) {
+			return _fn(std::move(_self), std::forward<Args>(args)...);
+		}
+
+		template <typename ...Args>
+		constexpr decltype(auto) operator()(Args &&...args) const
+		noexcept(noexcept(_fn(std::move(_self), std::forward<Args>(args)...))) {
+			return _fn(std::move(_self), std::forward<Args>(args)...);
+		}
+
+		constexpr bool operator==(const BindedMemberFunc &other) const noexcept {
+			return _fn == other._fn && &_self == &other._self;
+		}
+	};
+
+	template <typename MemFnPtrT, typename BindedSelfType>
+	BindedMemberFunc(MemFnPtrT, BindedSelfType &&) -> BindedMemberFunc<MemFnPtrT, BindedSelfType>;
+
+	template <typename MemFnPtrT, typename BindedSelfType>
+	BindedMemberFunc<MemFnPtrT, BindedSelfType &&> refBindedMemberFunc(MemFnPtrT fn, BindedSelfType &&self) noexcept {
+		return { fn, std::forward<BindedSelfType>(self) };
 	}
 
-	/*
-	 * Equals to pointer to an artificially created static function which invokes
-	 * the given FuncPtr.
-	 * Maps argument directly to FuncPtr for regular function pointer
-	 * Maps the first argument as "this" binding to FuncPtr for member function pointer.
-	 * 
-	 * Useful for turning a member function pointer into a regular function pointer.
-	 * Note that for regular function pointer, the value is NOT equal to the original function pointer.
-	 */
-	template <auto FuncPtr>
-	constexpr auto func_ptr_invoker = detail::FuncPtrInvokerImpl<FuncPtr>::invoke;
-
-	/*
-	 * Represents a type erased callable type with the given function signature.
-	 * FunctionSignature can be provided as following: Function<ReturnType (ArgumentTypes...)>.
-	 * Function is equality comparable. See description on operator== for more info.
-	 */
+	
 	template <typename FunctionSignature>
 	class Function;
 
@@ -62,7 +480,7 @@ namespace infd::util {
 	class Function<R (Args...)> {
 		class Interface {
 		public:
-			virtual R operator()(Args...) const = 0;
+			virtual R operator()(Args ...) const = 0;
 			virtual std::unique_ptr<Interface> clone() const = 0;
 			virtual bool operator==(const Interface &other) const = 0;
 			virtual ~Interface() {}
@@ -79,136 +497,45 @@ namespace infd::util {
 			R operator()(Args ...args) const override {
 				return _fn(std::forward<Args>(args)...);
 			}
+
 			std::unique_ptr<Interface> clone() const override {
 				return std::make_unique<Impl>(*this);
 			}
 
 			bool operator==(const Interface &other) const override {
-				if (this == &other) { return true; }
-				
-				if constexpr (std::equality_comparable<Fn>) {
-					if (auto ptr = dynamic_cast<const Impl *>(&other); ptr) {
-						return _fn == ptr->_fn;
-					}				
+				if (const Impl *other_ptr = dynamic_cast<const Impl *>(&other); other_ptr) {
+					if (this == other_ptr)
+						return true;
+
+					if constexpr (std::equality_comparable<Fn>)
+						return _fn == other_ptr->_fn;
+
 					return false;
-				} else {
-					return reinterpret_cast<const void *>(this) == reinterpret_cast<const void *>(&other);
 				}
-			}
-		};
 
-		class MemberFunctionInterface : public Interface {
-		public:
-			virtual const void *getSelf() const noexcept = 0;
-			virtual const void *getFunctionPointer() const noexcept = 0;
-		};
-
-		template <typename C>
-		class MemberFunctionImpl : public MemberFunctionInterface {
-			using function_pointer = R (*)(C *, Args...);
-			C *_self;
-			function_pointer _fn;
-
-		public:
-			MemberFunctionImpl(function_pointer fn, C *self) : _self(self), _fn(fn) {}
-
-			R operator()(Args ...args) const override {
-				return _fn(_self, std::forward<Args>(args)...);
-			}
-
-			std::unique_ptr<Interface> clone() const override {
-				return std::make_unique<MemberFunctionImpl>(*this);
-			}
-
-			const void *getSelf() const noexcept override { 
-				return reinterpret_cast<const void *>(_self); 
-			}
-			const void *getFunctionPointer() const noexcept override { 
-				return reinterpret_cast<const void *>(_fn);
-			}
-
-			bool operator==(const Interface &other) const override {
-				if (this == &other) return true;
-
-				if (auto ptr = dynamic_cast<const MemberFunctionInterface *>(&other); ptr) {
-					return getSelf() == ptr->getSelf() && getFunctionPointer() == ptr->getFunctionPointer();
-				}
 				return false;
 			}
 		};
 
-		template <typename C>
-		class MemberFunctionImpl<const C> : public MemberFunctionInterface {
-			using function_pointer = R (*)(const C *, Args...);
-			const C *_self;
-			function_pointer _fn;
-
-		public:
-			MemberFunctionImpl(function_pointer fn, const C *self) : _self(self), _fn(fn) {}
-
-			R operator()(Args ...args) const override {
-				return _fn(_self, std::forward<Args>(args)...);
-			}
-
-			std::unique_ptr<Interface> clone() const override {
-				return std::make_unique<MemberFunctionImpl>(*this);
-			}
-
-			const void *getSelf() const noexcept override {
-				return reinterpret_cast<const void *>(_self);
-			}
-			const void *getFunctionPointer() const noexcept override { 
-				return reinterpret_cast<const void *>(_fn);
-			}
-
-			bool operator==(const Interface &other) const override {
-				if (this == &other) return true;
-
-				if (auto ptr = dynamic_cast<const MemberFunctionInterface *>(&other); ptr) {
-					return getSelf() == ptr->getSelf() && getFunctionPointer() == ptr->getFunctionPointer();
-				}
-				return false;
-			}
-		};
-
-		template <typename C>
-		MemberFunctionImpl(R (*)(C*, Args...), C*) -> MemberFunctionImpl<C>;
-
+		template <typename Fn>
+		Impl(Fn) -> Impl<Fn>;
 
 		std::unique_ptr<Interface> _ptr;
 
-		template <typename Fn>
-		Impl(Fn fn) -> Impl<Fn>;
-
 	public:
-		/*
-		 * Constructs a function using the given functor as the underlying object.
-		 */
-		template <typename Fn> requires (!std::same_as<Function, std::remove_cvref_t<Fn>>)
-		Function(Fn &&fn) : _ptr(new Impl(std::forward<Fn>(fn))) {}
+		// Constructs a Function using the given functor as the underlying object.
+		template <typename Fn>
+		Function(Fn &&fn) : _ptr{new Impl{std::forward<Fn>(fn)}} {}
 
-		/*
-		 * Constructs a Function binding the self pointer to the first argument of invoker.
-		 * Two Functions constructed with this constructor are considered equal if 
-		 * they refer to the same invoker and self.
-		 */
-		template <typename C>
-		Function(R (*invoker)(C*, Args...), C *self) : _ptr(new MemberFunctionImpl(invoker, self)) {}
+		// copy constructor
+		Function(const Function &other) : _ptr{!!other._ptr ? other._ptr->clone() : nullptr} {}
 
-		/*
-		 * Copy constructs this Function.
-		 */
-		Function(const Function &other) : _ptr(other._ptr->clone()) {}
-		/*
-		 * Move constructs this Function.
-		 */
-		Function(Function &&other) : _ptr(std::move(other._ptr)) {}
+		// move constructor
+		Function(Function &&other) : _ptr{std::move(other._ptr)} {}
 
+		// copy assignment
 		Function& operator=(const Function &other) {
-			if (other._ptr)
-				_ptr = other._ptr->clone();
-			else
-				_ptr = nullptr;
+			_ptr = !!other._ptr ? other._ptr->clone() : nullptr;
 			return *this;
 		}
 
@@ -218,10 +545,9 @@ namespace infd::util {
 		}
 
 		/*
-		 * Invoke the underlying functor with the given arguments.
-		 * If this Function is empty as a result of move operation,
-		 * then std::bad_function_call si thrown.
-		 * One should never attempt to call a Function after it has been moved.
+		 * Invoke the underlying functor with the given arguments
+		 * If this function is empty as a result of move operation,
+		 * the std::bad_function_call is thrown.
 		 */
 		R operator()(Args ...args) const {
 			if (!_ptr) throw std::bad_function_call{};
@@ -229,24 +555,17 @@ namespace infd::util {
 		}
 
 		/*
-		 * Tests equality with another Function. 
-		 * Always return false if either of the operand is an empty
-		 * Function as a result of move operation, even if both Functions are empty.
+		 * Tests equality with another function
+		 * Always return false if either of the operand is empty from move operations,
+		 * even if both are empty.
 		 *
-		 * Otherwise, the two is considered equal if they refer to the same 
-		 * exact Function object. 
+		 * Otherwise, the two are considered equal if they refer to the same exact Function object.
 		 *
-		 * Or if both Functions have the same underlying 
-		 * object type and the underlying object is equality comparable,
+		 * If both Functions have exactly the same underlying functor type that is equality comparable,
 		 * then return the result of comparing the underlying object.
 		 *
-		 * Or if both Function are constructed using the invoker constructor,
-		 * and both the invoker and self pointers has the same exact values 
-		 * between two Functions.
-		 *
-		 * Copy constructed Functions may not be considered equal 
-		 * if the underlying object does not support equality comparison, 
-		 * or if the equality comparison results in not equal.
+		 * Copy constructed Functions may not be considered equal if the underlying object does not 
+		 * support equality comparison, or if the equality comparison results in non-equal.
 		 */
 		bool operator==(const Function &other) const {
 			if (!_ptr || !other._ptr) return false;
@@ -254,6 +573,5 @@ namespace infd::util {
 		}
 	};
 
-	template <typename C, typename R, typename ...Args>
-	Function(R (*)(C *, Args...), C *) -> Function<R (Args...)>;
-}
+
+} // namespace infd::util

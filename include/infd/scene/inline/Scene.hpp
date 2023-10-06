@@ -26,13 +26,8 @@
 namespace infd::scene {
 
 	inline Scene::Scene(std::string name) noexcept : _name(std::move(name)) {
-		_frame_timer.onIntervalComplete() += {
-			util::func_ptr_invoker<&Scene::frameUpdate>, this
-		};
-
-		_physics_timer.onIntervalComplete() += {
-			util::func_ptr_invoker<&Scene::physicsUpdate>, this
-		};
+		_frame_timer.onIntervalComplete() += util::BindedMemberFunc(&Scene::frameUpdate, *this);
+		_physics_timer.onIntervalComplete() += util::BindedMemberFunc(&Scene::physicsUpdate, *this);
 	}
 
 	inline Float Scene::frameRate() const noexcept {
