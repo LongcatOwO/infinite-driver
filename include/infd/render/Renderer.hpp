@@ -38,8 +38,8 @@ namespace infd::render {
         struct {
             glm::vec3 pos {0, 15, 30};
             glm::vec3 dir;
-            float angle_x;
-            float angle_y;
+            float angle_x = 0;
+            float angle_y = 0;
             float pattern_angle = 0;
         } _test_camera;
      public:
