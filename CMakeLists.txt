@@ -76,11 +76,17 @@ INTERFACE
 	BulletSoftBody
 	LinearMath
 )
-
 target_include_directories(Bullet
 INTERFACE
 	"${PROJECT_SOURCE_DIR}/lib/bullet3/src"
 )
+
+
+# Clipper2
+set(CLIPPER2_EXAMPLES OFF CACHE BOOL "Build examples for Clipper2")
+set(CLIPPER2_TESTS OFF CACHE BOOL "Build tests for Clipper2")
+set(CLIPPER2_USINGZ OFF CACHE STRING "Build Clipper2Z")
+add_subdirectory("${PROJECT_LIB_DIR}/Clipper2")
 
 
 #########################################################
@@ -170,6 +176,8 @@ INTERFACE
 	imgui
 	stb
 	Bullet
+	Clipper2
+	Clipper2utils
 )
 
 if (OPENMP_FOUND)
