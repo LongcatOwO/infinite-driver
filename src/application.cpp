@@ -18,6 +18,8 @@
 #include <infd/Shader.hpp>
 #include <misc/cpp/imgui_stdlib.h>
 
+#include <infd/scene/SceneObject.hpp>
+
 
 using namespace std;
 using namespace cgra;

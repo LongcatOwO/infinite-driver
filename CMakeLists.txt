@@ -153,6 +153,11 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "^(Apple)?Clang$")
 	# on mac
 	if ( "${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
 		# use homebrew c++ stdlib (for std::format et al)
+		target_compile_options(${CGRA_PROJECT}_aggregate
+				INTERFACE
+				-stdlib=libc++
+				-fexperimental-library
+		)
 		target_link_options(${CGRA_PROJECT}_aggregate
 		INTERFACE
 			-L /opt/homebrew/opt/llvm/lib/c++
