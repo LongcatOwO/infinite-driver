@@ -114,8 +114,11 @@ void infd::render::Pipeline::render(std::vector<RenderItem> items, const infd::r
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         auto program_guard = scopedProgram(_blit_shader);
 
-        _final_buf.renderToScreen(_blit_shader, _fullscreen_mesh);
-//        _dither_dome_buf.renderToScreen(_blit_shader, _fullscreen_mesh);
+        if (settings.render_dither) {
+            _dither_dome_buf.renderToScreen(_blit_shader, _fullscreen_mesh, settings.screen_size);
+        } else {
+            _final_buf.renderToScreen(_blit_shader, _fullscreen_mesh, settings.screen_size);
+        }
     }
 }
 

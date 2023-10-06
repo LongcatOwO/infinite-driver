@@ -43,10 +43,15 @@ namespace infd::render {
     }
 
     void Renderer::gui() {
+        if (ImGui::Button("Reload shaders")) {
+            reloadShaders();
+        }
+
         ImGui::SliderFloat3("Camera pos", glm::value_ptr(_test_camera.pos), -100, 100);
         ImGui::SliderFloat("View angle X", &_test_camera.angle_x, -1, 1);
         ImGui::SliderFloat("View angle Y", &_test_camera.angle_y, -1, 1);
         ImGui::SliderFloat("Pattern angle", &_test_camera.pattern_angle, 0, glm::pi<float>());
+
     }
 
 }

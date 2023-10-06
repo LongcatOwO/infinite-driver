@@ -30,13 +30,13 @@ namespace infd::render {
         _valid = true;
     }
 
-    void Framebuffer::renderToScreen(const GLProgram& shader, const GLMesh& display) const {
+    void Framebuffer::renderToScreen(const GLProgram& shader, const GLMesh& display, glm::ivec2 screen_size) const {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glActiveTexture(GL_TEXTURE0);
         auto texture_guard = scopedBind(colour, GL_TEXTURE_2D);
         glUniform1i(glGetUniformLocation(shader, "uFramebuffer"), 0);
 
-        glViewport(0, 0, _size.x, _size.y);
+        glViewport(0, 0, screen_size.x, screen_size.y);
         glClearColor(1, 1, 1, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         glDisable(GL_DEPTH_TEST);

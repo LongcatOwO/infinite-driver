@@ -20,7 +20,7 @@ namespace infd::render {
         }
         void setSize(glm::ivec2 new_size);
         // bind shader program BEFORE calling these
-        void renderToScreen(const GLProgram& shader, const GLMesh& display) const;
+        void renderToScreen(const GLProgram& shader, const GLMesh& display, const glm::ivec2 screen_size) const;
         void renderToOther(const GLProgram& shader, const Framebuffer& other, const GLMesh& display) const;
         // call after framebuffer is bound
         void setupDraw() const;

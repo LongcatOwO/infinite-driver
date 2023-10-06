@@ -100,7 +100,7 @@ void Application::renderGUI() {
 
 	// setup window
 	ImGui::SetNextWindowPos(ImVec2(5, 5), ImGuiCond_Once);
-	ImGui::SetNextWindowSize(ImVec2(300, 260), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(300, 330), ImGuiCond_Once);
 	ImGui::Begin("Options", 0);
 
 	// display current camera parameters
@@ -121,10 +121,8 @@ void Application::renderGUI() {
 	
 	ImGui::Separator();
 
-	if (ImGui::Button("Reload shaders")) {
-        _renderer.reloadShaders();
-    }
     _renderer.gui();
+    ImGui::Checkbox("Show dither sphere", &_render_settings.render_dither);
 
 	// finish creating window
 	ImGui::End();

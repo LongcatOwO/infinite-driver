@@ -29,6 +29,7 @@ namespace infd::render {
         glm::vec3 camera_dir;
         glm::mat4 temp_view;
         glm::mat4 temp_proj;
+        bool render_dither = false;
     };
     // class that does all the rendering - the application class has one of it and calls it to draw
     class Renderer {
