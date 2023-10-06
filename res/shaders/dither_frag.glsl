@@ -11,10 +11,11 @@ void main() {
     // https://en.wikipedia.org/wiki/Grayscale#Converting_color_to_grayscale
     float grey = 0.2126 * buffer_colour.r + 0.7152 * buffer_colour.g + 0.0722 * buffer_colour.b;
 
-    // fetch dither pixel
-    ivec2 frag_pos = ivec2(gl_FragCoord.xy);
-    frag_pos = frag_pos % textureSize(uDitherPattern, 0);
-    vec4 dither_point = texelFetch(uDitherPattern, frag_pos, 0);
+//    // fetch dither pixel
+//    ivec2 frag_pos = ivec2(gl_FragCoord.xy);
+//    frag_pos = frag_pos % textureSize(uDitherPattern, 0);
+//    vec4 dither_point = texelFetch(uDitherPattern, frag_pos, 0);
+    vec4 dither_point = texture(uDitherPattern, v_texCoord);
 
     vec4 colour = vec4(0, 0, 0, 1);
 

@@ -12,44 +12,57 @@
 #include <infd/Shader.hpp>
 #include <infd/ScopeGuard.hpp>
 #include <infd/render/Renderer.hpp>
+#include <infd/Wavefront.hpp>
 
 
-infd::render::Pipeline::Pipeline() {
+infd::render::Pipeline::Pipeline() : _sky_sphere{loadWavefrontCases(CGRA_SRCDIR + std::string("/res/assets/sky_sphere.obj")).build()} {
     loadShaders();
     // load dither texture
     {
-        auto texture_guard = scopedBind(_dither_texture, GL_TEXTURE_2D);
+        {
+            auto texture_guard = scopedBind(_dither_texture, GL_TEXTURE_2D);
 
-//        auto tex = cgra::rgba_image {CGRA_SRCDIR + std::string("/res/textures/dithers/16x16-ordered-dither.png")};
-        auto tex = cgra::rgba_image {CGRA_SRCDIR + std::string("/res/textures/dithers/64x64-blue-noise.png")};
+            auto tex = cgra::rgba_image{CGRA_SRCDIR + std::string("/res/textures/dithers/16x16-ordered-dither.png")};
+//        auto tex = cgra::rgba_image {CGRA_SRCDIR + std::string("/res/textures/dithers/64x64-blue-noise.png")};
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, tex.size.x, tex.size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex.data.data());
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, tex.size.x, tex.size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                         tex.data.data());
+        }
+
+        {
+            auto texture_guard = scopedBind(_temp_sphere_texture, GL_TEXTURE_2D);
+
+            auto tex = cgra::rgba_image{CGRA_SRCDIR + std::string("/res/textures/uv_texture.jpg")};
+
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, tex.size.x, tex.size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                         tex.data.data());
+        }
+
     }
 }
 
 void infd::render::Pipeline::render(std::vector<RenderItem> items, const infd::render::RenderSettings& settings) {
-    if (!_buffers_ready) {
+    if (!(_fx_buf.valid() && _final_buf.valid())) {
         std::cerr << "Error: Buffers not initialised before render called (screen size not set?)" << std::endl;
         abort();
     }
-    auto [width, height] = settings.screen_size;
+
+    int width = settings.screen_size.x; int height = settings.screen_size.y;
 
     using namespace glm;
     // draw scene to buffer
     {
         auto program_guard = scopedProgram(_main_shader);
-        auto fb_guard = scopedBind(_fb.buffer, GL_FRAMEBUFFER);
-
-        glViewport(0, 0, width, height); // set the viewport to draw to the entire window
-
-        glClearColor(0, 0, 0, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LESS);
+        auto fb_guard = scopedBind(_fx_buf.buffer, GL_FRAMEBUFFER);
+        _fx_buf.setupDraw();
 
         glUniform3fv(glGetUniformLocation(_main_shader, "uColour"), 1, glm::value_ptr(vec3{1, 0, 1}));
         glUniform3fv(glGetUniformLocation(_main_shader, "uLightPos"), 1, glm::value_ptr(vec3{10}));
@@ -63,25 +76,51 @@ void infd::render::Pipeline::render(std::vector<RenderItem> items, const infd::r
         }
     }
 
-    // draw to screen from buffer
+    // draw dither texture onto skydome
     {
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        auto program_guard = scopedProgram(_fullscreen_texture_shader);
+        auto fb_guard = scopedBind(_dither_dome_buf.buffer, GL_FRAMEBUFFER);
+        _dither_dome_buf.setupDraw();
+        auto program_guard = scopedProgram(_sky_shader);
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_CULL_FACE);
+        glDisable(GL_DEPTH_CLAMP);
 
-        glActiveTexture(GL_TEXTURE0);
-        auto texture_guard = scopedBind(_fb.colour, GL_TEXTURE_2D);
-        glUniform1i(glGetUniformLocation(_fullscreen_texture_shader, "uFramebuffer"), 0);
+        auto view = glm::lookAt({0, 0, 0}, settings.camera_dir, {0, 1, 0});
 
         glActiveTexture(GL_TEXTURE1);
-        auto dither_texture_guard = scopedBind(_dither_texture, GL_TEXTURE_2D);
-        glUniform1i(glGetUniformLocation(_fullscreen_texture_shader, "uDitherPattern"), 1);
+        auto sky_texture_guard = scopedBind(_dither_texture, GL_TEXTURE_2D);
+        glUniform1i(glGetUniformLocation(_sky_shader, "uTex"), 1);
+        glUniform2fv(glGetUniformLocation(_sky_shader, "uScreenSize"), 1, value_ptr(vec2 {width, height}));
+        glUniform1f(glGetUniformLocation(_sky_shader, "uPatternAngle"), settings.pattern_angle);
+        glUniformMatrix4fv(glGetUniformLocation(_sky_shader, "uProjectionMatrix"), 1, false, value_ptr(settings.temp_proj));
+        glUniformMatrix4fv(glGetUniformLocation(_sky_shader, "uViewMatrix"), 1, false, value_ptr(view));
+        glUniformMatrix4fv(glGetUniformLocation(_sky_shader, "uModelMatrix"), 1, false, value_ptr(glm::mat4 {1}));
+        _sky_sphere.draw();
+    }
 
-        glViewport(0, 0, width, height);
-        glClearColor(1, 1, 1, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-        glDisable(GL_DEPTH_TEST);
+    //draw dither from fx -> final buf
+    {
+        auto program_guard = scopedProgram(_dither_shader);
 
-        _fullscreen_mesh.draw();
+        glActiveTexture(GL_TEXTURE1);
+        auto dither_texture_guard = scopedBind(_dither_dome_buf.colour, GL_TEXTURE_2D);
+        glUniform1i(glGetUniformLocation(_dither_shader, "uDitherPattern"), 1);
+
+        _fx_buf.renderToOther(_dither_shader, _final_buf, _fullscreen_mesh);
+    }
+
+    // draw to screen from final buffer
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+        if (settings.render_dither) {
+            auto program_guard = scopedProgram(_blit_shader);
+            _dither_dome_buf.renderToScreen(_blit_shader, _fullscreen_mesh, settings.screen_size);
+        } else {
+            auto program_guard = scopedProgram(_threshold_blit_shader);
+            _final_buf.renderToScreen(_threshold_blit_shader, _fullscreen_mesh, settings.screen_size);
+        }
     }
 }
 
@@ -91,34 +130,31 @@ void infd::render::Pipeline::loadShaders() {
     main_shader_build.setShader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//phong_frag.glsl"));
     _main_shader = main_shader_build.build();
 
-    ShaderBuilder fullscreen_texture_build;
-    fullscreen_texture_build.setShader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//fullscreen_texture_vert.glsl"));
-    fullscreen_texture_build.setShader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//dither_frag.glsl"));
-    _fullscreen_texture_shader = fullscreen_texture_build.build();
+    ShaderBuilder dither_build;
+    dither_build.setShader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//fullscreen_vert.glsl"));
+    dither_build.setShader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//dither_frag.glsl"));
+    _dither_shader = dither_build.build();
+
+    ShaderBuilder blit_build;
+    blit_build.setShader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//fullscreen_vert.glsl"));
+    blit_build.setShader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//blit_frag.glsl"));
+    _blit_shader = blit_build.build();
+
+    ShaderBuilder threshold_blit_build;
+    threshold_blit_build.setShader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//fullscreen_vert.glsl"));
+    threshold_blit_build.setShader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//threshold_blit_frag.glsl"));
+    _threshold_blit_shader = threshold_blit_build.build();
+
+    ShaderBuilder sky_build;
+    sky_build.setShader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//phong_vert.glsl"));
+    sky_build.setShader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//obj_texture_frag.glsl"));
+    _sky_shader = sky_build.build();
 }
 
-void infd::render::Pipeline::screenSizeChanged(std::pair<int, int> new_size) {
-    auto [width, height] = new_size;
-    {
-        auto fb_guard       = scopedBind(_fb.buffer, GL_FRAMEBUFFER);
-        auto colour_guard   = scopedBind(_fb.colour, GL_TEXTURE_2D);
-        auto depth_guard    = scopedRenderbuffer(_fb.depth);
-
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _fb.colour, 0);
-
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _fb.depth);
-
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-            std::cerr << "Error: Framebuffer not complete" << std::endl;
-            abort();
-        }
-    }
-
-    _buffers_ready = true;
+void infd::render::Pipeline::screenSizeChanged(glm::ivec2 new_size) {
+    _fx_buf.setSize(new_size);
+    _dither_dome_buf.setSize(new_size * 2);
+    _final_buf.setSize(new_size * 2);
 }
 
 

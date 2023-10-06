@@ -6,6 +6,7 @@
 #include <vector>
 #include "infd/render/Utils.hpp"
 #include "infd/GLObject.hpp"
+#include "infd/render/Framebuffer.hpp"
 
 namespace infd::render {
     // forward declare to avoid recursive inclusion hellscape
@@ -14,20 +15,25 @@ namespace infd::render {
 
     class Pipeline {
         GLProgram _main_shader;
-        GLProgram _fullscreen_texture_shader;
-        bool _buffers_ready = false;
+        GLProgram _dither_shader;
+        GLProgram _blit_shader;
+        GLProgram _threshold_blit_shader;
+        GLProgram _sky_shader;
+
+        Framebuffer _fx_buf;
+        Framebuffer _dither_dome_buf;
+        Framebuffer _sky_buf;
+        Framebuffer _final_buf;
+
         GLMesh _fullscreen_mesh = build_fullscreen_texture_mesh();
-        struct {
-            GLFramebuffer buffer;
-            GLTexture colour;
-            GlRenderBuffer depth;
-        } _fb;
+        GLMesh _sky_sphere;
         GLTexture _dither_texture;
+        GLTexture _temp_sphere_texture;
      public:
         Pipeline();
         void render(std::vector<RenderItem> items, const RenderSettings& settings);
         void loadShaders();
         // MUST be called before draw with proper args to init
-        void screenSizeChanged(std::pair<int, int> new_size);
+        void screenSizeChanged(glm::ivec2 new_size);
     };
 }
