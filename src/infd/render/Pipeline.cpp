@@ -146,8 +146,8 @@ void infd::render::Pipeline::loadShaders() {
 
 void infd::render::Pipeline::screenSizeChanged(glm::ivec2 new_size) {
     _fx_buf.setSize(new_size);
-    _final_buf.setSize(new_size);
-    _dither_dome_buf.setSize(new_size);
+    _dither_dome_buf.setSize(new_size * 2);
+    _final_buf.setSize(new_size * 2);
 }
 
 
