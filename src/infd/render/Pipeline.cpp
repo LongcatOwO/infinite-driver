@@ -112,12 +112,14 @@ void infd::render::Pipeline::render(std::vector<RenderItem> items, const infd::r
     // draw to screen from final buffer
     {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        auto program_guard = scopedProgram(_blit_shader);
+
 
         if (settings.render_dither) {
+            auto program_guard = scopedProgram(_blit_shader);
             _dither_dome_buf.renderToScreen(_blit_shader, _fullscreen_mesh, settings.screen_size);
         } else {
-            _final_buf.renderToScreen(_blit_shader, _fullscreen_mesh, settings.screen_size);
+            auto program_guard = scopedProgram(_threshold_blit_shader);
+            _final_buf.renderToScreen(_threshold_blit_shader, _fullscreen_mesh, settings.screen_size);
         }
     }
 }
@@ -137,6 +139,11 @@ void infd::render::Pipeline::loadShaders() {
     blit_build.setShader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//fullscreen_vert.glsl"));
     blit_build.setShader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//blit_frag.glsl"));
     _blit_shader = blit_build.build();
+
+    ShaderBuilder threshold_blit_build;
+    threshold_blit_build.setShader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//fullscreen_vert.glsl"));
+    threshold_blit_build.setShader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//threshold_blit_frag.glsl"));
+    _threshold_blit_shader = threshold_blit_build.build();
 
     ShaderBuilder sky_build;
     sky_build.setShader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//phong_vert.glsl"));

@@ -26,8 +26,6 @@ void main() {
     float aspect_ratio = uScreenSize.x / uScreenSize.y;
     ivec2 tex_size = textureSize(uTex, 0);
 
-//    float reps = (uScreenSize.x / tex_size.x);
-//    vec2 scale = vec2(reps * aspect_ratio, reps/ aspect_ratio);
 
     vec2 uv = f_in.textureCoord;
     float c = cos(uPatternAngle), s = sin(uPatternAngle);
@@ -44,7 +42,6 @@ void main() {
     vec2 scale = reps;
 
     vec4 colour = texture(uTex, uv * scale);
-
 
     // output to the frambuffer
     fb_color = colour;

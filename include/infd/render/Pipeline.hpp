@@ -17,6 +17,7 @@ namespace infd::render {
         GLProgram _main_shader;
         GLProgram _dither_shader;
         GLProgram _blit_shader;
+        GLProgram _threshold_blit_shader;
         GLProgram _sky_shader;
 
         Framebuffer _fx_buf;
