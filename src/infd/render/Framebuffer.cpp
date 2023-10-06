@@ -6,8 +6,8 @@
 #include <iostream>
 
 namespace infd::render {
-    void Framebuffer::setSize(std::pair<int, int> new_size) {
-        auto [width, height] = new_size;
+    void Framebuffer::setSize(glm::ivec2 new_size) {
+        int width = new_size.x; int height = new_size.y;
         {
             auto fb_guard       = scopedBind(buffer, GL_FRAMEBUFFER);
             auto colour_guard   = scopedBind(colour, GL_TEXTURE_2D);
@@ -36,7 +36,7 @@ namespace infd::render {
         auto texture_guard = scopedBind(colour, GL_TEXTURE_2D);
         glUniform1i(glGetUniformLocation(shader, "uFramebuffer"), 0);
 
-        glViewport(0, 0, _size.first, _size.second);
+        glViewport(0, 0, _size.x, _size.y);
         glClearColor(1, 1, 1, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         glDisable(GL_DEPTH_TEST);
@@ -50,7 +50,7 @@ namespace infd::render {
         auto texture_guard = scopedBind(colour, GL_TEXTURE_2D);
         glUniform1i(glGetUniformLocation(shader, "uFramebuffer"), 0);
 
-        glViewport(0, 0, other._size.first, other._size.second);
+        glViewport(0, 0, other._size.x, other._size.y);
         glClearColor(1, 1, 1, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         glDisable(GL_DEPTH_TEST);
@@ -59,7 +59,7 @@ namespace infd::render {
     }
 
     void Framebuffer::setupDraw() const {
-        glViewport(0, 0, _size.first, _size.second); // set the viewport to draw to the entire window
+        glViewport(0, 0, _size.x, _size.y); // set the viewport to draw to the entire window
 
         glClearColor(0, 0, 0, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

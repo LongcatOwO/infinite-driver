@@ -24,7 +24,7 @@ namespace infd::render {
     // other things to consider - how lights/cameras/etc work in the scene
 
     struct RenderSettings {
-        std::pair<int, int> screen_size;
+        glm::ivec2 screen_size;
         float pattern_angle;
         glm::vec3 camera_dir;
         glm::mat4 temp_view;

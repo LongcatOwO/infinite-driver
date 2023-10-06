@@ -10,7 +10,7 @@
 namespace infd::render {
     class Framebuffer {
         bool _valid = false;
-        std::pair<int, int> _size;
+        glm::ivec2 _size;
      public:
         GLFramebuffer buffer;
         GLTexture colour;
@@ -18,7 +18,7 @@ namespace infd::render {
         [[nodiscard]] bool valid() const {
             return _valid;
         }
-        void setSize(std::pair<int, int> new_size);
+        void setSize(glm::ivec2 new_size);
         // bind shader program BEFORE calling these
         void renderToScreen(const GLProgram& shader, const GLMesh& display) const;
         void renderToOther(const GLProgram& shader, const Framebuffer& other, const GLMesh& display) const;

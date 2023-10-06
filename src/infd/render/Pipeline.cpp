@@ -55,7 +55,7 @@ void infd::render::Pipeline::render(std::vector<RenderItem> items, const infd::r
         abort();
     }
 
-    auto [width, height] = settings.screen_size;
+    int width = settings.screen_size.x; int height = settings.screen_size.y;
 
     using namespace glm;
     // draw scene to buffer
@@ -141,7 +141,7 @@ void infd::render::Pipeline::loadShaders() {
     _sky_shader = sky_build.build();
 }
 
-void infd::render::Pipeline::screenSizeChanged(std::pair<int, int> new_size) {
+void infd::render::Pipeline::screenSizeChanged(glm::ivec2 new_size) {
     _fx_buf.setSize(new_size);
     _final_buf.setSize(new_size);
     _dither_dome_buf.setSize(new_size);

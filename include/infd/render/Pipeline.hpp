@@ -33,6 +33,6 @@ namespace infd::render {
         void render(std::vector<RenderItem> items, const RenderSettings& settings);
         void loadShaders();
         // MUST be called before draw with proper args to init
-        void screenSizeChanged(std::pair<int, int> new_size);
+        void screenSizeChanged(glm::ivec2 new_size);
     };
 }
