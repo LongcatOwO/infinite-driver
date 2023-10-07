@@ -90,7 +90,7 @@ void infd::render::Pipeline::render(std::vector<RenderItem> items, const infd::r
         glActiveTexture(GL_TEXTURE1);
         auto sky_texture_guard = scopedBind(_dither_texture, GL_TEXTURE_2D);
         sendUniform(_sky_shader, "uTex", 1);
-        sendUniform(_sky_shader, "uScreenSize", glm::vec2 {width, height});
+        sendUniform(_sky_shader, "uScreenSize", (glm::vec2 {width, height}) * 1.f);
         sendUniform(_sky_shader, "uPatternAngle", settings.pattern_angle);
         sendUniform(_sky_shader, "uProjectionMatrix", settings.temp_proj);
         sendUniform(_sky_shader, "uViewMatrix", view);
@@ -152,7 +152,7 @@ void infd::render::Pipeline::loadShaders() {
 }
 
 void infd::render::Pipeline::screenSizeChanged(glm::ivec2 new_size) {
-    _fx_buf.setSize(new_size);
+    _fx_buf.setSize(new_size * 2);
     _dither_dome_buf.setSize(new_size * 2);
     _final_buf.setSize(new_size * 2);
 }
