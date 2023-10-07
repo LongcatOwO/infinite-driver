@@ -20,8 +20,19 @@
 namespace infd::scene {
 
 	SceneObject::~SceneObject() {
-		// TODO
+		// remove all children, calling their callbacks
 		while (!_children.empty()) {
+			_on_child_removed(*this, *_children.back());
+			_children.back()->internalUncheckedNotifyParentUnassigned();
+			_children.back()->internalUncheckedUnnotifiedSetParent(nullptr);
+			_children.pop_back();
+		}
+
+		while (!_components.empty()) {
+			_on_component_removed(*this, *_components.back());
+			_components.back()->onDetach();
+			_components.back()->_scene_object = nullptr;
+			_components.pop_back();
 		}
 	}
 
@@ -187,6 +198,12 @@ namespace infd::scene {
 	void SceneObject::internalUncheckedUnnotifiedSetScene(Scene *scene) noexcept {
 		_scene = scene;
 		visitAllChildren([scene](SceneObject &child) { child._scene = scene; });
+	}
+
+	void SceneObject::internalSetScene(Scene *scene) noexcept {
+		internalUncheckedNotifySceneUnassigned();
+		internalUncheckedUnnotifiedSetScene(scene);
+		internalUncheckedNotifySceneAssigned();
 	}
 
 	void SceneObject::internalUncheckedNotifyParentUnassigned() noexcept {

@@ -15,6 +15,10 @@ add_executable(${PROJECT_NAME}
 	"${PROJECT_SOURCE_DIR}/infd/render/Pipeline.cpp"
 	"${PROJECT_SOURCE_DIR}/infd/render/Utils.cpp"
 	"${PROJECT_SOURCE_DIR}/infd/render/Framebuffer.cpp"
+	"${PROJECT_SOURCE_DIR}/infd/scene/PhysicsContext.cpp"
+	"${PROJECT_SOURCE_DIR}/infd/scene/Scene.cpp"
+	"${PROJECT_SOURCE_DIR}/infd/scene/SceneObject.cpp"
+	"${PROJECT_SOURCE_DIR}/infd/scene/Transform.cpp"
 )
 
 target_link_libraries(${PROJECT_NAME}

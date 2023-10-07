@@ -58,6 +58,7 @@ namespace infd::scene {
 
 	public:
 		[[nodiscard]] SceneObject(std::string name) noexcept;
+		~SceneObject();
 
 		 SceneObject(const SceneObject &) = delete;
 		 SceneObject& operator=(const SceneObject &) = delete;
@@ -249,6 +250,7 @@ namespace infd::scene {
 		void internalUncheckedNotifySceneUnassigned() noexcept;
 		void internalUncheckedNotifySceneAssigned() noexcept;
 		void internalUncheckedUnnotifiedSetScene(Scene *scene) noexcept;
+		void internalSetScene(Scene *scene) noexcept;
 		void internalUncheckedNotifyParentUnassigned() noexcept;
 		void internalUncheckedNotifyParentAssigned() noexcept;
 		void internalUncheckedUnnotifiedSetParent(SceneObject *parent) noexcept;
