@@ -103,7 +103,7 @@ void infd::render::Pipeline::render(std::vector<RenderItem> items, const infd::r
         auto program_guard = scopedProgram(_outline_shader);
         sendUniform(_outline_shader, "uScreenSize", settings.screen_size);
         sendUniform(_outline_shader, "uWidth", 6.f);
-        _fx_buf.renderToOther(_outline_shader, _outline_buf, _fullscreen_mesh, Framebuffer::Kind::Depth);
+        _fx_buf.renderToOther(_outline_shader, _outline_buf, _fullscreen_mesh, true, Framebuffer::Kind::Depth);
     }
 
 
@@ -122,7 +122,7 @@ void infd::render::Pipeline::render(std::vector<RenderItem> items, const infd::r
     {
         if (!settings.render_dither) {
             auto program_guard = scopedProgram(_blit_shader);
-            _outline_buf.renderToOther(_blit_shader, _final_buf, _fullscreen_mesh);
+            _outline_buf.renderToOther(_blit_shader, _final_buf, _fullscreen_mesh, false);
         }
     }
 
@@ -132,7 +132,7 @@ void infd::render::Pipeline::render(std::vector<RenderItem> items, const infd::r
 
         if (settings.render_dither) {
             auto program_guard = scopedProgram(_blit_shader);
-            _outline_buf.renderToScreen(_blit_shader, _fullscreen_mesh, settings.screen_size);
+            _dither_dome_buf.renderToScreen(_blit_shader, _fullscreen_mesh, settings.screen_size);
         } else {
             auto program_guard = scopedProgram(_threshold_blit_shader);
             _final_buf.renderToScreen(_threshold_blit_shader, _fullscreen_mesh, settings.screen_size);
