@@ -9,7 +9,7 @@ namespace infd::render {
     void Framebuffer::setSize(glm::ivec2 new_size) {
         int width = new_size.x; int height = new_size.y;
         {
-            auto fb_guard       = scopedBind(buffer, GL_FRAMEBUFFER);
+            auto fb_guard = scopedBind(buffer, GL_FRAMEBUFFER);
 
             {
                 auto colour_guard = scopedBind(colour, GL_TEXTURE_2D);
@@ -27,6 +27,8 @@ namespace infd::render {
                              nullptr);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
                 glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth, 0);
             }
@@ -40,10 +42,10 @@ namespace infd::render {
         _valid = true;
     }
 
-    void Framebuffer::renderToScreen(const GLProgram& shader, const GLMesh& display, glm::ivec2 screen_size) const {
+    void Framebuffer::renderToScreen(const GLProgram& shader, const GLMesh& display, glm::ivec2 screen_size, Kind kind) const {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glActiveTexture(GL_TEXTURE0);
-        auto texture_guard = scopedBind(colour, GL_TEXTURE_2D);
+        auto texture_guard = kind == Kind::Colour ? scopedBind(colour, GL_TEXTURE_2D) : scopedBind(depth, GL_TEXTURE_2D);
         glUniform1i(glGetUniformLocation(shader, "uFramebuffer"), 0);
 
         glViewport(0, 0, screen_size.x, screen_size.y);
@@ -54,10 +56,10 @@ namespace infd::render {
         display.draw();
     }
 
-    void Framebuffer::renderToOther(const GLProgram& shader, const Framebuffer& other, const GLMesh& display) const {
+    void Framebuffer::renderToOther(const GLProgram& shader, const Framebuffer& other, const GLMesh& display, Kind kind) const {
         auto buffer_handle = scopedBind(other.buffer, GL_FRAMEBUFFER);
         glActiveTexture(GL_TEXTURE0);
-        auto texture_guard = scopedBind(colour, GL_TEXTURE_2D);
+        auto texture_guard = kind == Kind::Colour ? scopedBind(colour, GL_TEXTURE_2D) : scopedBind(depth, GL_TEXTURE_2D);
         glUniform1i(glGetUniformLocation(shader, "uFramebuffer"), 0);
 
         glViewport(0, 0, other._size.x, other._size.y);
