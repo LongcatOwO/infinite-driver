@@ -101,7 +101,11 @@ add_subdirectory("${PROJECT_LIB_DIR}/Clipper2")
 
 add_library(${CGRA_PROJECT}_aggregate)
 
-target_compile_definitions(${CGRA_PROJECT}_aggregate PUBLIC "-DCGRA_SRCDIR=\"${PROJECT_SOURCE_DIR}\"")
+target_compile_definitions(${CGRA_PROJECT}_aggregate 
+PUBLIC 
+	"-DCGRA_SRCDIR=\"${PROJECT_SOURCE_DIR}\""
+	"-DGLM_FORCE_SILENT_WARNINGS"
+)
 
 
 #########################################################
@@ -217,8 +221,6 @@ PUBLIC
 target_sources(${CGRA_PROJECT}_aggregate 
 PUBLIC
 	"${PROJECT_SOURCE_DIR}/src/application.cpp"
-	"${PROJECT_SOURCE_DIR}/src/skeleton.cpp"
-	"${PROJECT_SOURCE_DIR}/src/skeleton_model.cpp"
 	"${PROJECT_SOURCE_DIR}/src/cgra/cgra_geometry.cpp"
 	"${PROJECT_SOURCE_DIR}/src/cgra/cgra_gui.cpp"
 	"${PROJECT_SOURCE_DIR}/src/cgra/cgra_mesh.cpp"

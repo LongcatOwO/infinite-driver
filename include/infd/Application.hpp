@@ -29,7 +29,6 @@ namespace infd {
 	using GLFWWindowPtr = std::unique_ptr<GLFWwindow, GLFWWindowDeleter>;
 
 	class Application {
-
 		// window
 		GLFWWindowPtr _window;
 		glm::vec2 _window_size;
@@ -114,9 +113,8 @@ namespace infd {
 
 	inline void Application::run() {
 		_scene.enableTime();
-		while (!glfwWindowShouldClose(window())) {
+		while(!glfwWindowShouldClose(window())) {
 			_scene.updateTime();
-			// std::cout << "Current Time: " << _scene._frame_timer.currentTimeElapsed() << '\n';
 		}
 	}
 

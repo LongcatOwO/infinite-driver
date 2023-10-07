@@ -9,6 +9,7 @@
 
 // project - util
 #include <infd/util/concepts.hpp>
+#include <infd/util/Timer.hpp>
 
 // forward declarations
 #include <infd/scene/fwd/Component.hpp>
@@ -85,13 +86,13 @@ namespace infd::scene {
 		 * @throws InvalidStateException if this component is not attached to a SceneObject, 
 		 * or if the SceneObject this component is attached to is not in a scene.
 		 */
-		[[nodiscard]] Float frameDeltaTime() const;
+		[[nodiscard]] util::Timer::Duration frameDeltaTime() const;
 
 		/*
 		 * @throws InvalidStateException if this component is not attached to a SceneObject, 
 		 * or if the SceneObject this component is attached to is not in a scene.
 		 */
-		[[nodiscard]] Float physicsDeltaTime() const;
+		[[nodiscard]] util::Timer::Duration physicsDeltaTime() const;
 
 		/*
 		 * @throws InvalidStateException if this component is not attahced to a SceneObject.

@@ -1,6 +1,7 @@
 #pragma once
 
 // std
+#include <chrono>
 #include <concepts>
 #include <cstddef>
 #include <memory>
@@ -8,18 +9,15 @@
 // #include <unordered_map>
 #include <vector>
 
-// project - math
-#include <infd/math/DynamicRatio.hpp>
-
 // project - util
 #include <infd/util/concepts.hpp>
 #include <infd/util/exceptions.hpp>
 
 // project - scene
 #include <infd/scene/definitions.hpp>
-#include <infd/util/Event.hpp>
 #include <infd/scene/PhysicsContext.hpp>
-#include <infd/scene/Timer.hpp>
+#include <infd/util/Event.hpp>
+#include <infd/util/Timer.hpp>
 
 // forward declarations
 #include <infd/scene/fwd/Component.hpp>
@@ -31,14 +29,14 @@ namespace infd::scene {
 	public:
 		friend class SceneObject;
 
-		static constexpr math::DynamicRatio<Float> default_frame_rate{60};
-		static constexpr math::DynamicRatio<Float> default_physics_rate{300};
+		static constexpr double default_frame_per_sec = 60;
+		static constexpr double default_physics_per_sec = 300;
 
-		Timer _frame_timer{default_frame_rate.inverse()};
 	private:
 		std::string _name;
 
-		Timer _physics_timer{default_physics_rate.inverse()};
+		util::Timer _frame_timer = util::Timer::fromRate(default_frame_per_sec);
+		util::Timer _physics_timer = util::Timer::fromRate(default_physics_per_sec);
 
 		util::Event<void (Scene &)> _on_frame_render;
 
@@ -53,8 +51,8 @@ namespace infd::scene {
 		// TODO faster object identity lookup
 		// std::unordered_map<SceneObject *, std::size_t> _scene_objects_index;
 
-		void internalDoFrame(Timer &);
-		void internalDoPhysics(Timer &);
+		void internalDoFrame(util::Timer &);
+		void internalDoPhysics(util::Timer &);
 
 	public:
 		Scene(std::string name) noexcept;
@@ -62,11 +60,11 @@ namespace infd::scene {
 		Scene(const Scene &) = delete;
 		Scene& operator=(const Scene &) = delete;
 
-		[[nodiscard]] Float frameRate() const noexcept;
-		void frameRate(Float value) noexcept;
+		[[nodiscard]] double frameRate() const noexcept;
+		void frameRate(double value) noexcept;
 
-		[[nodiscard]] Float physicsRate() const noexcept;
-		void physicsRate(Float value) noexcept;
+		[[nodiscard]] double physicsRate() const noexcept;
+		void physicsRate(double value) noexcept;
 
 		void resetTime() noexcept;
 		void enableTime() noexcept;
@@ -75,8 +73,8 @@ namespace infd::scene {
 		void isTimeEnabled(bool value) noexcept;
 		void updateTime();
 
-		[[nodiscard]] Float frameDeltaTime() const noexcept;
-		[[nodiscard]] Float physicsDeltaTime() const noexcept;
+		[[nodiscard]] util::Timer::Duration frameDeltaTime() const noexcept;
+		[[nodiscard]] util::Timer::Duration physicsDeltaTime() const noexcept;
 
 		[[nodiscard]] util::PublicEvent<void (Scene &)>& onFrameRender() noexcept;
 

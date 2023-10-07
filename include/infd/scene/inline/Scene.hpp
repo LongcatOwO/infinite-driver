@@ -2,15 +2,13 @@
 
 // std
 #include <cassert>
+#include <chrono>
 #include <concepts>
 #include <format>
 #include <memory>
 #include <ranges>
 #include <utility>
 #include <vector>
-
-// project - math
-#include <infd/math/DynamicRatio.hpp>
 
 // project - util
 #include <infd/util/concepts.hpp>
@@ -20,8 +18,8 @@
 #include <infd/scene/definitions.hpp>
 #include <infd/util/Event.hpp>
 #include <infd/util/Function.hpp>
+#include <infd/util/Timer.hpp>
 #include <infd/scene/PhysicsContext.hpp>
-#include <infd/scene/Timer.hpp>
 
 // declarations
 #include <infd/scene/decl/Scene.hpp>
@@ -31,35 +29,35 @@
 
 namespace infd::scene {
 
-	inline void Scene::internalDoFrame(Timer &) {
+	inline void Scene::internalDoFrame(util::Timer &) {
 		visitRootSceneObjects(util::MemberFunc(&SceneObject::internalFrameUpdate));
 		_on_frame_render(*this);
 	}
 
-	inline void Scene::internalDoPhysics(Timer &) {
+	inline void Scene::internalDoPhysics(util::Timer &) {
 		visitRootSceneObjects(util::MemberFunc(&SceneObject::internalPhysicsUpdate));
 	}
 
 	inline Scene::Scene(std::string name) noexcept :
 		_name(std::move(name))
 	{
-		_frame_timer.onIntervalComplete() += util::BindedMemberFunc(&Scene::internalDoFrame, *this);
-		_physics_timer.onIntervalComplete() += util::BindedMemberFunc(&Scene::internalDoPhysics, *this);
+		_frame_timer.onIntervalCompleted() 	 += util::BindedMemberFunc(&Scene::internalDoFrame,   *this);
+		_physics_timer.onIntervalCompleted() += util::BindedMemberFunc(&Scene::internalDoPhysics, *this);
 	}
 
-	inline Float Scene::frameRate() const noexcept {
+	inline double Scene::frameRate() const noexcept {
 		return _frame_timer.rate();
 	}
 
-	inline void Scene::frameRate(Float value) noexcept {
+	inline void Scene::frameRate(double value) noexcept {
 		_frame_timer.rate(value);
 	}
 
-	inline Float Scene::physicsRate() const noexcept {
+	inline double Scene::physicsRate() const noexcept {
 		return _physics_timer.rate();
 	}
 
-	inline void Scene::physicsRate(Float value) noexcept {
+	inline void Scene::physicsRate(double value) noexcept {
 		_physics_timer.rate(value);
 	}
 
@@ -93,11 +91,11 @@ namespace infd::scene {
 		_physics_timer.update();
 	}
 
-	inline Float Scene::frameDeltaTime() const noexcept {
+	inline util::Timer::Duration Scene::frameDeltaTime() const noexcept {
 		return _frame_timer.deltaTime();
 	}
 
-	inline Float Scene::physicsDeltaTime() const noexcept {
+	inline util::Timer::Duration Scene::physicsDeltaTime() const noexcept {
 		return _physics_timer.deltaTime();
 	}
 

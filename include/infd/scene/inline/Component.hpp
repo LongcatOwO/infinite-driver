@@ -11,6 +11,7 @@
 // project - util
 #include <infd/util/concepts.hpp>
 #include <infd/util/exceptions.hpp>
+#include <infd/util/Timer.hpp>
 
 // declarations
 #include <infd/scene/decl/Component.hpp>
@@ -52,11 +53,11 @@ namespace infd::scene {
 		return sceneObject().transform();
 	}
 
-	inline Float Component::frameDeltaTime() const {
+	inline util::Timer::Duration Component::frameDeltaTime() const {
 		return scene().frameDeltaTime();
 	}
 
-	inline Float Component::physicsDeltaTime() const {
+	inline util::Timer::Duration Component::physicsDeltaTime() const {
 		return scene().physicsDeltaTime();
 	}
 
