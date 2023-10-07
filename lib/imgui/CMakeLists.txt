@@ -1,6 +1,6 @@
 project(imgui)
 
-add_library(${PROJECT_NAME}
+add_library(${PROJECT_NAME} STATIC
     "${PROJECT_SOURCE_DIR}/imgui/imgui.cpp"
     "${PROJECT_SOURCE_DIR}/imgui/imgui_demo.cpp"
     "${PROJECT_SOURCE_DIR}/imgui/imgui_draw.cpp"

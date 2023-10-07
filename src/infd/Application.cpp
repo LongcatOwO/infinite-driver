@@ -80,7 +80,7 @@ namespace infd {
 
 	Application::Application(GLFWWindowPtr window, std::string name) :
 		_window{std::move(window)},
-		// _scene{std::move(name)},
+		_scene{std::move(name)},
 		_model{infd::loadWavefrontCases(CGRA_SRCDIR "//res//assets//teapot.obj").build()}
 	{
 		_cursor_pos_event 	+= util::BindedMemberFunc{&Application::internalCursorPosCallback, 	 *this};
@@ -89,10 +89,7 @@ namespace infd {
 		_key_event 			+= util::BindedMemberFunc{&Application::internalKeyCallback, 		 *this};
 		_char_event 		+= util::BindedMemberFunc{&Application::internalCharCallback, 		 *this};
 
-		_frame_timer.onIntervalComplete() += [this](scene::Timer&) { internalDoRender(); };
-		// _frame_timer.onIntervalComplete() += util::BindedMemberFunc{&Application::internalDoRender, *this};
-
-		// _scene.onFrameRender() += util::BindedMemberFunc{&Application::internalDoRender, *this};
+		_scene.onFrameRender() += util::BindedMemberFunc{&Application::internalDoRender, *this};
 
 		infd::ShaderBuilder sb;
 		sb.setShader(GL_VERTEX_SHADER, CGRA_SRCDIR "//res//shaders//color_vert.glsl");
@@ -109,8 +106,7 @@ namespace infd {
 		_renderer.setRenderSettings(_render_settings);
 	}
 
-	void Application::internalDoRender() {
-	// void Application::internalDoRender(scene::Scene &) {
+	void Application::internalDoRender(scene::Scene &) {
 		// main rendering
 		// glEnable(GL_FRAMEBUFFER_SRGB); // use if you know about gamma correction
 		internalRender();

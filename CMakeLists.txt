@@ -34,14 +34,6 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 # External Libraries
 #########################################################
 
-if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
-	set(BUILD_SHARED_LIBS OFF)
-elseif ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
-	set(BUILD_SHARED_LIBS OFF)
-elseif ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
-	set(BUILD_SHARED_LIBS ON)
-endif()
-
 set(PROJECT_LIB_DIR "${PROJECT_SOURCE_DIR}/lib")
 
 # OpenGL
@@ -63,7 +55,6 @@ add_subdirectory("${PROJECT_LIB_DIR}/glfw-3.3.8")
 add_subdirectory("${PROJECT_LIB_DIR}/imgui")
 target_link_libraries(imgui PRIVATE glfw)
 
-
 # STB
 add_subdirectory("${PROJECT_LIB_DIR}/stb")
 
@@ -72,8 +63,16 @@ set(BUILD_UNIT_TESTS OFF CACHE BOOL "Build Unit Tests for Bullet3")
 set(BUILD_CPU_DEMOS OFF CACHE BOOL "Build CPU Demos for Bullet3")
 set(BUILD_EXTRAS OFF CACHE BOOL "Build Extras for Bullet3")
 set(BUILD_BULLET3 OFF CACHE BOOL "Build Bullet3 for Bullet3")
-
+set(BUILD_SHARED_LIBS_TEMP "${BUILD_SHARED_LIBS}")
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+	set(BUILD_SHARED_LIBS OFF)
+elseif ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+	set(BUILD_SHARED_LIBS OFF)
+elseif ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+	set(BUILD_SHARED_LIBS ON)
+endif()
 add_subdirectory("${PROJECT_LIB_DIR}/bullet3")
+set(BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS_TEMP}")
 add_library(Bullet INTERFACE)
 target_link_libraries(Bullet
 INTERFACE

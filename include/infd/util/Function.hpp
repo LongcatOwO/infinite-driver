@@ -4,7 +4,6 @@
 #include <concepts>
 #include <functional>
 #include <memory>
-#include <type_traits>
 #include <utility>
 
 namespace infd::util {
@@ -525,7 +524,7 @@ namespace infd::util {
 
 	public:
 		// Constructs a Function using the given functor as the underlying object.
-		template <typename Fn> requires (!std::same_as<Function, std::remove_cvref_t<Fn>>)
+		template <typename Fn>
 		Function(Fn &&fn) : _ptr{new Impl{std::forward<Fn>(fn)}} {}
 
 		// copy constructor
