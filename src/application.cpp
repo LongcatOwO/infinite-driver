@@ -18,7 +18,7 @@
 #include <infd/Shader.hpp>
 #include <misc/cpp/imgui_stdlib.h>
 
-#include <infd/scene/SceneObject.hpp>
+#include <infd/scene/Scene.hpp>
 
 
 using namespace std;

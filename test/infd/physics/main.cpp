@@ -76,11 +76,7 @@ int main() {
 		installDebugCallback(application_window);
 #endif
 
-		application.preLoopInit();
-
-		// loop until the user closes the window
-		while (!glfwWindowShouldClose(application_window))
-			application.update();
+		application.run();
 
 	} catch (const std::exception &e) {
 		// report error
@@ -167,10 +163,6 @@ namespace {
 		std::cout << "Using " << GLM_VERSION_MESSAGE << '\n';
 		std::cout << "Using Dear ImGui " << IMGUI_VERSION << '\n';
 
-		// initialize ImGui
-		if (!cgra::gui::init(window.get(), true))
-			throw infd::util::ImGuiException("Error: Could not initialize ImGui.");
-
 		return window;
 	}
 
@@ -197,17 +189,15 @@ namespace {
 			}
 
 			static void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) {
-				if (ImGui::GetIO().WantCaptureMouse) return;
+				if (ImGui::GetIO().WantCaptureKeyboard) return;
 				getWindowApplication(window).keyCallback(key, scancode, action, mods);
 			}
 
 			static void charCallback(GLFWwindow *window, unsigned int c) {
-				if (ImGui::GetIO().WantCaptureMouse) return;
+				if (ImGui::GetIO().WantTextInput) return;
 				getWindowApplication(window).charCallback(c);
 			}
-
-			static void APIENTRY debugCallback(GLenum, GLenum, GLuint, GLenum, GLsizei, const GLchar*, const GLvoid*);
-			};
+		};
 
 		GLFWwindow *window = application.window();
 		glfwSetWindowUserPointer(window, &application);
@@ -218,6 +208,10 @@ namespace {
 		glfwSetScrollCallback(window, Local::scrollCallback);
 		glfwSetKeyCallback(window, Local::keyCallback);
 		glfwSetCharCallback(window, Local::charCallback);
+
+		// initialize ImGui
+		if (!cgra::gui::init(window, true))
+			throw infd::util::ImGuiException("Error: Could not initialize ImGui.");
 	}
 
 #ifdef INFD_ENABLE_DEBUG

@@ -22,7 +22,7 @@ namespace infd::scene {
 		math::DynamicRatio<Float> _interval;
 		bool _is_enabled = false;
 
-		TimePoint _last_time_point;
+		TimePoint _last_time_point = Clock::now();
 		Float _time_elapsed_since_last_interval = 0;
 		Float _last_interval_delta_time = 0;
 
@@ -104,6 +104,10 @@ namespace infd::scene {
 		 */
 		[[nodiscard]] Float deltaTime() const noexcept {
 			return _last_interval_delta_time;
+		}
+
+		[[nodiscard]] Float currentTimeElapsed() const noexcept {
+			return _time_elapsed_since_last_interval;
 		}
 	};
 } // namespace infd::scene
