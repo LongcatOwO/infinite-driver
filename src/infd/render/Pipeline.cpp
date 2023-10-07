@@ -64,14 +64,14 @@ void infd::render::Pipeline::render(std::vector<RenderItem> items, const infd::r
         auto fb_guard = scopedBind(_fx_buf.buffer, GL_FRAMEBUFFER);
         _fx_buf.setupDraw();
 
-        glUniform3fv(glGetUniformLocation(_main_shader, "uColour"), 1, glm::value_ptr(vec3{1, 0, 1}));
-        glUniform3fv(glGetUniformLocation(_main_shader, "uLightPos"), 1, glm::value_ptr(vec3{10}));
-        glUniformMatrix4fv(glGetUniformLocation(_main_shader, "uProjectionMatrix"), 1, false, value_ptr(settings.temp_proj));
-        glUniformMatrix4fv(glGetUniformLocation(_main_shader, "uViewMatrix"), 1, false, value_ptr(settings.temp_view));
+        sendUniform(_main_shader, "uColour", {1, 0, 1});
+        sendUniform(_main_shader, "uLightPos", vec3{10});
+        sendUniform(_main_shader, "uProjectionMatrix", settings.temp_proj);
+        sendUniform(_main_shader, "uViewMatrix", settings.temp_view);
 
         for (auto& item : items) {
-            glUniformMatrix4fv(glGetUniformLocation(_main_shader, "uModelMatrix"), 1, false, value_ptr(item.transform));
-            glUniform1f(glGetUniformLocation(_main_shader, "uShininess"), item.material.shininess);
+            sendUniform(_main_shader, "uModelMatrix", item.transform);
+            sendUniform(_main_shader, "uShininess", item.material.shininess);
             item.mesh.draw();
         }
     }
@@ -89,12 +89,12 @@ void infd::render::Pipeline::render(std::vector<RenderItem> items, const infd::r
 
         glActiveTexture(GL_TEXTURE1);
         auto sky_texture_guard = scopedBind(_dither_texture, GL_TEXTURE_2D);
-        glUniform1i(glGetUniformLocation(_sky_shader, "uTex"), 1);
-        glUniform2fv(glGetUniformLocation(_sky_shader, "uScreenSize"), 1, value_ptr(vec2 {width, height}));
-        glUniform1f(glGetUniformLocation(_sky_shader, "uPatternAngle"), settings.pattern_angle);
-        glUniformMatrix4fv(glGetUniformLocation(_sky_shader, "uProjectionMatrix"), 1, false, value_ptr(settings.temp_proj));
-        glUniformMatrix4fv(glGetUniformLocation(_sky_shader, "uViewMatrix"), 1, false, value_ptr(view));
-        glUniformMatrix4fv(glGetUniformLocation(_sky_shader, "uModelMatrix"), 1, false, value_ptr(glm::mat4 {1}));
+        sendUniform(_sky_shader, "uTex", 1);
+        sendUniform(_sky_shader, "uScreenSize", glm::vec2 {width, height});
+        sendUniform(_sky_shader, "uPatternAngle", settings.pattern_angle);
+        sendUniform(_sky_shader, "uProjectionMatrix", settings.temp_proj);
+        sendUniform(_sky_shader, "uViewMatrix", view);
+        sendUniform(_sky_shader, "uModelMatrix", glm::mat4 {1});
         _sky_sphere.draw();
     }
 
@@ -104,7 +104,7 @@ void infd::render::Pipeline::render(std::vector<RenderItem> items, const infd::r
 
         glActiveTexture(GL_TEXTURE1);
         auto dither_texture_guard = scopedBind(_dither_dome_buf.colour, GL_TEXTURE_2D);
-        glUniform1i(glGetUniformLocation(_dither_shader, "uDitherPattern"), 1);
+        sendUniform(_dither_shader, "uDitherPattern", 1);
 
         _fx_buf.renderToOther(_dither_shader, _final_buf, _fullscreen_mesh);
     }
