@@ -58,7 +58,6 @@ namespace infd::scene {
 
 	public:
 		[[nodiscard]] SceneObject(std::string name) noexcept;
-		~SceneObject();
 
 		 SceneObject(const SceneObject &) = delete;
 		 SceneObject& operator=(const SceneObject &) = delete;
