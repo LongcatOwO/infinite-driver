@@ -18,6 +18,13 @@
 #include <infd/scene/SceneObject.hpp>
 
 namespace infd::scene {
+
+	SceneObject::~SceneObject() {
+		// TODO
+		while (!_children.empty()) {
+		}
+	}
+
 	std::vector<SceneObject*> SceneObject::allChildPointers() noexcept {
 		namespace rng = std::ranges;
 		namespace vw = std::views;
@@ -107,7 +114,7 @@ namespace infd::scene {
 				);
 		}
 
-		new_parent.internalUncheckedAddChild(_parent->internalUncheckedRemoveChild(*this));
+		_parent->internalUncheckedRemoveChild(*this, new_parent);
 	}
 
 	std::unique_ptr<SceneObject> SceneObject::removeFromScene() {
@@ -163,35 +170,61 @@ namespace infd::scene {
 		transform().globalTransform(position, rotation, scale);
 	}
 
-	void SceneObject::internalSetScene(Scene *scene) noexcept {
-		_on_scene_unassigned(*this);
-		_scene = scene;
-		_on_scene_assigned(*this);
-
-		for (SceneObject &child : childrenView()) {
-			child.internalSetScene(_scene);
+	void SceneObject::internalUncheckedNotifySceneUnassigned() noexcept {
+		if (this->hasScene()) {
+			_on_scene_unassigned(*this);
+			visitAllChildren([](SceneObject &child) { child._on_scene_unassigned(child); });
 		}
 	}
 
-	void SceneObject::internalUncheckedSetParent(SceneObject *parent) noexcept {
-		_on_parent_unassigned(*this);
-		_parent = parent;
-		_on_parent_assigned(*this);
+	void SceneObject::internalUncheckedNotifySceneAssigned() noexcept {
+		if (this->hasScene()) {
+			_on_scene_assigned(*this);
+			visitAllChildren([](SceneObject &child) { child._on_scene_assigned(child); });
+		}
+	}
 
-		if (parent) 
-			internalSetScene(parent->_scene);
+	void SceneObject::internalUncheckedUnnotifiedSetScene(Scene *scene) noexcept {
+		_scene = scene;
+		visitAllChildren([scene](SceneObject &child) { child._scene = scene; });
+	}
+
+	void SceneObject::internalUncheckedNotifyParentUnassigned() noexcept {
+		if (this->hasParent()) {
+			_on_parent_unassigned(*this);
+			internalUncheckedNotifySceneUnassigned();
+		}
+	}
+
+	void SceneObject::internalUncheckedNotifyParentAssigned() noexcept {
+		if (this->hasParent()) {
+			_on_parent_assigned(*this);
+			internalUncheckedNotifySceneAssigned();
+		}
+	}
+
+	void SceneObject::internalUncheckedUnnotifiedSetParent(SceneObject *parent) noexcept {
+		_parent = parent;
+		if (_parent)
+			internalUncheckedUnnotifiedSetScene(_parent->_scene);
 		else
-			internalSetScene(nullptr);
+			internalUncheckedUnnotifiedSetScene(nullptr);
 	}
 
 	void SceneObject::internalUncheckedAddChild(std::unique_ptr<SceneObject> child) noexcept {
-		SceneObject *child_ptr = child.get();
+		SceneObject &child_ref = *child;
+
 		_children.push_back(std::move(child));
-		child_ptr->internalUncheckedSetParent(this);
-		_on_child_added(*this, *child_ptr);
+		child_ref.internalUncheckedUnnotifiedSetParent(this);
+
+		child_ref.internalUncheckedNotifyParentAssigned();
+		_on_child_added(*this, child_ref);
 	}
 
 	std::unique_ptr<SceneObject> SceneObject::internalUncheckedRemoveChild(SceneObject &child) noexcept {
+		_on_child_removed(*this, child);
+		child.internalUncheckedNotifyParentUnassigned();
+
 		auto it = std::find_if(
 				_children.begin(), _children.end(), 
 				[&child](std::unique_ptr<SceneObject> &ptr) {
@@ -200,8 +233,66 @@ namespace infd::scene {
 			);
 		std::unique_ptr<SceneObject> owning_child{std::move(*it)};
 		_children.erase(it);
-		child.internalUncheckedSetParent(nullptr);
-		_on_child_removed(*this, child);
+		child.internalUncheckedUnnotifiedSetParent(nullptr);
+
+		return owning_child;
 	}
 
+	void SceneObject::internalUncheckedRemoveChild(SceneObject &child, SceneObject &new_parent) noexcept {
+		_on_child_removed(*this, child);
+		child.internalUncheckedNotifyParentUnassigned();
+
+		auto it = std::find_if(
+				_children.begin(), _children.end(),
+				[&child](std::unique_ptr<SceneObject> &ptr) {
+					return &child == ptr.get();
+				}
+			);
+		std::unique_ptr<SceneObject> owning_child{std::move(*it)};
+		_children.erase(it);
+		new_parent._children.push_back(std::move(owning_child));
+		child.internalUncheckedUnnotifiedSetParent(&new_parent);
+
+		child.internalUncheckedNotifyParentAssigned();
+		new_parent._on_child_added(new_parent, child);
+	}
+
+	void SceneObject::internalUncheckedAddComponent(std::unique_ptr<Component> component) noexcept {
+		Component *comp_ptr = component.get();
+		_components.push_back(std::move(component));
+		comp_ptr->_scene_object = this;
+		comp_ptr->onAttach();
+		_on_component_added(*this, *comp_ptr);
+	}
+
+	std::unique_ptr<Component> SceneObject::internalUncheckedRemoveComponent(Component &component) noexcept {
+		_on_component_removed(*this, component);
+		component.onDetach();
+		auto it = std::find_if(
+				_components.begin(), _components.end(), 
+				[&component](std::unique_ptr<Component> &comp_ptr) {
+					return &component == comp_ptr.get();
+				}
+			);
+
+		std::unique_ptr<Component> owning_comp{std::move(*it)};
+		_components.erase(it);
+		owning_comp->_scene_object = nullptr;
+		return owning_comp;
+	}
+
+	void SceneObject::internalUncheckedRemoveComponent(Component &component, SceneObject &new_owner) noexcept {
+		_on_component_removed(*this, component);
+		component.onDetach();
+		auto it = std::find_if(
+				_components.begin(), _components.end(),
+				[&component](std::unique_ptr<Component> &comp_ptr) {
+					return &component == comp_ptr.get();
+				}
+			);
+
+		std::unique_ptr<Component> owning_comp{std::move(*it)};
+		_components.erase(it);
+		new_owner.internalUncheckedAddComponent(std::move(owning_comp));
+	}
 }
