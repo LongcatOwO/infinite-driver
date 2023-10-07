@@ -118,6 +118,14 @@ void infd::render::Pipeline::render(std::vector<RenderItem> items, const infd::r
         _fx_buf.renderToOther(_dither_shader, _final_buf, _fullscreen_mesh);
     }
 
+    // render outlines over dithered scene
+    {
+        if (!settings.render_dither) {
+            auto program_guard = scopedProgram(_blit_shader);
+            _outline_buf.renderToOther(_blit_shader, _final_buf, _fullscreen_mesh);
+        }
+    }
+
     // draw to screen from final buffer
     {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
