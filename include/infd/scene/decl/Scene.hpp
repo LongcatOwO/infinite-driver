@@ -51,6 +51,9 @@ namespace infd::scene {
 	public:
 		Scene(std::string name) noexcept;
 
+		Scene(const Scene &) = delete;
+		Scene& operator=(const Scene &) = delete;
+
 		[[nodiscard]] Float frameRate() const noexcept;
 		void frameRate(Float value) noexcept;
 

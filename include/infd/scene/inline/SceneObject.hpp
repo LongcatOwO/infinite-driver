@@ -24,11 +24,6 @@
 
 namespace infd::scene {
 
-	inline void SceneObject::internalAttachComponentRoutine(Component &component) {
-		component._scene_object = this;
-		component.onAttach();
-	}
-
 	inline SceneObject::SceneObject(std::string name) noexcept :
 		_name(std::move(name)),
 		_transform(&emplaceComponent<Transform>())
@@ -64,6 +59,14 @@ namespace infd::scene {
 
 	inline util::PublicEvent<void (SceneObject &self, SceneObject &child)>& SceneObject::onChildRemoved() noexcept {
 		return _on_child_removed;
+	}
+
+	inline util::PublicEvent<void (SceneObject &self, Component &component)>& SceneObject::onComponentAdded() noexcept {
+		return _on_component_added;
+	}
+
+	inline util::PublicEvent<void (SceneObject &self, Component &component)>& SceneObject::onComponentRemoved() noexcept {
+		return _on_component_removed;
 	}
 
 	inline bool SceneObject::isRoot() const noexcept {
@@ -217,16 +220,15 @@ namespace infd::scene {
 			throw util::NullPointerException(
 				std::format("[SceneObject(\"{}\")::addComponent(std::unique_ptr<T> component)]: component is null.", name())
 			);
-		_components.push_back(std::move(component));
-		internalAttachComponentRoutine(*comp_ptr);
+
+		internalUncheckedAddComponent(std::move(component));
 		return *comp_ptr;
 	}
 
 	template <std::derived_from<Component> T, typename ...Args>
 	inline T& SceneObject::emplaceComponent(Args &&...args) {
 		T *comp_ptr = new T(std::forward<Args>(args)...);
-		_components.push_back(std::unique_ptr<T>(comp_ptr));
-		internalAttachComponentRoutine(*comp_ptr);
+		internalUncheckedAddComponent(std::unique_ptr<T>(comp_ptr));
 		return *comp_ptr;
 	}
 
