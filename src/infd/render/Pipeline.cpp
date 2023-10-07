@@ -98,6 +98,15 @@ void infd::render::Pipeline::render(std::vector<RenderItem> items, const infd::r
         _sky_sphere.draw();
     }
 
+    // draw outlines from fx -> outline buf
+    {
+        auto program_guard = scopedProgram(_outline_shader);
+        sendUniform(_outline_shader, "uScreenSize", settings.screen_size);
+        sendUniform(_outline_shader, "uWidth", 6.f);
+        _fx_buf.renderToOther(_outline_shader, _outline_buf, _fullscreen_mesh, Framebuffer::Kind::Depth);
+    }
+
+
     //draw dither from fx -> final buf
     {
         auto program_guard = scopedProgram(_dither_shader);
@@ -115,7 +124,7 @@ void infd::render::Pipeline::render(std::vector<RenderItem> items, const infd::r
 
         if (settings.render_dither) {
             auto program_guard = scopedProgram(_blit_shader);
-            _dither_dome_buf.renderToScreen(_blit_shader, _fullscreen_mesh, settings.screen_size);
+            _outline_buf.renderToScreen(_blit_shader, _fullscreen_mesh, settings.screen_size);
         } else {
             auto program_guard = scopedProgram(_threshold_blit_shader);
             _final_buf.renderToScreen(_threshold_blit_shader, _fullscreen_mesh, settings.screen_size);
@@ -148,11 +157,17 @@ void infd::render::Pipeline::loadShaders() {
     sky_build.setShader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//phong_vert.glsl"));
     sky_build.setShader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//obj_texture_frag.glsl"));
     _sky_shader = sky_build.build();
+
+    ShaderBuilder outline_build;
+    outline_build.setShader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//fullscreen_vert.glsl"));
+    outline_build.setShader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//outline_frag.glsl"));
+    _outline_shader = outline_build.build();
 }
 
 void infd::render::Pipeline::screenSizeChanged(glm::ivec2 new_size) {
     _fx_buf.setSize(new_size * 2);
     _dither_dome_buf.setSize(new_size * 2);
+    _outline_buf.setSize(new_size);
     _final_buf.setSize(new_size * 2);
 }
 
