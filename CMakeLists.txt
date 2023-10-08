@@ -19,6 +19,11 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT "infinite-driver")
 
 
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+	set(BUILD_SHARED_LIBS OFF)
+endif()
+
+
 #########################################################
 # Force Output Directories
 # In general, this isn't a very friendly thing to do, but
@@ -63,24 +68,15 @@ set(BUILD_UNIT_TESTS OFF CACHE BOOL "Build Unit Tests for Bullet3")
 set(BUILD_CPU_DEMOS OFF CACHE BOOL "Build CPU Demos for Bullet3")
 set(BUILD_EXTRAS OFF CACHE BOOL "Build Extras for Bullet3")
 set(BUILD_BULLET3 OFF CACHE BOOL "Build Bullet3 for Bullet3")
-# set(BUILD_SHARED_LIBS_TEMP "${BUILD_SHARED_LIBS}")
-# if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
-# 	set(BUILD_SHARED_LIBS OFF)
-# elseif ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
-# 	set(BUILD_SHARED_LIBS OFF)
-# elseif ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
-# 	set(BUILD_SHARED_LIBS ON)
-# endif()
 add_subdirectory("${PROJECT_LIB_DIR}/bullet3")
-# set(BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS_TEMP}")
 add_library(Bullet INTERFACE)
-target_link_libraries(Bullet
-INTERFACE
+target_link_libraries(Bullet INTERFACE
+	LinearMath
+	Bullet3Common
 	BulletCollision
 	BulletDynamics
 	BulletInverseDynamics
 	BulletSoftBody
-	LinearMath
 )
 target_include_directories(Bullet
 INTERFACE
