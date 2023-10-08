@@ -15,7 +15,8 @@
 #include <infd/render/Renderer.hpp>
 #include <infd/util/Event.hpp>
 #include <infd/scene/Scene.hpp>
-
+#include <infd/math/DynamicRatio.hpp>
+#include <infd/scene/Timer.hpp>
 
 namespace infd {
 
@@ -29,12 +30,14 @@ namespace infd {
 	using GLFWWindowPtr = std::unique_ptr<GLFWwindow, GLFWWindowDeleter>;
 
 	class Application {
+		static constexpr math::DynamicRatio<float> default_frame_rate{60};
+		scene::Timer _frame_timer{default_frame_rate.inverse()};
 
 		// window
 		GLFWWindowPtr _window;
 		glm::vec2 _window_size;
 
-		scene::Scene _scene;
+		// scene::Scene _scene;
 
 		// orbital camera
 		float _pitch = .86;
@@ -71,7 +74,8 @@ namespace infd {
 
 		// this calls internalRender, and internalRenderGUI
 		// with other setups also.
-		void internalDoRender(scene::Scene &);
+		// void internalDoRender(scene::Scene &);
+		void internalDoRender();
 
 		void internalCursorPosCallback(double x_pos, double y_pos);
 		void internalMouseButtonCallback(int button, int action, int mods);
@@ -89,7 +93,7 @@ namespace infd {
 		void run();
 
 		[[nodiscard]] GLFWwindow* window() noexcept;
-		[[nodiscard]] scene::Scene& scene() noexcept;
+		// [[nodiscard]] scene::Scene& scene() noexcept;
 
 		// ----------input callbacks----------
 
@@ -113,44 +117,48 @@ namespace infd {
 	// ----------inline implementations----------
 
 	inline void Application::run() {
-		_scene.enableTime();
+		_frame_timer.enable();
 		while (!glfwWindowShouldClose(window())) {
-			_scene.updateTime();
-			// std::cout << "Current Time: " << _scene._frame_timer.currentTimeElapsed() << '\n';
+			_frame_timer.update();
 		}
+		// _scene.enableTime();
+		// while (!glfwWindowShouldClose(window())) {
+		// 	_scene.updateTime();
+		// 	std::cout << "Current Time: " << _scene._frame_timer.currentTimeElapsed() << '\n';
+		// }
 	}
 
 	inline GLFWwindow* Application::window() noexcept {
 		return _window.get();
 	}
 
-	inline scene::Scene& Application::scene() noexcept {
-		return _scene;
-	}
+	// inline scene::Scene& Application::scene() noexcept {
+	// 	return _scene;
+	// }
 
 	inline void Application::cursorPosCallback(double x_pos, double y_pos) {
 		_cursor_pos_event(x_pos, y_pos);
-		scene().cursorPosCallback(x_pos, y_pos);
+		// scene().cursorPosCallback(x_pos, y_pos);
 	}
 
 	inline void Application::mouseButtonCallback(int button, int action, int mods) {
 		_mouse_button_event(button, action, mods);
-		scene().mouseButtonCallback(button, action, mods);
+		// scene().mouseButtonCallback(button, action, mods);
 	}
 
 	inline void Application::scrollCallback(double x_offset, double y_offset) {
 		_scroll_event(x_offset, y_offset);
-		scene().scrollCallback(x_offset, y_offset);
+		// scene().scrollCallback(x_offset, y_offset);
 	}
 
 	inline void Application::keyCallback(int key, int scancode, int action, int mods) {
 		_key_event(key, scancode, action, mods);
-		scene().keyCallback(key, scancode, action, mods);
+		// scene().keyCallback(key, scancode, action, mods);
 	}
 
 	inline void Application::charCallback(unsigned int c) {
 		_char_event(c);
-		scene().charCallback(c);
+		// scene().charCallback(c);
 	}
 
 	inline util::PublicEvent<void (double x_pos, double y_pos)>& Application::cursorPosEvent() noexcept {

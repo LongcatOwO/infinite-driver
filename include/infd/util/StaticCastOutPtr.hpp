@@ -7,11 +7,12 @@ namespace infd::util {
 	template <typename ResultT, typename OrigT>
 	requires std::convertible_to<ResultT, OrigT> && std::default_initializable<ResultT>
 	class StaticCastOutPtr {
-		ResultT _result_holder;
 		OrigT *_target;
+		ResultT _result_holder;
 
 	public:
-		StaticCastOutPtr(OrigT *target) noexcept(noexcept(ResultT{})) : _target(target) {}
+		StaticCastOutPtr(OrigT *target, const ResultT &init = {}) noexcept(noexcept(ResultT{})) : 
+			_target(target), _result_holder(init) {}
 
 		StaticCastOutPtr(const StaticCastOutPtr &) = delete;
 		StaticCastOutPtr(StaticCastOutPtr &&) = delete;
