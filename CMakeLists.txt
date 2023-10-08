@@ -216,7 +216,6 @@ PUBLIC
 
 target_sources(${CGRA_PROJECT}_aggregate 
 PUBLIC
-	"${PROJECT_SOURCE_DIR}/src/application.cpp"
 	"${PROJECT_SOURCE_DIR}/src/cgra/cgra_geometry.cpp"
 	"${PROJECT_SOURCE_DIR}/src/cgra/cgra_gui.cpp"
 	"${PROJECT_SOURCE_DIR}/src/cgra/cgra_mesh.cpp"
@@ -238,6 +237,5 @@ PUBLIC
 
 add_subdirectory(src)
 add_subdirectory(res) # add the resource folder to make it appear in IDE
-add_subdirectory(test)
 
 set_property(TARGET ${CGRA_PROJECT} PROPERTY FOLDER "CGRA")
