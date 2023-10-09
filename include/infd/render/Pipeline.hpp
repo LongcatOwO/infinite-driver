@@ -19,10 +19,12 @@ namespace infd::render {
         GLProgram _blit_shader;
         GLProgram _threshold_blit_shader;
         GLProgram _sky_shader;
+        GLProgram _outline_shader;
 
         Framebuffer _fx_buf;
         Framebuffer _dither_dome_buf;
         Framebuffer _sky_buf;
+        Framebuffer _outline_buf;
         Framebuffer _final_buf;
 
         GLMesh _fullscreen_mesh = build_fullscreen_texture_mesh();

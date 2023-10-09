@@ -23,6 +23,10 @@ namespace infd::render {
         glUniform2fv(glGetUniformLocation(shader, name.c_str()), 1, glm::value_ptr(value));
     }
 
+    inline void sendUniform(const GLProgram& shader, const std::string& name, glm::ivec2 value) {
+        glUniform2iv(glGetUniformLocation(shader, name.c_str()), 1, glm::value_ptr(value));
+    }
+
     inline void sendUniform(const GLProgram& shader, const std::string& name, glm::vec3 value) {
         glUniform3fv(glGetUniformLocation(shader, name.c_str()), 1, glm::value_ptr(value));
     }
