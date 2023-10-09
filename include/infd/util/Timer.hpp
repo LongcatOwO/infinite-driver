@@ -33,7 +33,7 @@ namespace infd::util {
 			_interval(interval) {}
 
 		template <typename Period2 = std::ratio<1>, std::floating_point Rep2>
-		static Timer fromRate(Rep2 value) noexcept {
+		static Timer fromRate(const Rep2 &value) noexcept {
 			return { std::chrono::duration_cast<Duration>(std::chrono::duration<Rep2, Period2>{1} / value) };
 		}
 
@@ -56,7 +56,7 @@ namespace infd::util {
 		}
 
 		template <typename Period2 = std::ratio<1>, std::floating_point Rep2>
-		void rate(Rep2 value) noexcept {
+		void rate(const Rep2 &value) noexcept {
 			_interval = std::chrono::duration_cast<Duration>(std::chrono::duration<Rep2, Period2>{1} / value);
 		}
 
