@@ -15,7 +15,7 @@
 #include <infd/util/exceptions.hpp>
 
 // project - scene
-#include <infd/scene/SceneObject.hpp>
+#include <infd/scene/Scene.hpp>
 
 namespace infd::scene {
 

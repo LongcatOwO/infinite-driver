@@ -4,7 +4,13 @@ IF(BUILD_BULLET3)
 ENDIF(BUILD_BULLET3)
 
 
-SUBDIRS(   BulletInverseDynamics BulletSoftBody BulletCollision BulletDynamics LinearMath Bullet3Common)
+add_subdirectory(LinearMath)
+add_subdirectory(Bullet3Common)
+add_subdirectory(BulletCollision)
+add_subdirectory(BulletDynamics)
+add_subdirectory(BulletInverseDynamics)
+add_subdirectory(BulletSoftBody)
+# SUBDIRS(   BulletInverseDynamics BulletSoftBody BulletCollision BulletDynamics LinearMath Bullet3Common)
 
 
 IF(INSTALL_LIBS)

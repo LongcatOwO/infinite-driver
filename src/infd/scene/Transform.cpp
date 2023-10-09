@@ -3,7 +3,7 @@
 #include <vector>
 
 // project - scene
-#include <infd/scene/Transform.hpp>
+#include <infd/scene/Scene.hpp>
 
 namespace infd::scene {
 

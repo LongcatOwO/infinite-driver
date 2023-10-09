@@ -1,29 +1,19 @@
 // std
 #include <algorithm>
+#include <format>
 #include <memory>
+#include <ranges>
+#include <vector>
 
 // project - util
-#include <infd/scene/Timer.hpp>
+#include <infd/util/exceptions.hpp>
+#include <infd/util/Timer.hpp>
 
 // project - scene
 #include <infd/scene/Scene.hpp>
-#include <infd/scene/SceneObject.hpp>
+
 
 namespace infd::scene {
-
-	void Scene::frameUpdate(Timer &) {
-		for (std::unique_ptr<SceneObject> &so : _scene_objects)
-			so->internalFrameUpdate();
-
-		_on_frame_update(*this);
-	}
-
-	void Scene::physicsUpdate(Timer &) {
-		for (std::unique_ptr<SceneObject> &so : _scene_objects)
-			so->internalPhysicsUpdate();
-
-		_on_physics_update(*this);
-	}
 
 	SceneObject& Scene::addSceneObject(std::unique_ptr<SceneObject> so) {
 		if (!so)
@@ -35,6 +25,27 @@ namespace infd::scene {
 		_scene_objects.push_back(std::move(so));
 		so_ptr->internalSetScene(this);
 		return *so_ptr;
+	}
+
+	std::vector<SceneObject *> Scene::sceneObjectPointers() noexcept {
+		namespace rng = std::ranges;
+		namespace vw = std::views;
+
+		std::vector<SceneObject *> result = rootSceneObjectPointers();
+		auto begin = result.begin();
+		auto end = result.end();
+		while (begin != end) {
+			auto next_gen = rng::subrange(begin, end)
+				| vw::transform([](SceneObject *so) { return so->childrenView(); })
+				| vw::join
+				| vw::transform([](SceneObject &so) -> SceneObject* { return &so; })
+				| vw::common;
+			result.insert(end, next_gen.begin(), next_gen.end());
+			begin = end;
+			end = result.end();
+		}
+
+		return result;
 	}
 
 	std::unique_ptr<SceneObject> Scene::internalUncheckedRemoveSceneObject(SceneObject &so) noexcept {
