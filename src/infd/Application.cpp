@@ -29,10 +29,10 @@
 #include <infd/scene/physics/BoxShape.hpp>
 #include <infd/scene/physics/physics.hpp>
 #include <infd/scene/physics/StaticPlaneShape.hpp>
+#include "infd/generator/ChunkLoader.hpp"
 
 
 namespace infd {
-
 	void Application::internalCursorPosCallback(double x_pos, double y_pos) {
 		if (_left_mouse_down) {
 			glm::vec2 half_window_size = _window_size / 2.f;
@@ -148,15 +148,13 @@ namespace infd {
 			infd::loadWavefrontCases(CGRA_SRCDIR "//res//assets//bunny.obj").build()
 		);
 		bunny_mesh.transform().localScale(glm::vec3{75});
-        // auto& bunnyTransform = bunny.transform();
-        // bunnyTransform.localPosition(glm::vec3(8, 4, -1.5));
-        // bunnyTransform.localScale(glm::vec3(75));
-		// bunny.emplaceComponent<render::RenderComponent>(
-		// 	_renderer,
-		// 	infd::loadWavefrontCases(CGRA_SRCDIR "//res//assets//bunny.obj").build()
-		// );
 		bunny.emplaceComponent<scene::physics::BoxShape>().halfSize({3, 3, 3});
 		bunny.emplaceComponent<scene::physics::RigidBody>();
+
+        scene::SceneObject& chunkLoader = _scene.addSceneObject(std::make_unique<scene::SceneObject>("ChunkLoader"));
+        auto& loader = chunkLoader.emplaceComponent<generator::ChunkLoader>(chunkLoader, _renderer, 5);
+        loader.move(-6,-6);
+        loader.transform().localScale(glm::vec3(30));
 	}
 
 	void Application::internalDoRender(scene::Scene &) {

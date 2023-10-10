@@ -10,7 +10,7 @@
 
 namespace infd::generator {
     static const float ROAD_LENGTH = 0.05f;
-    static const float PERLIN_DEPTH = 0.8f;
+    static const float PERLIN_DEPTH = 1.f;
     static const float MAX_BORDER_ROOTS = 3.2f;
     static const float BORDER_ROOT_PADDING = ROAD_LENGTH * 2;
     static const float BORDER_ROOT_ANGLE = glm::half_pi<float>() / 32;
@@ -32,6 +32,15 @@ namespace infd::generator {
     public:
         ChunkGenerator(int x, int y, unsigned int seed, PerlinNoise& perlinNoise);
 
+        unsigned int seed;
+
+        int x;
+        int y;
+        PerlinNoise& perlinNoise;
+
+        std::vector<std::shared_ptr<Node>> nodes;
+        std::vector<Clipper2Lib::PathD> cycles;
+        static float scaledPerlin(float x, float y, PerlinNoise& noise);
     private:
         static float rootDistribution(float value);
 
@@ -42,15 +51,6 @@ namespace infd::generator {
         void findCycles();
 
         void addNode(Node* parent, std::deque<Node*>& nodeQueue, helpers::RandomType random, float angleOffset);
-
-        int _x;
-        int _y;
-
-        unsigned int _seed;
-
-        std::vector<std::shared_ptr<Node>> _nodes;
-        std::vector<Clipper2Lib::PathD> cycles;
-        PerlinNoise& _perlinNoise;
 
         static void populateRoots(std::vector<std::shared_ptr<Node>> &roots, float x, float y, unsigned int seed, size_t roadCount,
                            float angleMultiple,

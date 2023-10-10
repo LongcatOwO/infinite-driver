@@ -34,16 +34,14 @@ namespace infd::scene::physics {
 
 		using LifeSpanHandle = PhysicsContext::RigidBodyLifeSpanHandle;
 
-		PhysicsContext *_physics_context = nullptr;
-		CollisionShape *_collision_shape = nullptr;
+		PhysicsContext* _physics_context = nullptr;
+		CollisionShape* _collision_shape = nullptr;
 
 		std::unique_ptr<btMotionState> _motion_state;
 		std::unique_ptr<btRigidBody> _rigid_body;
 		LifeSpanHandle _life_span_handle;
 
 		util::PropertyOwner<bool> _transform_ignore_parent;
-
-		bool _debugged = false;
 
 		/*
 		 * @throws MissingRootSceneObjectException if a root SceneObject with PhysicsContext cannot be found.

@@ -60,23 +60,10 @@ namespace infd::scene::physics {
 	}
 
 	void RigidBody::internalSyncTransformToMotionState() noexcept {
-		if (!_debugged) {
-			using namespace debug;
-			std::cout << sceneObject().name() << " before: "
-				<< "local" << transform().localPosition() << ' '
-				<< "global" << transform().globalPosition() << '\n';
-		}
 		btTransform t;
 		_motion_state->getWorldTransform(t);
 		transform().localPosition(math::toGlm(t.getOrigin()));
 		transform().localRotation(math::toGlm(t.getRotation()));
-		if (!_debugged) {
-			using namespace debug;
-			_debugged = true;
-			std::cout << sceneObject().name() << " after: "
-				<< "local" << transform().localPosition() << ' '
-				<< "global" << transform().globalPosition() << '\n';
-		}
 	}
 
 	void RigidBody::internalSyncMotionStateToTransform() noexcept {
