@@ -25,6 +25,7 @@
 
 
 namespace infd::scene {
+
 	class Transform : public Component {
 		glm::vec<3, Float> _local_position;
 		glm::qua<Float> _local_rotation;
@@ -37,7 +38,7 @@ namespace infd::scene {
 		void onDetach() noexcept override;
 		void internalOnParentAssigned(SceneObject &) noexcept;
 
-		const glm::mat<4, 4, Float>& internalParentGlobalTransform() const noexcept;
+		glm::mat<4, 4, Float> internalParentGlobalTransform() const noexcept;
 
 	public:
 		[[nodiscard]] Transform() noexcept;
@@ -100,9 +101,9 @@ namespace infd::scene {
 		 */
 		void detachFromParent(Transform &new_parent);
 
-		[[nodiscard]] const glm::vec<3, Float>& localPosition() const noexcept;
-		[[nodiscard]] const glm::qua<Float>& localRotation() const noexcept;
-		[[nodiscard]] const glm::vec<3, Float>& localScale() const noexcept;
+		[[nodiscard]] glm::vec<3, Float> localPosition() const noexcept;
+		[[nodiscard]] glm::qua<Float> localRotation() const noexcept;
+		[[nodiscard]] glm::vec<3, Float> localScale() const noexcept;
 		[[nodiscard]] glm::mat<4, 4, Float> localTransform() const noexcept;
 
 		void localPosition(const glm::vec<3, Float> &value) noexcept;

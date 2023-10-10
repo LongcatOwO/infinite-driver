@@ -32,7 +32,7 @@ namespace infd::scene {
 		// called before detached
 		virtual void onDetach() {}
 
-		// not working
+		// called once the scene is awaken
 		virtual void onAwake() {}
 
 

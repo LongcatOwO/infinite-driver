@@ -112,6 +112,7 @@ namespace infd {
 	// ----------inline implementations----------
 
 	inline void Application::run() {
+		_scene.awake();
 		_scene.enableTime();
 		while(!glfwWindowShouldClose(window())) {
 			_scene.updateTime();

@@ -15,7 +15,6 @@
 
 // project - scene
 #include <infd/scene/definitions.hpp>
-#include <infd/scene/PhysicsContext.hpp>
 #include <infd/util/Event.hpp>
 #include <infd/util/Timer.hpp>
 
@@ -60,11 +59,31 @@ namespace infd::scene {
 		Scene(const Scene &) = delete;
 		Scene& operator=(const Scene &) = delete;
 
-		[[nodiscard]] double frameRate() const noexcept;
-		void frameRate(double value) noexcept;
+		void awake();
 
-		[[nodiscard]] double physicsRate() const noexcept;
-		void physicsRate(double value) noexcept;
+		template <typename Period = std::ratio<1>, std::floating_point Rep = double>
+		[[nodiscard]] Rep frameRate() const noexcept;
+
+		template <typename Period = std::ratio<1>, std::floating_point Rep>
+		void frameRate(const Rep &value) noexcept;
+
+		[[nodiscard]] const util::Timer::Duration& frameInterval() const noexcept;
+
+		template <typename Rep, typename Period>
+		void frameInterval(const std::chrono::duration<Rep, Period> &value) noexcept;
+
+
+		template <typename Period = std::ratio<1>, std::floating_point Rep = double>
+		[[nodiscard]] Rep physicsRate() const noexcept;
+
+		template <typename Period = std::ratio<1>, std::floating_point Rep>
+		void physicsRate(const Rep &value) noexcept;
+
+		[[nodiscard]] const util::Timer::Duration& physicsInterval() const noexcept;
+
+		template <typename Rep, typename Period>
+		void physicsInterval(const std::chrono::duration<Rep, Period> &value) noexcept;
+
 
 		void resetTime() noexcept;
 		void enableTime() noexcept;

@@ -510,8 +510,8 @@ namespace infd::util {
 
 					if constexpr (std::equality_comparable<Fn>)
 						return _fn == other_ptr->_fn;
-
-					return false;
+					else
+						return false;
 				}
 
 				return false;
@@ -532,7 +532,7 @@ namespace infd::util {
 		Function(const Function &other) : _ptr{!!other._ptr ? other._ptr->clone() : nullptr} {}
 
 		// move constructor
-		Function(Function &&other) : _ptr{std::move(other._ptr)} {}
+		Function(Function &&other) noexcept : _ptr{std::move(other._ptr)} {}
 
 		// copy assignment
 		Function& operator=(const Function &other) {
