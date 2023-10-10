@@ -62,6 +62,10 @@ namespace infd::util {
 			}
 
 		public:
+			[[nodiscard]] constexpr element_handler() noexcept {
+				disown();
+			}
+
 			[[nodiscard]] constexpr element_handler(element_handler&& other) noexcept {
 				take_ownership(other);
 			}
@@ -69,6 +73,7 @@ namespace infd::util {
 			constexpr element_handler& operator=(element_handler&& other) noexcept {
 				destroy_element();
 				take_ownership(other);
+				return *this;
 			}
 
 			constexpr ~element_handler() noexcept {
@@ -161,6 +166,7 @@ namespace infd::util {
 			_container = std::move(other._container);
 			_handlers = std::move(other._handlers);
 			take_handlers_ownership();
+			return *this;
 		}
 
 		constexpr ~handle_vector() {

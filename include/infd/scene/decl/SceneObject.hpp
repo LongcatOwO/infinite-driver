@@ -261,6 +261,12 @@ namespace infd::scene {
 		[[nodiscard]] std::unique_ptr<Component> internalUncheckedRemoveComponent(Component &component) noexcept;
 		void internalUncheckedRemoveComponent(Component &component, SceneObject &new_owner) noexcept;
 
+		/*
+		 * calls Component.onAwake() on all components in this object and all its children 
+		 * recursively.
+		 */
+		void internalAwake();
+
 		/* 
 		 * calls Component.onFrameUpdate() on all components in this object and all its children
 		 * recursively.

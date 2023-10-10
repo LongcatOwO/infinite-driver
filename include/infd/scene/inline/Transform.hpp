@@ -30,6 +30,7 @@
 // inline definitions
 #include <infd/scene/inline/SceneObject.hpp>
 
+#include <iostream>
 
 namespace infd::scene {
 
@@ -50,7 +51,7 @@ namespace infd::scene {
 		visitAllChildren([](Transform &child) { child._parent_global_transform_updated = false; });
 	}
 
-	inline const glm::mat<4, 4, Float>& Transform::internalParentGlobalTransform() const noexcept {
+	inline glm::mat<4, 4, Float> Transform::internalParentGlobalTransform() const noexcept {
 		if (_parent_global_transform_updated) 
 			return _parent_global_transform_cache;
 
@@ -197,15 +198,15 @@ namespace infd::scene {
 		sceneObject().detachFromParent(new_parent.sceneObject());
 	}
 
-	inline const glm::vec<3, Float>& Transform::localPosition() const noexcept {
+	inline glm::vec<3, Float> Transform::localPosition() const noexcept {
 		return _local_position;
 	}
 
-	inline const glm::qua<Float>& Transform::localRotation() const noexcept {
+	inline glm::qua<Float> Transform::localRotation() const noexcept {
 		return _local_rotation;
 	}
 
-	inline const glm::vec<3, Float>& Transform::localScale() const noexcept {
+	inline glm::vec<3, Float> Transform::localScale() const noexcept {
 		return _local_scale;
 	}
 

@@ -25,9 +25,10 @@
 namespace infd::scene {
 
 	inline SceneObject::SceneObject(std::string name) noexcept :
-		_name(std::move(name)),
-		_transform(&emplaceComponent<Transform>())
-	{}
+		_name(std::move(name))
+	{
+		_transform = &emplaceComponent<Transform>();
+	}
 
 	inline std::string& SceneObject::name() noexcept {
 		return _name;
@@ -418,6 +419,14 @@ namespace infd::scene {
 	util::random_access_move_only_range_of<const T &> auto SceneObject::getComponentsInChildren(bool include_self) const noexcept {
 		return std::ranges::owning_view(getComponentPointersInChildren<T>(include_self))
 			| std::views::transform([](const T *ptr) -> const T& { return *ptr; });
+	}
+
+	inline void SceneObject::internalAwake() {
+		for (Component &comp : getComponentsView<Component>())
+			comp.onAwake();
+
+		for (SceneObject &child : childrenView())
+			child.internalAwake();
 	}
 
 	inline void SceneObject::internalFrameUpdate() {

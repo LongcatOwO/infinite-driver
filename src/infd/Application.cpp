@@ -1,4 +1,5 @@
 // std
+#include <iostream>
 #include <string>
 #include <utility>
 
@@ -23,8 +24,8 @@
 #include <infd/Wavefront.hpp>
 #include <infd/util/Function.hpp>
 #include <infd/util/StaticCastOutPtr.hpp>
+#include <infd/scene/Scene.hpp>
 
-#include <iostream>
 
 namespace infd {
 
@@ -104,6 +105,8 @@ namespace infd {
 			&_render_settings.screen_size.y
 		);
 		_renderer.setRenderSettings(_render_settings);
+
+		_scene.addSceneObject(std::make_unique<scene::SceneObject>("Physics Context"));
 	}
 
 	void Application::internalDoRender(scene::Scene &) {

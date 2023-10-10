@@ -19,7 +19,6 @@
 #include <infd/util/Event.hpp>
 #include <infd/util/Function.hpp>
 #include <infd/util/Timer.hpp>
-#include <infd/scene/PhysicsContext.hpp>
 
 // declarations
 #include <infd/scene/decl/Scene.hpp>
@@ -45,20 +44,46 @@ namespace infd::scene {
 		_physics_timer.onIntervalCompleted() += util::BindedMemberFunc(&Scene::internalDoPhysics, *this);
 	}
 
-	inline double Scene::frameRate() const noexcept {
-		return _frame_timer.rate();
+	inline void Scene::awake() {
+		visitRootSceneObjects(util::MemberFunc(&SceneObject::internalAwake));
 	}
 
-	inline void Scene::frameRate(double value) noexcept {
-		_frame_timer.rate(value);
+	template <typename Period, std::floating_point Rep>
+	Rep Scene::frameRate() const noexcept {
+		return _frame_timer.rate<Period, Rep>();
 	}
 
-	inline double Scene::physicsRate() const noexcept {
-		return _physics_timer.rate();
+	template <typename Period, std::floating_point Rep>
+	void Scene::frameRate(const Rep &value) noexcept {
+		_frame_timer.rate<Period, Rep>(value);
 	}
 
-	inline void Scene::physicsRate(double value) noexcept {
-		_physics_timer.rate(value);
+	inline const util::Timer::Duration& Scene::frameInterval() const noexcept {
+		return _frame_timer.interval();
+	}
+
+	template <typename Rep, typename Period>
+	void Scene::frameInterval(const std::chrono::duration<Rep, Period> &value) noexcept {
+		_frame_timer.interval(value);
+	}
+
+	template <typename Period, std::floating_point Rep>
+	Rep Scene::physicsRate() const noexcept {
+		return _physics_timer.rate<Period, Rep>();
+	}
+
+	template <typename Period, std::floating_point Rep>
+	void Scene::physicsRate(const Rep &value) noexcept {
+		_physics_timer.rate<Period, Rep>(value);
+	}
+
+	inline const util::Timer::Duration& Scene::physicsInterval() const noexcept {
+		return _physics_timer.interval();
+	}
+
+	template <typename Rep, typename Period>
+	void Scene::physicsInterval(const std::chrono::duration<Rep, Period> &value) noexcept {
+		_physics_timer.interval(value);
 	}
 
 	inline void Scene::resetTime() noexcept {

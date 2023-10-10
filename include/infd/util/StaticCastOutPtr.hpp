@@ -1,8 +1,17 @@
 #pragma once
 
 #include <concepts>
+#include <utility>
 
 namespace infd::util {
+
+	// template <typename ResultT, typename TargetT, typename Converter>
+	// requires (ResultT&& result, TargetT& target, Converter&& converter) {
+	// 	{ target = std::forward<Converter>(converter)(std::move(result)) };
+	// }
+	// class ConvertingOutPtr 
+	// {
+	// }; 
 
 	template <typename ResultT, typename OrigT>
 	requires std::convertible_to<ResultT, OrigT> && std::default_initializable<ResultT>

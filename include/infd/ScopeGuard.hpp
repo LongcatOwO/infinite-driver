@@ -15,6 +15,7 @@ namespace infd {
 	class ScopeGuard {
 		OnConstruct _on_construct;
 		OnDestruct _on_destruct;
+		bool _alive;
 
 	public:
 		/*
@@ -27,15 +28,39 @@ namespace infd {
 		) :
 			_on_construct(on_construct),
 			_on_destruct(on_destruct) {
+			_alive = true;
 			_on_construct();
 		}
 
-		ScopeGuard(const ScopeGuard &) = delete;
-		ScopeGuard(ScopeGuard &&) = delete;
-		ScopeGuard& operator=(const ScopeGuard &) = delete;
-		ScopeGuard& operator=(ScopeGuard &&) = delete;
+		ScopeGuard(ScopeGuard&& other) :
+			_on_construct(other._on_construct),
+			_on_destruct(other._on_destruct) {
+			if (other._alive) {
+				_alive = true;
+				other._alive = false;
+			} else {
+				_alive = false;
+			}
+		}
 
-		~ScopeGuard() { _on_destruct(); }
+		ScopeGuard& operator=(ScopeGuard&& other) {
+			if (_alive)
+				_on_destruct();
+
+			_on_construct = other._on_construct;
+			_on_destruct = other._on_destruct;
+			if (other._alive) {
+				_alive = true;
+				other._alive = false;
+			} else {
+				_alive = false;
+			}
+		}
+
+		ScopeGuard(const ScopeGuard &) = delete;
+		ScopeGuard& operator=(const ScopeGuard &) = delete;
+
+		~ScopeGuard() { if (_alive) _on_destruct(); }
 	};
 
 	template <typename C, typename D>
