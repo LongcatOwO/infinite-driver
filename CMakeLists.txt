@@ -232,6 +232,11 @@ PUBLIC
 	"${PROJECT_SOURCE_DIR}/src/infd/scene/Scene.cpp"
 	"${PROJECT_SOURCE_DIR}/src/infd/scene/SceneObject.cpp"
 	"${PROJECT_SOURCE_DIR}/src/infd/scene/Transform.cpp"
+	"${PROJECT_SOURCE_DIR}/src/infd/generator/Node.cpp"
+	"${PROJECT_SOURCE_DIR}/src/infd/generator/ChunkLoader.cpp"
+	"${PROJECT_SOURCE_DIR}/src/infd/generator/ChunkPtr.cpp"
+	"${PROJECT_SOURCE_DIR}/src/infd/generator/Edge.cpp"
+	"${PROJECT_SOURCE_DIR}/src/infd/generator/ChunkGenerator.cpp"
 )
 
 

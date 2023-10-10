@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <string>
 #include <infd/GLMesh.hpp>
 #include <glm/glm.hpp>
 #include "glm/gtc/type_ptr.hpp"
