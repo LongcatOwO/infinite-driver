@@ -10,7 +10,7 @@
 #include <btBulletDynamicsCommon.h>
 
 // project - util
-#include <infd/util/AlignedVector.hpp>
+#include <infd/util/aligned_containers.hpp>
 
 // project - scene
 #include <infd/scene/definitions.hpp>
@@ -25,7 +25,7 @@ namespace infd::scene {
 		std::unique_ptr<btBroadphaseInterface> _overlapping_pair_cache;
 		std::unique_ptr<btConstraintSolver> _constraint_solver;
 		std::unique_ptr<btDynamicsWorld> _dynamics_world;
-		util::AlignedVector<std::unique_ptr<btCollisionShape>> _collision_shapes;
+		util::aligned_vector<std::unique_ptr<btCollisionShape>> _collision_shapes;
 
 	public:
 		[[nodiscard]] PhysicsContext() noexcept;
