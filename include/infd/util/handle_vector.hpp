@@ -26,78 +26,93 @@ namespace infd::util {
 		using const_reverse_iterator 	= container::const_reverse_iterator;
 
 		class element_handler {
+			friend class handle_vector;
+
 			bool _owning;
 			handle_vector* _vec;
 			size_type pos;
 
-			element_handler(handle_vector& vec, size_type pos) noexcept : 
+			[[nodiscard]] constexpr element_handler(handle_vector& vec, size_type pos) noexcept : 
 				_owning(true), _vec(&vec), pos(pos) 
 			{
-				_vec->handlers[pos] = this;
+				_vec->_handlers[pos] = this;
 			}
 
-			void take_ownership(element_handler& other) noexcept {
+			constexpr void take_ownership(element_handler& other) noexcept {
 				if (!other._owning) {
-					_owning = false;
+					disown();
 					return;
 				}
 
 				_owning = true;
-				other._owning = false;
 
 				_vec = other._vec;
 				pos = other.pos;
 				_vec->_handlers[pos] = this;
+
+				other.disown();
+			}
+
+			// make this element handler own nothing
+			// does not destroy the element it owns
+			constexpr void disown() noexcept {
+				_owning = false;
+				_vec = nullptr;
+				pos = -1;
 			}
 
 		public:
-			element_handler(element_handler&& other) noexcept {
+			[[nodiscard]] constexpr element_handler(element_handler&& other) noexcept {
 				take_ownership(other);
 			}
 
-			element_handler& operator=(element_handler&& other) noexcept {
+			constexpr element_handler& operator=(element_handler&& other) noexcept {
 				destroy_element();
 				take_ownership(other);
 			}
 
-			~element_handler() noexcept {
+			constexpr ~element_handler() noexcept {
 				destroy_element();
 			}
 
 			element_handler(const element_handler&) = delete;
 			element_handler& operator=(const element_handler&) = delete;
 
-			void destroy_element() {
+			constexpr void destroy_element() {
 				if (!_owning) return;
 				_vec->destroy_element(pos);
-				_owning = false;
+				disown();
 			}
 
-			reference operator*() noexcept {
+			[[nodiscard]] constexpr bool is_owning() const noexcept {
+				return _owning;
+			}
+
+			[[nodiscard]] constexpr reference operator*() noexcept {
 				return (*_vec)[pos];
 			}
 
-			const_reference operator*() const noexcept {
+			[[nodiscard]] constexpr const_reference operator*() const noexcept {
 				return (*_vec)[pos];
 			}
 
-			pointer operator->() noexcept {
+			[[nodiscard]] constexpr pointer operator->() noexcept {
 				return &(*_vec)[pos];
 			}
 
-			const_pointer operator->() const noexcept {
+			[[nodiscard]] constexpr const_pointer operator->() const noexcept {
 				return &(*_vec)[pos];
 			}
 
-			iterator it() noexcept {
+			[[nodiscard]] constexpr iterator it() noexcept {
 				return _vec->begin() + pos;
 			}
 
-			const_iterator it() const noexcept {
+			[[nodiscard]] constexpr const_iterator it() const noexcept {
 				return _vec->begin() + pos;
 			}
 
-			const_iterator cit() const noexcept {
+			[[nodiscard]] constexpr const_iterator cit() const noexcept {
 				return _vec->cbegin() + pos;
 			}
 		};
@@ -112,7 +127,7 @@ namespace infd::util {
 			>
 		> _handlers;
 
-		void destroy_element(size_type pos) {
+		constexpr void destroy_element(size_type pos) {
 			if (pos != _container.size() - 1) {
 				_container[pos] = std::move(_container.back());
 				_handlers[pos] = _handlers.back();
@@ -122,19 +137,38 @@ namespace infd::util {
 			}
 		}
 
-	public:
-		[[nodiscard]] handle_vector(handle_vector&& other) : 
-			_container(std::move(other._container)), _handlers(std::move(other._handlers)) 
-		{
-			for (element_handler *handler : _handlers)
+		constexpr void invalidate_handlers() noexcept {
+			for (element_handler* handler : _handlers)
+				handler->disown();
+		}
+
+		constexpr void take_handlers_ownership() noexcept {
+			for (element_handler* handler : _handlers)
 				handler->_vec = this;
 		}
 
-		~handle_vector() = default;
+	public:
+		[[nodiscard]] handle_vector() = default;
+
+		[[nodiscard]] constexpr handle_vector(handle_vector&& other) noexcept : 
+			_container(std::move(other._container)), _handlers(std::move(other._handlers)) 
+		{
+			take_handlers_ownership();
+		}
+
+		constexpr handle_vector& operator=(handle_vector&& other) noexcept {
+			invalidate_handlers();
+			_container = std::move(other._container);
+			_handlers = std::move(other._handlers);
+			take_handlers_ownership();
+		}
+
+		constexpr ~handle_vector() {
+			invalidate_handlers();
+		}
 
 		handle_vector(const handle_vector&) 			= delete;
 		handle_vector& operator=(const handle_vector&) 	= delete;
-		handle_vector& operator=(handle_vector&&) 		= delete;
 
 		constexpr void assign(size_type count, const T &value) {
 			_container.assign(count, value);
@@ -265,20 +299,20 @@ namespace infd::util {
 			_container.shrink_to_fit();
 		}
 
-		constexpr element_handler push_back(const T& value) {
+		[[nodiscard]] constexpr element_handler push_back(const T& value) {
 			_container.push_back(value);
 			_handlers.push_back(nullptr);
 			return element_handler{*this, _handlers.size() - 1};
 		}
 
-		constexpr element_handler push_back(T&& value) {
+		[[nodiscard]] constexpr element_handler push_back(T&& value) {
 			_container.push_back(std::move(value));
 			_handlers.push_back(nullptr);
 			return element_handler{*this, _handlers.size() - 1};
 		}
 
 		template <typename... Args>
-		constexpr element_handler emplace_back(Args&&... args) {
+		[[nodiscard]] constexpr element_handler emplace_back(Args&&... args) {
 			_container.emplace_back(std::forward<Args>(args)...);
 			_handlers.push_back(nullptr);
 			return element_handler{*this, _handlers.size() - 1};
@@ -297,7 +331,7 @@ namespace infd::util {
 				handler->_vec = &other;
 		}
 
-		auto operator<=>(const handle_vector& other) const = default;
+		[[nodiscard]] auto operator<=>(const handle_vector& other) const = default;
 
 	}; // class handle_vector
 
