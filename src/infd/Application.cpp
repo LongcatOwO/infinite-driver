@@ -133,12 +133,13 @@ namespace infd {
         scene::SceneObject& teapot = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Teapot"));
         // teapot.transform().localPosition(glm::vec3(-5, 3, 2));
 		teapot.transform().localPosition({-5, 15, 2});
-		teapot.emplaceComponent<render::RenderComponent>(
-			_renderer, 
+        teapot.emplaceComponent<render::RenderComponent>(
+			_renderer,
 			infd::loadWavefrontCases(CGRA_SRCDIR "//res//assets//teapot.obj").build()
 		);
-		teapot.emplaceComponent<scene::physics::BoxShape>().halfSize({3, 3, 3});
-		teapot.emplaceComponent<scene::physics::RigidBody>();
+        teapot.getComponent<render::RenderComponent>()->material.colour = {47/255.f, 196/255.f, 94/255.f};
+        teapot.emplaceComponent<scene::physics::BoxShape>().halfSize({3, 3, 3});
+        teapot.emplaceComponent<scene::physics::RigidBody>();
 
         scene::SceneObject& bunny = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Bunny"));
 		bunny.transform().localPosition({8, 15, -1.5});
@@ -148,8 +149,9 @@ namespace infd {
 			infd::loadWavefrontCases(CGRA_SRCDIR "//res//assets//bunny.obj").build()
 		);
 		bunny_mesh.transform().localScale(glm::vec3{75});
-		bunny.emplaceComponent<scene::physics::BoxShape>().halfSize({3, 3, 3});
-		bunny.emplaceComponent<scene::physics::RigidBody>();
+        bunny_mesh.getComponent<render::RenderComponent>()->material.colour = {232/255.f, 205/255.f, 136/255.f};
+        bunny.emplaceComponent<scene::physics::BoxShape>().halfSize({3, 3, 3});
+        bunny.emplaceComponent<scene::physics::RigidBody>();
 
         scene::SceneObject& chunkLoader = _scene.addSceneObject(std::make_unique<scene::SceneObject>("ChunkLoader"));
         auto& loader = chunkLoader.emplaceComponent<generator::ChunkLoader>(chunkLoader, _renderer, 5);

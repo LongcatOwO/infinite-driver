@@ -15,6 +15,7 @@ namespace infd::render {
         GLMesh mesh;
 
         struct {
+            glm::vec3 colour {1, 0, 1};
             float shininess = 20;
         } material;
     private:
