@@ -21,6 +21,7 @@ namespace infd::render {
         glm::mat4 temp_proj;
         glm::vec3 temp_light_pos;
         bool render_original = false;
+        bool render_wireframe = false;
     };
     // class that does all the rendering - the application class has one of it and calls it to draw
     class Renderer {
