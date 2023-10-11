@@ -1,6 +1,7 @@
 #pragma once
 
 // std
+#include <iostream>
 #include <memory>
 
 // bullet
@@ -42,6 +43,8 @@ namespace infd::scene::physics {
 
 		util::PropertyOwner<bool> _transform_ignore_parent;
 
+		bool _debugged = false;
+
 		/*
 		 * @throws MissingRootSceneObjectException if a root SceneObject with PhysicsContext cannot be found.
 		 */
@@ -67,7 +70,6 @@ namespace infd::scene::physics {
 		void onAttach() override;
 
 		void onDetach() override;
-
 
 	public:
 		RigidBody();

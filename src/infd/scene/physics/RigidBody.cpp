@@ -1,5 +1,6 @@
 // std
 #include <format>
+#include <iostream>
 
 // bullet
 #include <btBulletDynamicsCommon.h>
@@ -13,8 +14,12 @@
 // project - util
 #include <infd/util/StaticCastOutPtr.hpp>
 
+// project - debug
+#include <infd/debug/glm.hpp>
+
 // project - scene::physics
 #include <infd/scene/physics/physics.hpp>
+
 
 namespace infd::scene::physics {
 
@@ -55,10 +60,23 @@ namespace infd::scene::physics {
 	}
 
 	void RigidBody::internalSyncTransformToMotionState() noexcept {
+		if (!_debugged) {
+			using namespace debug;
+			std::cout << sceneObject().name() << " before: "
+				<< "local" << transform().localPosition() << ' '
+				<< "global" << transform().globalPosition() << '\n';
+		}
 		btTransform t;
 		_motion_state->getWorldTransform(t);
 		transform().localPosition(math::toGlm(t.getOrigin()));
 		transform().localRotation(math::toGlm(t.getRotation()));
+		if (!_debugged) {
+			using namespace debug;
+			_debugged = true;
+			std::cout << sceneObject().name() << " after: "
+				<< "local" << transform().localPosition() << ' '
+				<< "global" << transform().globalPosition() << '\n';
+		}
 	}
 
 	void RigidBody::internalSyncMotionStateToTransform() noexcept {

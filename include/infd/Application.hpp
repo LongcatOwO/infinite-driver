@@ -50,7 +50,7 @@ namespace infd {
 		bool _show_axis = false;
 		bool _show_grid = false;
 		bool _show_wireframe = false;
-		bool _use_render_pipeline = false;
+		bool _use_render_pipeline = true;
 
 		// geometry
 		BasicModel _model;
