@@ -25,6 +25,7 @@
 #include <infd/util/Function.hpp>
 #include <infd/util/StaticCastOutPtr.hpp>
 #include <infd/scene/Scene.hpp>
+#include <infd/scene/physics/physics.hpp>
 
 
 namespace infd {

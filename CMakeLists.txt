@@ -215,7 +215,7 @@ PUBLIC
 )
 
 target_sources(${CGRA_PROJECT}_aggregate 
-PUBLIC
+PRIVATE
 	"${PROJECT_SOURCE_DIR}/src/cgra/cgra_geometry.cpp"
 	"${PROJECT_SOURCE_DIR}/src/cgra/cgra_gui.cpp"
 	"${PROJECT_SOURCE_DIR}/src/cgra/cgra_mesh.cpp"
@@ -229,7 +229,6 @@ PUBLIC
 	"${PROJECT_SOURCE_DIR}/src/infd/render/Pipeline.cpp"
 	"${PROJECT_SOURCE_DIR}/src/infd/render/Utils.cpp"
 	"${PROJECT_SOURCE_DIR}/src/infd/render/Framebuffer.cpp"
-	"${PROJECT_SOURCE_DIR}/src/infd/scene/PhysicsContext.cpp"
 	"${PROJECT_SOURCE_DIR}/src/infd/scene/Scene.cpp"
 	"${PROJECT_SOURCE_DIR}/src/infd/scene/SceneObject.cpp"
 	"${PROJECT_SOURCE_DIR}/src/infd/scene/Transform.cpp"
@@ -238,6 +237,9 @@ PUBLIC
 	"${PROJECT_SOURCE_DIR}/src/infd/generator/ChunkPtr.cpp"
 	"${PROJECT_SOURCE_DIR}/src/infd/generator/Edge.cpp"
 	"${PROJECT_SOURCE_DIR}/src/infd/generator/ChunkGenerator.cpp"
+	"${PROJECT_SOURCE_DIR}/src/infd/scene/physics/CollisionShape.cpp"
+	"${PROJECT_SOURCE_DIR}/src/infd/scene/physics/PhysicsContext.cpp"
+	"${PROJECT_SOURCE_DIR}/src/infd/scene/physics/RigidBody.cpp"
 )
 
 

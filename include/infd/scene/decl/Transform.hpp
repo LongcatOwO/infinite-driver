@@ -16,6 +16,7 @@
 // project - util
 #include <infd/util/concepts.hpp>
 #include <infd/util/exceptions.hpp>
+#include <infd/util/OwnableProperty.hpp>
 
 // forward declarations
 #include <infd/scene/fwd/Transform.hpp>
@@ -30,6 +31,8 @@ namespace infd::scene {
 		glm::vec<3, Float> _local_position;
 		glm::qua<Float> _local_rotation;
 		glm::vec<3, Float> _local_scale;
+
+		util::OwnableProperty<bool> _ignore_parent{false};
 
 		mutable bool _parent_global_transform_updated = false;
 		mutable glm::mat<4, 4, Float> _parent_global_transform_cache;
@@ -51,6 +54,9 @@ namespace infd::scene {
 
 		[[nodiscard]] Transform* parent() noexcept;
 		[[nodiscard]] const Transform* parent() const noexcept;
+
+		[[nodiscard]] util::OwnableProperty<bool>& ignoreParent() noexcept;
+		[[nodiscard]] const util::OwnableProperty<bool>& ignoreParent() const noexcept;
 
 		[[nodiscard]] bool hasChildren() const noexcept;
 		[[nodiscard]] std::size_t numChildren() const noexcept;
@@ -121,9 +127,9 @@ namespace infd::scene {
 		[[nodiscard]] glm::mat<4, 4, Float> globalTransform() const noexcept;
 
 		void globalTransform(
-			const glm::vec<3, Float> &position,
-			const glm::qua<Float> &rotation 		= glm::qua<Float>{1, 0, 0, 0},
-			const glm::vec<3, Float> &scale 		= glm::vec<3, Float>{1}
+			const glm::vec<3, Float>& position,
+			const glm::qua<Float>& rotation 		= glm::qua<Float>{1, 0, 0, 0},
+			const glm::vec<3, Float>& scale 		= glm::vec<3, Float>{1}
 		) noexcept;
 
 		void decomposeGlobalTransform(
