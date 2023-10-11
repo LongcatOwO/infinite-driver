@@ -137,9 +137,9 @@ namespace infd::util {
 				_container[pos] = std::move(_container.back());
 				_handlers[pos] = _handlers.back();
 				_handlers[pos]->pos = pos;
-				_container.pop_back();
-				_handlers.pop_back();
 			}
+			_container.pop_back();
+			_handlers.pop_back();
 		}
 
 		constexpr void invalidate_handlers() noexcept {
