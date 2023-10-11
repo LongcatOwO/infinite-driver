@@ -10,8 +10,6 @@
 #include "RenderComponent.hpp"
 
 namespace infd::render {
-    using RenderComponentHandler = util::handle_vector<RenderComponent*>::element_handler;
-
     // other things to consider - how lights/cameras/etc work in the scene
 
     struct RenderSettings {
