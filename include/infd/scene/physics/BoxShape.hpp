@@ -22,11 +22,11 @@ namespace infd::scene::physics {
 		btBoxShape _box_shape;
 		glm::vec<3, Float> _half_size;
 
-		[[nodiscard]] btCollisionShape& getBtCollisionShape() override {
+		[[nodiscard]] btCollisionShape& getBtCollisionShape() noexcept override {
 			return _box_shape;
 		}
 
-		[[nodiscard]] const btCollisionShape& getBtCollisionShape() const override {
+		[[nodiscard]] const btCollisionShape& getBtCollisionShape() const noexcept override {
 			return _box_shape;
 		}
 

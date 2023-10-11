@@ -233,9 +233,10 @@ namespace infd::scene {
 
 		_children.push_back(std::move(child));
 		child_ref.internalUncheckedUnnotifiedSetParent(this);
-
 		child_ref.internalUncheckedNotifyParentAssigned();
 		_on_child_added(*this, child_ref);
+		if (hasScene() && scene().isAwaken())
+			child_ref.internalAwake();
 	}
 
 	std::unique_ptr<SceneObject> SceneObject::internalUncheckedRemoveChild(SceneObject &child) noexcept {
@@ -280,6 +281,8 @@ namespace infd::scene {
 		comp_ptr->_scene_object = this;
 		comp_ptr->onAttach();
 		_on_component_added(*this, *comp_ptr);
+		if (hasScene() && scene().isAwaken())
+			comp_ptr->onAwake();
 	}
 
 	std::unique_ptr<Component> SceneObject::internalUncheckedRemoveComponent(Component &component) noexcept {

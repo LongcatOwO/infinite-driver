@@ -29,6 +29,7 @@
 #include <infd/scene/physics/BoxShape.hpp>
 #include <infd/scene/physics/physics.hpp>
 #include <infd/scene/physics/StaticPlaneShape.hpp>
+#include <infd/scene/physics/BvhTriangleMeshShape.hpp>
 #include "infd/generator/ChunkLoader.hpp"
 
 
@@ -117,22 +118,22 @@ namespace infd {
 		scene::SceneObject& physicsContext = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Physics Context"));
 		physicsContext.emplaceComponent<scene::physics::PhysicsContext>();
 
-        scene::SceneObject& plane = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Plane"));
-		plane.transform().localPosition({0, 0, 0});
-        plane.transform().localScale(glm::vec3(5,0.01,5));
-        plane.addComponent(
-                std::make_unique<render::RenderComponent>(
-                        _renderer,
-                        infd::loadWavefrontCases(CGRA_SRCDIR + std::string("/res//assets//plane.obj")).build()
-                )
-        );
+        // scene::SceneObject& plane = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Plane"));
+		// plane.transform().localPosition({0, 0, 0});
+        // plane.transform().localScale(glm::vec3(5,0.01,5));
+        // plane.addComponent(
+        //         std::make_unique<render::RenderComponent>(
+        //                 _renderer,
+        //                 infd::loadWavefrontCases(CGRA_SRCDIR + std::string("/res//assets//plane.obj")).build()
+        //         )
+        // );
 
-		plane.emplaceComponent<scene::physics::StaticPlaneShape>(glm::vec3(0, 1, 0), 0);
-		plane.emplaceComponent<scene::physics::RigidBody>().mass(0);
+		// plane.emplaceComponent<scene::physics::StaticPlaneShape>(glm::vec3(0, 1, 0), 0);
+		// plane.emplaceComponent<scene::physics::RigidBody>().mass(0);
 
         scene::SceneObject& teapot = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Teapot"));
         // teapot.transform().localPosition(glm::vec3(-5, 3, 2));
-		teapot.transform().localPosition({-5, 15, 2});
+		teapot.transform().localPosition({-5, 30, 2});
 		teapot.emplaceComponent<render::RenderComponent>(
 			_renderer, 
 			infd::loadWavefrontCases(CGRA_SRCDIR "//res//assets//teapot.obj").build()
@@ -141,7 +142,7 @@ namespace infd {
 		teapot.emplaceComponent<scene::physics::RigidBody>();
 
         scene::SceneObject& bunny = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Bunny"));
-		bunny.transform().localPosition({8, 15, -1.5});
+		bunny.transform().localPosition({8, 1000, -1.5});
 		scene::SceneObject& bunny_mesh = bunny.addChild("Bunny Mesh");
 		bunny_mesh.emplaceComponent<render::RenderComponent>(
 			_renderer,
@@ -151,10 +152,17 @@ namespace infd {
 		bunny.emplaceComponent<scene::physics::BoxShape>().halfSize({3, 3, 3});
 		bunny.emplaceComponent<scene::physics::RigidBody>();
 
-        scene::SceneObject& chunkLoader = _scene.addSceneObject(std::make_unique<scene::SceneObject>("ChunkLoader"));
-        auto& loader = chunkLoader.emplaceComponent<generator::ChunkLoader>(chunkLoader, _renderer, 5);
-        loader.move(-6,-6);
-        loader.transform().localScale(glm::vec3(30));
+		// std::unique_ptr<btTriangleMesh> tri_mesh{new btTriangleMesh()};
+		// tri_mesh->addTriangle({-8, 0, 5}, {10, 0, 5}, {0, 0, -10});
+		// scene::SceneObject& test_tri = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Test Tri"));
+		// test_tri.emplaceComponent<scene::physics::BvhTriangleMeshShape>(std::move(tri_mesh));
+		// test_tri.emplaceComponent<scene::physics::RigidBody>().mass(0);
+
+
+        // scene::SceneObject& chunkLoader = _scene.addSceneObject(std::make_unique<scene::SceneObject>("ChunkLoader"));
+        // auto& loader = chunkLoader.emplaceComponent<generator::ChunkLoader>(chunkLoader, _renderer, 5);
+        // loader.move(-6,-6);
+        // loader.transform().localScale(glm::vec3(30));
 	}
 
 	void Application::internalDoRender(scene::Scene &) {

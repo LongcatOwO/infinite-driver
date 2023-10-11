@@ -237,14 +237,17 @@ namespace infd::scene {
 
 	inline void Transform::localPosition(const glm::vec<3, Float> &value) noexcept {
 		_local_position = value;
+		visitAllChildren([](Transform &child) { child._parent_global_transform_updated = false; });
 	}
 
 	inline void Transform::localRotation(const glm::qua<Float> &value) noexcept {
 		_local_rotation = value;
+		visitAllChildren([](Transform &child) { child._parent_global_transform_updated = false; });
 	}
 
 	inline void Transform::localScale(const glm::vec<3, Float> &value) noexcept {
 		_local_scale = value;
+		visitAllChildren([](Transform &child) { child._parent_global_transform_updated = false; });
 	}
 
 	inline void Transform::localTransform(
@@ -252,9 +255,10 @@ namespace infd::scene {
 		const glm::qua<Float> &rotation,
 		const glm::vec<3, Float> &scale
 	) noexcept {
-		localPosition(position);
-		localRotation(rotation);
-		localScale(scale);
+		_local_position = position;
+		_local_rotation = rotation;
+		_local_scale = scale;
+		visitAllChildren([](Transform &child) { child._parent_global_transform_updated = false; });
 	}
 
 	inline glm::vec<3, Float> Transform::globalPosition() const noexcept {
@@ -304,6 +308,7 @@ namespace infd::scene {
 		glm::vec<3, Float> skew;
 		glm::vec<4, Float> perspective;
 		glm::decompose(target_local_transform, _local_scale, _local_rotation, _local_position, skew, perspective);
+		visitAllChildren([](Transform& child) { child._parent_global_transform_updated = false; });
 	}
 
 	inline void Transform::decomposeGlobalTransform(

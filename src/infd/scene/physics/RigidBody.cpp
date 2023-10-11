@@ -5,6 +5,10 @@
 // bullet
 #include <btBulletDynamicsCommon.h>
 
+// glm
+#include <glm/vec3.hpp>
+#include <glm/gtc/quaternion.hpp>
+
 // prject - scene
 #include <infd/scene/exceptions.hpp>
 
@@ -87,7 +91,12 @@ namespace infd::scene::physics {
 					sceneObject().name()
 				));
 		}
+		glm::vec<3, Float> position;
+		glm::qua<Float> rotation;
+		glm::vec<3, Float> scale;
+		transform().decomposeGlobalTransform(position, rotation, scale);
 		_transform_ignore_parent.set(true);
+		transform().localTransform(position, rotation, scale);
 	}
 
 	void RigidBody::onDetach() {

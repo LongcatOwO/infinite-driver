@@ -25,8 +25,8 @@ namespace infd::scene::physics {
 		void onAttach() override;
 
 	protected:
-		[[nodiscard]] virtual btCollisionShape& getBtCollisionShape() = 0;
-		[[nodiscard]] virtual const btCollisionShape& getBtCollisionShape() const = 0;
+		[[nodiscard]] virtual btCollisionShape& getBtCollisionShape() noexcept = 0;
+		[[nodiscard]] virtual const btCollisionShape& getBtCollisionShape() const noexcept = 0;
 		virtual void syncCollisionShapeScaling() = 0;
 
 	}; // class CollisionBound

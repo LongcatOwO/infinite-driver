@@ -46,6 +46,11 @@ namespace infd::scene {
 
 	inline void Scene::awake() {
 		visitRootSceneObjects(util::MemberFunc(&SceneObject::internalAwake));
+		_is_awaken = true;
+	}
+
+	inline bool Scene::isAwaken() const noexcept {
+		return _is_awaken;
 	}
 
 	template <typename Period, std::floating_point Rep>
