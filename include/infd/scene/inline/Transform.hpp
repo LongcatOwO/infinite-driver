@@ -19,6 +19,7 @@
 // project - util
 #include <infd/util/concepts.hpp>
 #include <infd/util/Function.hpp>
+#include <infd/util/OwnableProperty.hpp>
 
 // project - scene
 #include <infd/scene/definitions.hpp>
@@ -52,6 +53,9 @@ namespace infd::scene {
 	}
 
 	inline glm::mat<4, 4, Float> Transform::internalParentGlobalTransform() const noexcept {
+		if (_ignore_parent)
+			return glm::mat<4, 4, Float>{1};
+
 		if (_parent_global_transform_updated) 
 			return _parent_global_transform_cache;
 
@@ -100,6 +104,14 @@ namespace infd::scene {
 			return &parent_so->transform();
 		}
 		return nullptr;
+	}
+
+	inline util::OwnableProperty<bool>& Transform::ignoreParent() noexcept {
+		return _ignore_parent;
+	}
+
+	inline const util::OwnableProperty<bool>& Transform::ignoreParent() const noexcept {
+		return _ignore_parent;
 	}
 
 	inline bool Transform::hasChildren() const noexcept {

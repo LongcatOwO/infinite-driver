@@ -20,11 +20,15 @@
 
 // project - infd
 #include <infd/Application.hpp>
+#include <infd/debug/glm.hpp>
 #include <infd/Shader.hpp>
 #include <infd/Wavefront.hpp>
 #include <infd/util/Function.hpp>
 #include <infd/util/StaticCastOutPtr.hpp>
 #include <infd/scene/Scene.hpp>
+#include <infd/scene/physics/BoxShape.hpp>
+#include <infd/scene/physics/physics.hpp>
+#include <infd/scene/physics/StaticPlaneShape.hpp>
 #include "infd/generator/ChunkLoader.hpp"
 
 
@@ -110,32 +114,46 @@ namespace infd {
 
         // TODO: REMOVE
         // Create Demo Objects:
-        scene::SceneObject& teapot = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Teapot"));
-        teapot.transform().localPosition(glm::vec3(-5, 3, 2));
-        teapot.addComponent(
+		scene::SceneObject& physicsContext = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Physics Context"));
+		physicsContext.emplaceComponent<scene::physics::PhysicsContext>();
+
+        scene::SceneObject& plane = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Plane"));
+		plane.transform().localPosition({0, 0, 0});
+        plane.transform().localScale(glm::vec3(5,0.01,5));
+        plane.addComponent(
                 std::make_unique<render::RenderComponent>(
                         _renderer,
-                        infd::loadWavefrontCases(CGRA_SRCDIR + std::string("/res//assets//teapot.obj")).build()
+                        infd::loadWavefrontCases(CGRA_SRCDIR + std::string("/res//assets//plane.obj")).build()
                 )
         );
+
+		plane.emplaceComponent<scene::physics::StaticPlaneShape>(glm::vec3(0, 1, 0), 0);
+		plane.emplaceComponent<scene::physics::RigidBody>().mass(0);
+
+        scene::SceneObject& teapot = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Teapot"));
+        // teapot.transform().localPosition(glm::vec3(-5, 3, 2));
+		teapot.transform().localPosition({-5, 15, 2});
+		teapot.emplaceComponent<render::RenderComponent>(
+			_renderer, 
+			infd::loadWavefrontCases(CGRA_SRCDIR "//res//assets//teapot.obj").build()
+		);
+		teapot.emplaceComponent<scene::physics::BoxShape>().halfSize({3, 3, 3});
+		teapot.emplaceComponent<scene::physics::RigidBody>();
 
         scene::SceneObject& bunny = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Bunny"));
-        auto& bunnyTransform = bunny.transform();
-        bunnyTransform.localPosition(glm::vec3(8, 4, -1.5));
-        bunnyTransform.localScale(glm::vec3(75));
-        bunny.addComponent(
-                std::make_unique<render::RenderComponent>(
-                        _renderer,
-                        infd::loadWavefrontCases(CGRA_SRCDIR + std::string("/res//assets//bunny.obj")).build()
-                )
-        );
+		bunny.transform().localPosition({8, 15, -1.5});
+		scene::SceneObject& bunny_mesh = bunny.addChild("Bunny Mesh");
+		bunny_mesh.emplaceComponent<render::RenderComponent>(
+			_renderer,
+			infd::loadWavefrontCases(CGRA_SRCDIR "//res//assets//bunny.obj").build()
+		);
+		bunny_mesh.transform().localScale(glm::vec3{75});
+		bunny.emplaceComponent<scene::physics::BoxShape>().halfSize({3, 3, 3});
+		bunny.emplaceComponent<scene::physics::RigidBody>();
 
         scene::SceneObject& chunkLoader = _scene.addSceneObject(std::make_unique<scene::SceneObject>("ChunkLoader"));
-
         auto& loader = chunkLoader.emplaceComponent<generator::ChunkLoader>(chunkLoader, _renderer, 5);
-
         loader.move(-6,-6);
-
         loader.transform().localScale(glm::vec3(30));
 	}
 
