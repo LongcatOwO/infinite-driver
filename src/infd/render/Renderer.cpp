@@ -8,27 +8,15 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <imgui.h>
 #include "infd/Wavefront.hpp"
+#include "infd/util/handle_vector.hpp"
 
 namespace infd::render {
-    Renderer::Renderer() {
-        _test_items = {
-                {loadWavefrontCases(CGRA_SRCDIR + std::string("/res//assets//plane.obj")).build(), glm::scale(glm::mat4 {1}, {5, 0, 5}), {}},
-                {loadWavefrontCases(CGRA_SRCDIR + std::string("/res//assets//teapot.obj")).build(), glm::translate(glm::mat4 {1}, {-5, 3, 2}), {}},
-                {loadWavefrontCases(CGRA_SRCDIR + std::string("/res//assets//bunny.obj")).build(),
-                    glm::translate(glm::mat4 {1}, {8, 4, -1.5}) * glm::scale(glm::mat4 {1}, glm::vec3 {75}), {}}
-        };
-    }
-
-    void Renderer::render(std::vector<RenderItem> items) {
+    void Renderer::render() {
         _render_settings.camera_dir = {_test_camera.angle_x, _test_camera.angle_y, -1};
         auto view_target = _test_camera.pos + _render_settings.camera_dir;
         _render_settings.temp_view = glm::lookAt(_test_camera.pos, view_target, {0, 1, 0});
         _render_settings.pattern_angle = _test_camera.pattern_angle;
-        _pipeline.render(std::move(items), _render_settings);
-    }
-
-    void Renderer::render() {
-        render(_test_items);
+        _pipeline.render(_render_components, _render_settings);
     }
 
     void Renderer::reloadShaders() {
@@ -51,7 +39,9 @@ namespace infd::render {
         ImGui::SliderFloat("View angle X", &_test_camera.angle_x, -1, 1);
         ImGui::SliderFloat("View angle Y", &_test_camera.angle_y, -1, 1);
         ImGui::SliderFloat("Pattern angle", &_test_camera.pattern_angle, 0, glm::pi<float>());
-
     }
 
+    RenderComponentHandler Renderer::addRenderComponent(RenderComponent& component) {
+        return _render_components.push_back(&component);
+    }
 }

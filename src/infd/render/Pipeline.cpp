@@ -14,7 +14,6 @@
 #include <infd/render/Renderer.hpp>
 #include <infd/Wavefront.hpp>
 
-
 infd::render::Pipeline::Pipeline() : _sky_sphere{loadWavefrontCases(CGRA_SRCDIR + std::string("/res/assets/sky_sphere.obj")).build()} {
     loadShaders();
     // load dither texture
@@ -49,7 +48,7 @@ infd::render::Pipeline::Pipeline() : _sky_sphere{loadWavefrontCases(CGRA_SRCDIR 
     }
 }
 
-void infd::render::Pipeline::render(std::vector<RenderItem> items, const infd::render::RenderSettings& settings) {
+void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items, const infd::render::RenderSettings& settings) {
     if (!(_fx_buf.valid() && _final_buf.valid())) {
         std::cerr << "Error: Buffers not initialised before render called (screen size not set?)" << std::endl;
         abort();
@@ -70,9 +69,9 @@ void infd::render::Pipeline::render(std::vector<RenderItem> items, const infd::r
         sendUniform(_main_shader, "uViewMatrix", settings.temp_view);
 
         for (auto& item : items) {
-            sendUniform(_main_shader, "uModelMatrix", item.transform);
-            sendUniform(_main_shader, "uShininess", item.material.shininess);
-            item.mesh.draw();
+            sendUniform(_main_shader, "uModelMatrix", item->transform().globalTransform());
+            sendUniform(_main_shader, "uShininess", item->material.shininess);
+            item->mesh.draw();
         }
     }
 

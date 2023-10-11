@@ -5,22 +5,13 @@
 #pragma once
 #include <glm/glm.hpp>
 #include <infd/GLMesh.hpp>
-#include <infd/render/Pipeline.hpp>
+#include "Pipeline.hpp"
+#include <infd/util/handle_vector.hpp>
+#include "RenderComponent.hpp"
 
 namespace infd::render {
-    // every item that gets rendered in the scene tree has one of these,
-    // and they all get collected and passed to the Renderer
-    // may change shape _somewhat_ as the architecture of the scene tree/
-    // component system gets worked out
-    struct RenderItem {
-        GLMesh mesh;
-        glm::mat4 transform {1};
+    using RenderComponentHandler = util::handle_vector<RenderComponent*>::element_handler;
 
-        struct {
-            float shininess = 20;
-            // etc
-        } material;
-    };
     // other things to consider - how lights/cameras/etc work in the scene
 
     struct RenderSettings {
@@ -35,7 +26,7 @@ namespace infd::render {
     class Renderer {
         Pipeline _pipeline;
         RenderSettings _render_settings;
-        std::vector<RenderItem> _test_items;
+        util::handle_vector<RenderComponent*> _render_components;
         struct {
             glm::vec3 pos {0, 15, 30};
             glm::vec3 dir;
@@ -44,10 +35,7 @@ namespace infd::render {
             float pattern_angle = 0;
         } _test_camera;
      public:
-        Renderer();
-        // (or later takes/finds scene tree and walks that itself
-        void render(std::vector<RenderItem> items);
-        // temp for testing, uses dummy info
+        RenderComponentHandler addRenderComponent(RenderComponent& component);
         void render();
         void setRenderSettings(RenderSettings settings);
         void reloadShaders();
