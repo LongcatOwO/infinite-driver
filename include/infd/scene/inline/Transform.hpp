@@ -89,11 +89,17 @@ namespace infd::scene {
 	}
 
 	inline Transform* Transform::parent() noexcept {
-		return &sceneObject().transform();
+		if (SceneObject* parent_so = sceneObject().parent(); parent_so) {
+			return &parent_so->transform();
+		}
+		return nullptr;
 	}
 
 	inline const Transform* Transform::parent() const noexcept {
-		return &sceneObject().transform();
+		if (const SceneObject* parent_so = sceneObject().parent(); parent_so) {
+			return &parent_so->transform();
+		}
+		return nullptr;
 	}
 
 	inline bool Transform::hasChildren() const noexcept {
