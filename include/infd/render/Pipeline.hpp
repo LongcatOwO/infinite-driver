@@ -11,18 +11,21 @@
 #include "infd/GLObject.hpp"
 
 namespace infd::render {
+    const int shadow_res = 1024;
     // forward declare to avoid recursive inclusion hellscape
     struct RenderSettings;
 
     class Pipeline {
         GLProgram _main_shader;
+        GLProgram _shadow_shader;
         GLProgram _dither_shader;
         GLProgram _blit_shader;
         GLProgram _threshold_blit_shader;
         GLProgram _sky_shader;
         GLProgram _outline_shader;
 
-        Framebuffer _fx_buf;
+        Framebuffer _scene_buf;
+        Framebuffer _shadow_buf;
         Framebuffer _dither_dome_buf;
         Framebuffer _sky_buf;
         Framebuffer _outline_buf;

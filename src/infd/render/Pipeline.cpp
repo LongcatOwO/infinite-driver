@@ -49,24 +49,50 @@ infd::render::Pipeline::Pipeline() : _sky_sphere{loadWavefrontCases(CGRA_SRCDIR 
 }
 
 void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items, const infd::render::RenderSettings& settings) {
-    if (!(_fx_buf.valid() && _final_buf.valid())) {
+    using namespace glm;
+    if (!(_scene_buf.valid() && _final_buf.valid())) {
         std::cerr << "Error: Buffers not initialised before render called (screen size not set?)" << std::endl;
         abort();
     }
 
     int width = settings.screen_size.x; int height = settings.screen_size.y;
 
-    using namespace glm;
+    vec3 up_vec = normalize(settings.temp_light_pos) != vec3{0, 1, 0} ? vec3{0, 1, 0} : vec3{0, 0, 1} ;
+
+    auto shadow_view = lookAt(settings.temp_light_pos, {0, 0, 0}, up_vec);
+    auto shadow_proj = ortho(-10.f, 10.f, -10.f, 10.f, -0.f, 100.f);
+
+    // render shadow buffer
+    {
+        auto program_guard = scopedProgram(_shadow_shader);
+        auto fb_guard = scopedBind(_shadow_buf.buffer, GL_FRAMEBUFFER);
+        _shadow_buf.setupDraw();
+
+        sendUniform(_shadow_shader, "uProjectionMatrix", shadow_proj);
+        sendUniform(_shadow_shader, "uViewMatrix", shadow_view);
+
+        for (auto& item : items) {
+            sendUniform(_main_shader, "uModelMatrix", item->transform().globalTransform());
+            item->mesh.draw();
+        }
+    }
+
     // draw scene to buffer
     {
         auto program_guard = scopedProgram(_main_shader);
-        auto fb_guard = scopedBind(_fx_buf.buffer, GL_FRAMEBUFFER);
-        _fx_buf.setupDraw();
+        auto fb_guard = scopedBind(_scene_buf.buffer, GL_FRAMEBUFFER);
+        _scene_buf.setupDraw();
 
         sendUniform(_main_shader, "uColour", {1, 0, 1});
-        sendUniform(_main_shader, "uLightPos", vec3{10});
+        sendUniform(_main_shader, "uLightPos", settings.temp_light_pos);
+        sendUniform(_main_shader, "uCameraPos", settings.camera_pos);
         sendUniform(_main_shader, "uProjectionMatrix", settings.temp_proj);
         sendUniform(_main_shader, "uViewMatrix", settings.temp_view);
+
+        glActiveTexture(GL_TEXTURE0);
+        auto tex_guard = scopedBind(_shadow_buf.depth, GL_TEXTURE_2D);
+        sendUniform(_main_shader, "uShadowTex", 0);
+        sendUniform(_main_shader, "uShadowMatrix", shadow_proj * shadow_view);
 
         for (auto& item : items) {
             sendUniform(_main_shader, "uModelMatrix", item->transform().globalTransform());
@@ -102,7 +128,7 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
         auto program_guard = scopedProgram(_outline_shader);
         sendUniform(_outline_shader, "uScreenSize", settings.screen_size);
         sendUniform(_outline_shader, "uWidth", 6.f);
-        _fx_buf.renderToOther(_outline_shader, _outline_buf, _fullscreen_mesh, true, Framebuffer::Kind::Depth);
+        _scene_buf.renderToOther(_outline_shader, _outline_buf, _fullscreen_mesh, true, Framebuffer::Kind::Depth);
     }
 
 
@@ -114,12 +140,12 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
         auto dither_texture_guard = scopedBind(_dither_dome_buf.colour, GL_TEXTURE_2D);
         sendUniform(_dither_shader, "uDitherPattern", 1);
 
-        _fx_buf.renderToOther(_dither_shader, _final_buf, _fullscreen_mesh);
+        _scene_buf.renderToOther(_dither_shader, _final_buf, _fullscreen_mesh);
     }
 
     // render outlines over dithered scene
     {
-        if (!settings.render_dither) {
+        if (!settings.render_original) {
             auto program_guard = scopedProgram(_blit_shader);
             _outline_buf.renderToOther(_blit_shader, _final_buf, _fullscreen_mesh, false);
         }
@@ -127,9 +153,9 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
 
     // draw to screen from final buffer
     {
-        if (settings.render_dither) {
+        if (settings.render_original) {
             auto program_guard = scopedProgram(_blit_shader);
-            _dither_dome_buf.renderToScreen(_blit_shader, _fullscreen_mesh, settings.screen_size);
+            _scene_buf.renderToScreen(_blit_shader, _fullscreen_mesh, settings.screen_size);
         } else {
             auto program_guard = scopedProgram(_threshold_blit_shader);
             _final_buf.renderToScreen(_threshold_blit_shader, _fullscreen_mesh, settings.screen_size);
@@ -142,6 +168,11 @@ void infd::render::Pipeline::loadShaders() {
     main_shader_build.setShader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//phong_vert.glsl"));
     main_shader_build.setShader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//phong_frag.glsl"));
     _main_shader = main_shader_build.build();
+
+    ShaderBuilder shadow_build;
+    shadow_build.setShader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//shadow_vert.glsl"));
+    shadow_build.setShader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//shadow_frag.glsl"));
+    _shadow_shader = shadow_build.build();
 
     ShaderBuilder dither_build;
     dither_build.setShader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//fullscreen_vert.glsl"));
@@ -170,10 +201,11 @@ void infd::render::Pipeline::loadShaders() {
 }
 
 void infd::render::Pipeline::screenSizeChanged(glm::ivec2 new_size) {
-    _fx_buf.setSize(new_size * 2);
+    _scene_buf.setSize(new_size * 2);
     _dither_dome_buf.setSize(new_size * 2);
     _outline_buf.setSize(new_size);
     _final_buf.setSize(new_size * 2);
+    _shadow_buf.setSize({shadow_res, shadow_res});
 }
 
 
