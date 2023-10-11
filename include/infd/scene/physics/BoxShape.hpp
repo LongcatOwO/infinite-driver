@@ -26,6 +26,10 @@ namespace infd::scene::physics {
 			return _box_shape;
 		}
 
+		[[nodiscard]] const btCollisionShape& getBtCollisionShape() const override {
+			return _box_shape;
+		}
+
 		void syncCollisionShapeScaling() override {
 			_box_shape.setLocalScaling(
 				math::toBullet(_half_size * transform().localScale())
