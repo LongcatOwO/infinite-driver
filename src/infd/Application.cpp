@@ -112,32 +112,32 @@ namespace infd {
         // Create Demo Objects:
         scene::SceneObject& plane = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Plane"));
         plane.transform().localScale(glm::vec3(5,0,5));
-        render::RenderComponent& planeComponent = plane.addComponent(
+        plane.addComponent(
                 std::make_unique<render::RenderComponent>(
+                        _renderer,
                         infd::loadWavefrontCases(CGRA_SRCDIR + std::string("/res//assets//plane.obj")).build()
                 )
         );
-        elementHandles.push_back(_renderer.addRenderComponent(planeComponent));
 
         scene::SceneObject& teapot = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Teapot"));
         teapot.transform().localPosition(glm::vec3(-5, 3, 2));
-        render::RenderComponent& teapotComponent = teapot.addComponent(
+        teapot.addComponent(
                 std::make_unique<render::RenderComponent>(
+                        _renderer,
                         infd::loadWavefrontCases(CGRA_SRCDIR + std::string("/res//assets//teapot.obj")).build()
                 )
         );
-        elementHandles.push_back(_renderer.addRenderComponent(teapotComponent));
 
         scene::SceneObject& bunny = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Bunny"));
         auto& bunnyTransform = bunny.transform();
         bunnyTransform.localPosition(glm::vec3(8, 4, -1.5));
         bunnyTransform.localScale(glm::vec3(75));
-        render::RenderComponent& bunnyComponent = bunny.addComponent(
+        bunny.addComponent(
                 std::make_unique<render::RenderComponent>(
+                        _renderer,
                         infd::loadWavefrontCases(CGRA_SRCDIR + std::string("/res//assets//bunny.obj")).build()
                 )
         );
-        elementHandles.push_back(_renderer.addRenderComponent(bunnyComponent));
 	}
 
 	void Application::internalDoRender(scene::Scene &) {
