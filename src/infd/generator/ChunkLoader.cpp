@@ -3,17 +3,14 @@
 #include "infd/generator/ChunkGenerator.hpp"
 
 namespace infd::generator {
-    ChunkLoader::ChunkLoader(int radius, unsigned int seed) {
-        _perlinNoise = PerlinNoise(seed);
-        _diameter = radius + radius + 1;
-        _seed = seed;
-
+    ChunkLoader::ChunkLoader(scene::SceneObject& scene, render::Renderer& renderer, int radius, unsigned int seed) :
+    _diameter(radius+radius+1), _seed(seed), _perlinNoise(PerlinNoise(seed)), _renderer(renderer)
+    {
         _chunks.reserve(_diameter * _diameter);
         for (int x = 0; x < _diameter; x++) {
             for (int y = 0; y < _diameter; y++) {
-                //TODO: replace with call to ChunkGenerator build methods, which should return a ptr to use here :)
                 ChunkGenerator generator(x+_x, y+_y, _seed, _perlinNoise);
-                _chunks.emplace_back(generator);
+                _chunks.emplace_back(scene, _renderer, generator);
             }
         }
     }
@@ -31,9 +28,9 @@ namespace infd::generator {
 
     void ChunkLoader::replace(int x, int y, int xOffset, int yOffset) {
         ChunkGenerator generator(x+xOffset, y+yOffset, _seed, _perlinNoise);
-        ChunkPtr& ptr = _chunks[x * _diameter + y];
+        ChunkPtr& ptr = operator()(x , y);
         ptr.detach();
-        ptr = ChunkPtr(generator);
+        ptr = ChunkPtr(*this, _renderer, generator);
     }
 
     ChunkPtr& ChunkLoader::operator()(int x, int y) {
@@ -89,8 +86,7 @@ namespace infd::generator {
         }
     }
 
-    ChunkLoader::~ChunkLoader() {
-        // Clean up all children.
+    void ChunkLoader::detachAll() {
         for (ChunkPtr& ptr : _chunks) {
             ptr.detach();
         }

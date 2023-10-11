@@ -25,10 +25,10 @@
 #include <infd/util/Function.hpp>
 #include <infd/util/StaticCastOutPtr.hpp>
 #include <infd/scene/Scene.hpp>
+#include "infd/generator/ChunkLoader.hpp"
 
 
 namespace infd {
-
 	void Application::internalCursorPosCallback(double x_pos, double y_pos) {
 		if (_left_mouse_down) {
 			glm::vec2 half_window_size = _window_size / 2.f;
@@ -110,15 +110,6 @@ namespace infd {
 
         // TODO: REMOVE
         // Create Demo Objects:
-        scene::SceneObject& plane = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Plane"));
-        plane.transform().localScale(glm::vec3(5,0,5));
-        plane.addComponent(
-                std::make_unique<render::RenderComponent>(
-                        _renderer,
-                        infd::loadWavefrontCases(CGRA_SRCDIR + std::string("/res//assets//plane.obj")).build()
-                )
-        );
-
         scene::SceneObject& teapot = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Teapot"));
         teapot.transform().localPosition(glm::vec3(-5, 3, 2));
         teapot.addComponent(
@@ -138,6 +129,14 @@ namespace infd {
                         infd::loadWavefrontCases(CGRA_SRCDIR + std::string("/res//assets//bunny.obj")).build()
                 )
         );
+
+        scene::SceneObject& chunkLoader = _scene.addSceneObject(std::make_unique<scene::SceneObject>("ChunkLoader"));
+
+        auto& loader = chunkLoader.emplaceComponent<generator::ChunkLoader>(chunkLoader, _renderer, 5);
+
+        loader.move(-6,-6);
+
+        loader.transform().localScale(glm::vec3(30));
 	}
 
 	void Application::internalDoRender(scene::Scene &) {
