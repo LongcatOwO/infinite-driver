@@ -77,6 +77,9 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
         }
     }
 
+    if (settings.render_wireframe) {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
     // draw scene to buffer
     {
         auto program_guard = scopedProgram(_main_shader);
@@ -99,6 +102,9 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
             sendUniform(_main_shader, "uShininess", item->material.shininess);
             item->mesh.draw();
         }
+    }
+    if (settings.render_wireframe) {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
 
     // draw dither texture onto skydome
@@ -153,7 +159,7 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
 
     // draw to screen from final buffer
     {
-        if (settings.render_original) {
+        if (settings.render_original || settings.render_wireframe) {
             auto program_guard = scopedProgram(_blit_shader);
             _scene_buf.renderToScreen(_blit_shader, _fullscreen_mesh, settings.screen_size);
         } else {
