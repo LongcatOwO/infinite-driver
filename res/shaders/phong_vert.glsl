@@ -22,8 +22,8 @@ void main() {
     // transform vertex data to viewspace
     mat4 modelView = uViewMatrix * uModelMatrix;
 
-    v_out.position = (modelView * vec4(aPosition, 1)).xyz;
-    v_out.normal = normalize((modelView * vec4(aNormal, 0)).xyz);
+    v_out.position = (uModelMatrix * vec4(aPosition, 1)).xyz;
+    v_out.normal = normalize((uModelMatrix * vec4(aNormal, 0)).xyz);
     v_out.textureCoord = aTexCoord;
 
     // set the screenspace position (needed for converting to fragment data)

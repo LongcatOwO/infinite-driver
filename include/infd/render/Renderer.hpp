@@ -17,10 +17,12 @@ namespace infd::render {
     struct RenderSettings {
         glm::ivec2 screen_size;
         float pattern_angle;
+        glm::vec3 camera_pos;
         glm::vec3 camera_dir;
         glm::mat4 temp_view;
         glm::mat4 temp_proj;
-        bool render_dither = false;
+        glm::vec3 temp_light_pos;
+        bool render_original = false;
     };
     // class that does all the rendering - the application class has one of it and calls it to draw
     class Renderer {
@@ -34,6 +36,7 @@ namespace infd::render {
             float angle_y = 0;
             float pattern_angle = 0;
         } _test_camera;
+        glm::vec3 _test_light_pos {0, 37, 32};
      public:
         RenderComponentHandler addRenderComponent(RenderComponent& component);
         void render();
