@@ -124,7 +124,7 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 		$<$<NOT:$<CONFIG:Debug>>:-O2>
 		-std=c++20
 		-Wall -Wextra -Wpedantic 	# full normal warnings
-		-fvisibility=hidden 		# don't export by default
+		# -fvisibility=hidden 		# don't export by default
 		-pthread -msse2 			# threading support, enable sse2
 		-Werror=return-type 		# promote missing return to error
 	)
@@ -144,7 +144,7 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "^(Apple)?Clang$")
 		$<$<NOT:$<CONFIG:Debug>>:-O2>
 		-std=c++20
 		-Wall -Wextra -Wpedantic 	# full normal warnings
-		-fvisibility=hidden 		# don't export by default
+		# -fvisibility=hidden 		# don't export by default
 		-pthread 					# threading support
 		-Werror=return-type 		# promote missing return to error
 	)
