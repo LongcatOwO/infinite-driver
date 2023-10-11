@@ -72,7 +72,7 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
         sendUniform(_shadow_shader, "uViewMatrix", shadow_view);
 
         for (auto& item : items) {
-            sendUniform(_main_shader, "uModelMatrix", item->transform().globalTransform());
+            sendUniform(_shadow_shader, "uModelMatrix", item->transform().globalTransform());
             item->mesh.draw();
         }
     }
