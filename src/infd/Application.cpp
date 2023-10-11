@@ -227,7 +227,7 @@ namespace infd {
 	void Application::internalRenderGUI() {
 		// setup the window
 		ImGui::SetNextWindowPos(ImVec2{5, 5}, ImGuiCond_Once);
-		ImGui::SetNextWindowSize(ImVec2{300, 330}, ImGuiCond_Once);
+		ImGui::SetNextWindowSize(ImVec2{300, 380}, ImGuiCond_Once);
 		ImGui::Begin("Options", 0);
 
 		// display current camera parameters
@@ -249,6 +249,7 @@ namespace infd {
 
 		_renderer.gui();
 		ImGui::Checkbox("Render un-dithered scene", &_render_settings.render_original);
+        ImGui::Checkbox("Render wireframe", &_render_settings.render_wireframe);
 
 		// finish creating window
 		ImGui::End();
