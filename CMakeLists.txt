@@ -224,6 +224,7 @@ PUBLIC
 	"${PROJECT_SOURCE_DIR}/src/infd/BasicModel.cpp"
 	"${PROJECT_SOURCE_DIR}/src/infd/GLMesh.cpp"
 	"${PROJECT_SOURCE_DIR}/src/infd/Shader.cpp"
+	"${PROJECT_SOURCE_DIR}/src/infd/render/RenderComponent.cpp"
 	"${PROJECT_SOURCE_DIR}/src/infd/render/Renderer.cpp"
 	"${PROJECT_SOURCE_DIR}/src/infd/render/Pipeline.cpp"
 	"${PROJECT_SOURCE_DIR}/src/infd/render/Utils.cpp"

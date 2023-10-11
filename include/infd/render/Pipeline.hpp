@@ -4,13 +4,14 @@
 
 #pragma once
 #include <vector>
-#include "infd/render/Utils.hpp"
+#include "Framebuffer.hpp"
+#include "Utils.hpp"
+#include "infd/util/handle_vector.hpp"
+#include "infd/render/fwd/RenderComponent.hpp"
 #include "infd/GLObject.hpp"
-#include "infd/render/Framebuffer.hpp"
 
 namespace infd::render {
     // forward declare to avoid recursive inclusion hellscape
-    struct RenderItem;
     struct RenderSettings;
 
     class Pipeline {
@@ -33,7 +34,7 @@ namespace infd::render {
         GLTexture _temp_sphere_texture;
      public:
         Pipeline();
-        void render(std::vector<RenderItem> items, const RenderSettings& settings);
+        void render(util::handle_vector<RenderComponent*>&, const RenderSettings& settings);
         void loadShaders();
         // MUST be called before draw with proper args to init
         void screenSizeChanged(glm::ivec2 new_size);

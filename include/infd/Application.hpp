@@ -15,6 +15,8 @@
 #include <infd/render/Renderer.hpp>
 #include <infd/util/Event.hpp>
 #include <infd/scene/Scene.hpp>
+#include <infd/render/RenderComponent.hpp>
+#include "Wavefront.hpp"
 
 
 namespace infd {
@@ -49,7 +51,10 @@ namespace infd {
 		bool _show_grid = false;
 		bool _show_wireframe = false;
 		bool _use_render_pipeline = false;
-		
+
+        //TODO: Remove this from the Application. This exists just to hold the test objects
+        std::vector<infd::render::RenderComponentHandler> elementHandles;
+
 		// geometry
 		BasicModel _model;
 		infd::render::RenderSettings _render_settings;
