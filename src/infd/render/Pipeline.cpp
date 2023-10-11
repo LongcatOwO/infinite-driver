@@ -127,8 +127,6 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
 
     // draw to screen from final buffer
     {
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
         if (settings.render_dither) {
             auto program_guard = scopedProgram(_blit_shader);
             _dither_dome_buf.renderToScreen(_blit_shader, _fullscreen_mesh, settings.screen_size);

@@ -43,7 +43,6 @@ namespace infd::render {
     }
 
     void Framebuffer::renderToScreen(const GLProgram& shader, const GLMesh& display, glm::ivec2 screen_size, bool clear, Kind kind) const {
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glActiveTexture(GL_TEXTURE0);
         auto texture_guard = kind == Kind::Colour ? scopedBind(colour, GL_TEXTURE_2D) : scopedBind(depth, GL_TEXTURE_2D);
         glUniform1i(glGetUniformLocation(shader, "uFramebuffer"), 0);
