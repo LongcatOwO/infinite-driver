@@ -229,7 +229,7 @@ namespace infd {
 		ImGui::Separator();
 
 		_renderer.gui();
-		ImGui::Checkbox("Show dither sphere", &_render_settings.render_dither);
+		ImGui::Checkbox("Render un-dithered scene", &_render_settings.render_original);
 
 		// finish creating window
 		ImGui::End();
