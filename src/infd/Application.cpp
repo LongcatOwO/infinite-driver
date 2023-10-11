@@ -248,6 +248,7 @@ namespace infd {
 		ImGui::Separator();
 
 		_renderer.gui();
+        ImGui::Checkbox("Dither with colour", &_render_settings.dither_colour);
 		ImGui::Checkbox("Render un-dithered scene", &_render_settings.render_original);
         ImGui::Checkbox("Render wireframe", &_render_settings.render_wireframe);
 

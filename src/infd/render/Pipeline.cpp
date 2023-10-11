@@ -145,6 +145,7 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
         glActiveTexture(GL_TEXTURE1);
         auto dither_texture_guard = scopedBind(_dither_dome_buf.colour, GL_TEXTURE_2D);
         sendUniform(_dither_shader, "uDitherPattern", 1);
+        sendUniform(_dither_shader, "uDitherColour", settings.dither_colour);
 
         _scene_buf.renderToOther(_dither_shader, _final_buf, _fullscreen_mesh);
     }
