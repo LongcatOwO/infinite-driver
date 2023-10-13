@@ -48,7 +48,7 @@ infd::render::Pipeline::Pipeline() : _sky_sphere{loadWavefrontCases(CGRA_SRCDIR 
     }
 }
 
-void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items, const RenderSettings& settings, const DirectionalLightComponent& light) {
+void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items, const RenderSettings& settings, const DirectionalLightComponent& light, const CameraComponent& camera) {
     using namespace glm;
     if (!(_scene_buf.valid() && _final_buf.valid())) {
         std::cerr << "Error: Buffers not initialised before render called (screen size not set?)" << std::endl;
@@ -82,6 +82,9 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
         }
     }
 
+    auto proj = camera.proj(settings.screen_size);
+    auto view = camera.view();
+
     if (settings.render_wireframe) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     }
@@ -92,9 +95,9 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
         _scene_buf.setupDraw();
 
         sendUniform(_main_shader, "uLightDir", light.direction);
-        sendUniform(_main_shader, "uCameraPos", settings.camera_pos);
-        sendUniform(_main_shader, "uProjectionMatrix", settings.temp_proj);
-        sendUniform(_main_shader, "uViewMatrix", settings.temp_view);
+        sendUniform(_main_shader, "uCameraPos", camera.transform().globalPosition());
+        sendUniform(_main_shader, "uProjectionMatrix", proj);
+        sendUniform(_main_shader, "uViewMatrix", view);
 
         glActiveTexture(GL_TEXTURE0);
         auto tex_guard = scopedBind(_shadow_buf.depth, GL_TEXTURE_2D);
@@ -121,15 +124,16 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
         glDisable(GL_CULL_FACE);
         glDisable(GL_DEPTH_CLAMP);
 
-        auto view = glm::lookAt({0, 0, 0}, settings.camera_dir, {0, 1, 0});
+        auto sphere_view = glm::lookAt({0, 0, 0}, camera.forward(), {0, 1, 0});
 
         glActiveTexture(GL_TEXTURE1);
         auto sky_texture_guard = scopedBind(_dither_texture, GL_TEXTURE_2D);
         sendUniform(_sky_shader, "uTex", 1);
         sendUniform(_sky_shader, "uScreenSize", (glm::vec2 {width, height}) * 1.f);
         sendUniform(_sky_shader, "uPatternAngle", settings.pattern_angle);
-        sendUniform(_sky_shader, "uProjectionMatrix", settings.temp_proj);
-        sendUniform(_sky_shader, "uViewMatrix", view);
+        sendUniform(_sky_shader, "uFov", camera.fov);
+        sendUniform(_sky_shader, "uProjectionMatrix", proj);
+        sendUniform(_sky_shader, "uViewMatrix", sphere_view);
         sendUniform(_sky_shader, "uModelMatrix", glm::mat4 {1});
         _sky_sphere.draw();
     }
@@ -141,7 +145,6 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
         sendUniform(_outline_shader, "uWidth", 6.f);
         _scene_buf.renderToOther(_outline_shader, _outline_buf, _fullscreen_mesh, true, Framebuffer::Kind::Depth);
     }
-
 
     //draw dither from fx -> final buf
     {

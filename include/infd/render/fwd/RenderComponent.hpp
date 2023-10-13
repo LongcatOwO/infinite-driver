@@ -3,4 +3,5 @@
 namespace infd::render {
     class RenderComponent;
     class DirectionalLightComponent;
+    class CameraComponent;
 }
