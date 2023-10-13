@@ -19,7 +19,6 @@ namespace infd::render {
         glm::vec3 camera_dir;
         glm::mat4 temp_view;
         glm::mat4 temp_proj;
-        glm::vec3 temp_light_dir;
         bool render_original = false;
         bool render_wireframe = false;
         bool dither_colour = true;
@@ -36,8 +35,9 @@ namespace infd::render {
             float angle_y = 0;
             float pattern_angle = 0;
         } _test_camera;
-        glm::vec3 _test_light_dir = glm::normalize(glm::vec3{-4, -6, -50});
      public:
+        static DirectionalLightComponent* _light;
+
         RenderComponentHandler addRenderComponent(RenderComponent& component);
         void render();
         void setRenderSettings(RenderSettings settings);

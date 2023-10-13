@@ -48,7 +48,7 @@ infd::render::Pipeline::Pipeline() : _sky_sphere{loadWavefrontCases(CGRA_SRCDIR 
     }
 }
 
-void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items, const infd::render::RenderSettings& settings) {
+void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items, const RenderSettings& settings, const DirectionalLightComponent& light) {
     using namespace glm;
     if (!(_scene_buf.valid() && _final_buf.valid())) {
         std::cerr << "Error: Buffers not initialised before render called (screen size not set?)" << std::endl;
@@ -60,7 +60,7 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
     const float shadow_size = 10;
     const float shadow_cam_offset = 4;
 
-    vec3 shadow_cam = vec3{0, 0, 0} - (normalize(settings.temp_light_dir) * shadow_cam_offset);
+    vec3 shadow_cam = light.transform().globalPosition() - (normalize(light.direction) * shadow_cam_offset);
 
     vec3 up_vec = normalize(shadow_cam) != vec3{0, 1, 0} ? vec3{0, 1, 0} : vec3{0, 0, 1} ;
     auto shadow_view = lookAt(shadow_cam, {0, 0, 0}, up_vec);
@@ -91,7 +91,7 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
         auto fb_guard = scopedBind(_scene_buf.buffer, GL_FRAMEBUFFER);
         _scene_buf.setupDraw();
 
-        sendUniform(_main_shader, "uLightDir", settings.temp_light_dir);
+        sendUniform(_main_shader, "uLightDir", light.direction);
         sendUniform(_main_shader, "uCameraPos", settings.camera_pos);
         sendUniform(_main_shader, "uProjectionMatrix", settings.temp_proj);
         sendUniform(_main_shader, "uViewMatrix", settings.temp_view);
@@ -167,12 +167,12 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
     {
         if (settings.render_original || settings.render_wireframe) {
             auto program_guard = scopedProgram(_blit_shader);
-            _shadow_buf.renderToScreen(_blit_shader, _fullscreen_mesh, settings.screen_size, true, Framebuffer::Kind::Depth);
-        } else {
-//            auto program_guard = scopedProgram(_threshold_blit_shader);
-//            _final_buf.renderToScreen(_threshold_blit_shader, _fullscreen_mesh, settings.screen_size);
-            auto program_guard = scopedProgram(_blit_shader);
             _scene_buf.renderToScreen(_blit_shader, _fullscreen_mesh, settings.screen_size);
+        } else {
+            auto program_guard = scopedProgram(_threshold_blit_shader);
+            _final_buf.renderToScreen(_threshold_blit_shader, _fullscreen_mesh, settings.screen_size);
+//            auto program_guard = scopedProgram(_blit_shader);
+//            _scene_buf.renderToScreen(_blit_shader, _fullscreen_mesh, settings.screen_size);
         }
     }
 }
