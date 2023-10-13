@@ -51,7 +51,6 @@ namespace infd::render {
         ImGui::SliderFloat3("Camera pos", glm::value_ptr(v), -50, 50);
         transform().localPosition(v);
 
-//        glm::vec3 r = glm::eulerAngles(transform().localRotation());
         ImGui::SliderFloat2("Camera rot", glm::value_ptr(euler_rot), -glm::pi<float>(), glm::pi<float>());
         transform().localRotation(euler_rot);
     }
