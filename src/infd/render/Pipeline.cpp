@@ -86,7 +86,6 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
         auto fb_guard = scopedBind(_scene_buf.buffer, GL_FRAMEBUFFER);
         _scene_buf.setupDraw();
 
-        sendUniform(_main_shader, "uColour", {1, 0, 1});
         sendUniform(_main_shader, "uLightPos", settings.temp_light_pos);
         sendUniform(_main_shader, "uCameraPos", settings.camera_pos);
         sendUniform(_main_shader, "uProjectionMatrix", settings.temp_proj);
@@ -99,6 +98,7 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
 
         for (auto& item : items) {
             sendUniform(_main_shader, "uModelMatrix", item->transform().globalTransform());
+            sendUniform(_main_shader, "uColour", item->material.colour);
             sendUniform(_main_shader, "uShininess", item->material.shininess);
             item->mesh.draw();
         }
@@ -145,6 +145,7 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
         glActiveTexture(GL_TEXTURE1);
         auto dither_texture_guard = scopedBind(_dither_dome_buf.colour, GL_TEXTURE_2D);
         sendUniform(_dither_shader, "uDitherPattern", 1);
+        sendUniform(_dither_shader, "uDitherColour", settings.dither_colour);
 
         _scene_buf.renderToOther(_dither_shader, _final_buf, _fullscreen_mesh);
     }

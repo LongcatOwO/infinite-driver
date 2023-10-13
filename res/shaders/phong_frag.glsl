@@ -4,6 +4,7 @@
 uniform mat4 uProjectionMatrix;
 uniform mat4 uModelMatrix;
 uniform mat4 uViewMatrix;
+
 uniform vec3 uColour;
 uniform float uShininess;
 

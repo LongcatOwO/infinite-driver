@@ -22,6 +22,7 @@ namespace infd::render {
         glm::vec3 temp_light_pos;
         bool render_original = false;
         bool render_wireframe = false;
+        bool dither_colour = true;
     };
     // class that does all the rendering - the application class has one of it and calls it to draw
     class Renderer {
