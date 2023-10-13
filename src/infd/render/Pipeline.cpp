@@ -57,12 +57,15 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
 
     int width = settings.screen_size.x; int height = settings.screen_size.y;
 
-    vec3 shadow_cam = vec3{0, 0, 0} + (settings.temp_light_dir * 10.f);
+    const float shadow_size = 10;
+    const float shadow_cam_offset = 4;
+
+    vec3 shadow_cam = vec3{0, 0, 0} - (normalize(settings.temp_light_dir) * shadow_cam_offset);
 
     vec3 up_vec = normalize(shadow_cam) != vec3{0, 1, 0} ? vec3{0, 1, 0} : vec3{0, 0, 1} ;
     auto shadow_view = lookAt(shadow_cam, {0, 0, 0}, up_vec);
 
-    auto shadow_proj = ortho(-10.f, 10.f, -10.f, 10.f, -0.f, 100.f);
+    auto shadow_proj = ortho(-shadow_size, shadow_size, -shadow_size, shadow_size, -0.f, 100.f);
 
     // render shadow buffer
     {

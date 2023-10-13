@@ -36,7 +36,7 @@ namespace infd::render {
             float angle_y = 0;
             float pattern_angle = 0;
         } _test_camera;
-        glm::vec3 _test_light_dir {-4, -6, -50};
+        glm::vec3 _test_light_dir = glm::normalize(glm::vec3{-4, -6, -50});
      public:
         RenderComponentHandler addRenderComponent(RenderComponent& component);
         void render();
