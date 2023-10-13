@@ -57,9 +57,9 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
 
     int width = settings.screen_size.x; int height = settings.screen_size.y;
 
-    vec3 up_vec = normalize(settings.temp_light_pos) != vec3{0, 1, 0} ? vec3{0, 1, 0} : vec3{0, 0, 1} ;
+    vec3 up_vec = normalize(settings.temp_light_dir) != vec3{0, 1, 0} ? vec3{0, 1, 0} : vec3{0, 0, 1} ;
 
-    auto shadow_view = lookAt(settings.temp_light_pos, {0, 0, 0}, up_vec);
+    auto shadow_view = lookAt(settings.temp_light_dir, {0, 0, 0}, up_vec);
     auto shadow_proj = ortho(-10.f, 10.f, -10.f, 10.f, -0.f, 100.f);
 
     // render shadow buffer
@@ -86,7 +86,7 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
         auto fb_guard = scopedBind(_scene_buf.buffer, GL_FRAMEBUFFER);
         _scene_buf.setupDraw();
 
-        sendUniform(_main_shader, "uLightPos", settings.temp_light_pos);
+        sendUniform(_main_shader, "uLightDir", settings.temp_light_dir);
         sendUniform(_main_shader, "uCameraPos", settings.camera_pos);
         sendUniform(_main_shader, "uProjectionMatrix", settings.temp_proj);
         sendUniform(_main_shader, "uViewMatrix", settings.temp_view);

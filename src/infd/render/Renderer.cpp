@@ -17,7 +17,7 @@ namespace infd::render {
         auto view_target = _test_camera.pos + _render_settings.camera_dir;
         _render_settings.temp_view = glm::lookAt(_test_camera.pos, view_target, {0, 1, 0});
         _render_settings.pattern_angle = _test_camera.pattern_angle;
-        _render_settings.temp_light_pos = _test_light_pos;
+        _render_settings.temp_light_dir = _test_light_dir;
         _pipeline.render(_render_components, _render_settings);
     }
 
@@ -41,7 +41,7 @@ namespace infd::render {
         ImGui::SliderFloat("View angle X", &_test_camera.angle_x, -4, 4);
         ImGui::SliderFloat("View angle Y", &_test_camera.angle_y, -2, 2);
         ImGui::SliderFloat("Pattern angle", &_test_camera.pattern_angle, 0, glm::pi<float>());
-        ImGui::SliderFloat3("Light pos", glm::value_ptr(_test_light_pos), -50, 50);
+        ImGui::SliderFloat3("Light dir", glm::value_ptr(_test_light_dir), -50, 50);
 
     }
 

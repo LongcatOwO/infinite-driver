@@ -8,7 +8,7 @@ uniform mat4 uViewMatrix;
 uniform vec3 uColour;
 uniform float uShininess;
 
-uniform vec3 uLightPos;
+uniform vec3 uLightDir;
 uniform vec3 uCameraPos;
 
 uniform sampler2D uShadowTex;
@@ -27,7 +27,9 @@ out vec4 fb_color;
 void main() {
     vec3 N = normalize(f_in.normal);
     vec3 V = normalize(uCameraPos - f_in.position);
-    vec3 L = normalize(uLightPos - f_in.position);
+    // wrong
+//    vec3 L = normalize(uLightDir - f_in.position);
+    vec3 L = normalize(-uLightDir);
     vec3 H = normalize(L + V);
 
     vec3 ambient = 0.3 * uColour;
@@ -36,7 +38,7 @@ void main() {
 
     vec3 colour = ambient + diffuse + specular;
 
-    if (true) {
+    if (false) {
         vec4 shadow_coord = uShadowMatrix * vec4(f_in.position, 1);
         shadow_coord = shadow_coord * 0.5 + 0.5;
         float shadow_z = texture(uShadowTex, shadow_coord.xy).x;
