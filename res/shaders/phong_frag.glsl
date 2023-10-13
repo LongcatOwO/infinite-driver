@@ -38,7 +38,7 @@ void main() {
 
     vec3 colour = ambient + diffuse + specular;
 
-    if (false) {
+    if (true) {
         vec4 shadow_coord = uShadowMatrix * vec4(f_in.position, 1);
         shadow_coord = shadow_coord * 0.5 + 0.5;
         float shadow_z = texture(uShadowTex, shadow_coord.xy).x;

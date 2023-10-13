@@ -57,9 +57,11 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
 
     int width = settings.screen_size.x; int height = settings.screen_size.y;
 
-    vec3 up_vec = normalize(settings.temp_light_dir) != vec3{0, 1, 0} ? vec3{0, 1, 0} : vec3{0, 0, 1} ;
+    vec3 shadow_cam = vec3{0, 0, 0} + (settings.temp_light_dir * 10.f);
 
-    auto shadow_view = lookAt(settings.temp_light_dir, {0, 0, 0}, up_vec);
+    vec3 up_vec = normalize(shadow_cam) != vec3{0, 1, 0} ? vec3{0, 1, 0} : vec3{0, 0, 1} ;
+    auto shadow_view = lookAt(shadow_cam, {0, 0, 0}, up_vec);
+
     auto shadow_proj = ortho(-10.f, 10.f, -10.f, 10.f, -0.f, 100.f);
 
     // render shadow buffer
@@ -162,10 +164,12 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
     {
         if (settings.render_original || settings.render_wireframe) {
             auto program_guard = scopedProgram(_blit_shader);
-            _scene_buf.renderToScreen(_blit_shader, _fullscreen_mesh, settings.screen_size);
+            _shadow_buf.renderToScreen(_blit_shader, _fullscreen_mesh, settings.screen_size, true, Framebuffer::Kind::Depth);
         } else {
-            auto program_guard = scopedProgram(_threshold_blit_shader);
-            _final_buf.renderToScreen(_threshold_blit_shader, _fullscreen_mesh, settings.screen_size);
+//            auto program_guard = scopedProgram(_threshold_blit_shader);
+//            _final_buf.renderToScreen(_threshold_blit_shader, _fullscreen_mesh, settings.screen_size);
+            auto program_guard = scopedProgram(_blit_shader);
+            _scene_buf.renderToScreen(_blit_shader, _fullscreen_mesh, settings.screen_size);
         }
     }
 }
