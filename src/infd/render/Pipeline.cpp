@@ -48,7 +48,7 @@ infd::render::Pipeline::Pipeline() : _sky_sphere{loadWavefrontCases(CGRA_SRCDIR 
     }
 }
 
-void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items, const infd::render::RenderSettings& settings) {
+void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items, const RenderSettings& settings, const DirectionalLightComponent& light, const CameraComponent& camera) {
     using namespace glm;
     if (!(_scene_buf.valid() && _final_buf.valid())) {
         std::cerr << "Error: Buffers not initialised before render called (screen size not set?)" << std::endl;
@@ -57,10 +57,15 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
 
     int width = settings.screen_size.x; int height = settings.screen_size.y;
 
-    vec3 up_vec = normalize(settings.temp_light_pos) != vec3{0, 1, 0} ? vec3{0, 1, 0} : vec3{0, 0, 1} ;
+    const float shadow_size = 10;
+    const float shadow_cam_offset = 4;
 
-    auto shadow_view = lookAt(settings.temp_light_pos, {0, 0, 0}, up_vec);
-    auto shadow_proj = ortho(-10.f, 10.f, -10.f, 10.f, -0.f, 100.f);
+    vec3 shadow_cam = light.transform().globalPosition() - (normalize(light.direction) * shadow_cam_offset);
+
+    vec3 up_vec = normalize(shadow_cam) != vec3{0, 1, 0} ? vec3{0, 1, 0} : vec3{0, 0, 1} ;
+    auto shadow_view = lookAt(shadow_cam, {0, 0, 0}, up_vec);
+
+    auto shadow_proj = ortho(-shadow_size, shadow_size, -shadow_size, shadow_size, -0.f, 100.f);
 
     // render shadow buffer
     {
@@ -77,6 +82,9 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
         }
     }
 
+    auto proj = camera.proj(settings.screen_size);
+    auto view = camera.view();
+
     if (settings.render_wireframe) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     }
@@ -86,11 +94,10 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
         auto fb_guard = scopedBind(_scene_buf.buffer, GL_FRAMEBUFFER);
         _scene_buf.setupDraw();
 
-        sendUniform(_main_shader, "uColour", {1, 0, 1});
-        sendUniform(_main_shader, "uLightPos", settings.temp_light_pos);
-        sendUniform(_main_shader, "uCameraPos", settings.camera_pos);
-        sendUniform(_main_shader, "uProjectionMatrix", settings.temp_proj);
-        sendUniform(_main_shader, "uViewMatrix", settings.temp_view);
+        sendUniform(_main_shader, "uLightDir", light.direction);
+        sendUniform(_main_shader, "uCameraPos", camera.transform().globalPosition());
+        sendUniform(_main_shader, "uProjectionMatrix", proj);
+        sendUniform(_main_shader, "uViewMatrix", view);
 
         glActiveTexture(GL_TEXTURE0);
         auto tex_guard = scopedBind(_shadow_buf.depth, GL_TEXTURE_2D);
@@ -99,6 +106,7 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
 
         for (auto& item : items) {
             sendUniform(_main_shader, "uModelMatrix", item->transform().globalTransform());
+            sendUniform(_main_shader, "uColour", item->material.colour);
             sendUniform(_main_shader, "uShininess", item->material.shininess);
             item->mesh.draw();
         }
@@ -116,15 +124,16 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
         glDisable(GL_CULL_FACE);
         glDisable(GL_DEPTH_CLAMP);
 
-        auto view = glm::lookAt({0, 0, 0}, settings.camera_dir, {0, 1, 0});
+        auto sphere_view = glm::lookAt({0, 0, 0}, camera.forward(), {0, 1, 0});
 
         glActiveTexture(GL_TEXTURE1);
         auto sky_texture_guard = scopedBind(_dither_texture, GL_TEXTURE_2D);
         sendUniform(_sky_shader, "uTex", 1);
         sendUniform(_sky_shader, "uScreenSize", (glm::vec2 {width, height}) * 1.f);
         sendUniform(_sky_shader, "uPatternAngle", settings.pattern_angle);
-        sendUniform(_sky_shader, "uProjectionMatrix", settings.temp_proj);
-        sendUniform(_sky_shader, "uViewMatrix", view);
+        sendUniform(_sky_shader, "uFov", camera.fov);
+        sendUniform(_sky_shader, "uProjectionMatrix", proj);
+        sendUniform(_sky_shader, "uViewMatrix", sphere_view);
         sendUniform(_sky_shader, "uModelMatrix", glm::mat4 {1});
         _sky_sphere.draw();
     }
@@ -137,7 +146,6 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
         _scene_buf.renderToOther(_outline_shader, _outline_buf, _fullscreen_mesh, true, Framebuffer::Kind::Depth);
     }
 
-
     //draw dither from fx -> final buf
     {
         auto program_guard = scopedProgram(_dither_shader);
@@ -145,6 +153,7 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
         glActiveTexture(GL_TEXTURE1);
         auto dither_texture_guard = scopedBind(_dither_dome_buf.colour, GL_TEXTURE_2D);
         sendUniform(_dither_shader, "uDitherPattern", 1);
+        sendUniform(_dither_shader, "uDitherColour", settings.dither_colour);
 
         _scene_buf.renderToOther(_dither_shader, _final_buf, _fullscreen_mesh);
     }
@@ -165,6 +174,8 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
         } else {
             auto program_guard = scopedProgram(_threshold_blit_shader);
             _final_buf.renderToScreen(_threshold_blit_shader, _fullscreen_mesh, settings.screen_size);
+//            auto program_guard = scopedProgram(_blit_shader);
+//            _scene_buf.renderToScreen(_blit_shader, _fullscreen_mesh, settings.screen_size);
         }
     }
 }

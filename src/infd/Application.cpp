@@ -138,8 +138,9 @@ namespace infd {
 			_renderer, 
 			infd::loadWavefrontCases(CGRA_SRCDIR "//res//assets//teapot.obj").build()
 		);
-		teapot.emplaceComponent<scene::physics::BoxShape>().halfSize({3, 3, 3});
-		teapot.emplaceComponent<scene::physics::RigidBody>();
+        teapot.getComponent<render::RenderComponent>()->material.colour = {47/255.f, 196/255.f, 94/255.f};
+        teapot.emplaceComponent<scene::physics::BoxShape>().halfSize({3, 3, 3});
+        teapot.emplaceComponent<scene::physics::RigidBody>();
 
         scene::SceneObject& bunny = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Bunny"));
 		bunny.transform().localPosition({8, 30, -1.5});
@@ -149,20 +150,21 @@ namespace infd {
 			infd::loadWavefrontCases(CGRA_SRCDIR "//res//assets//bunny.obj").build()
 		);
 		bunny_mesh.transform().localScale(glm::vec3{75});
-		bunny.emplaceComponent<scene::physics::BoxShape>().halfSize({3, 3, 3});
-		bunny.emplaceComponent<scene::physics::RigidBody>();
-
-		// std::unique_ptr<btTriangleMesh> tri_mesh{new btTriangleMesh()};
-		// tri_mesh->addTriangle({-8, 0, 5}, {10, 0, 5}, {0, 0, -10});
-		// scene::SceneObject& test_tri = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Test Tri"));
-		// test_tri.emplaceComponent<scene::physics::BvhTriangleMeshShape>(std::move(tri_mesh));
-		// test_tri.emplaceComponent<scene::physics::RigidBody>().mass(0);
-
+        bunny_mesh.getComponent<render::RenderComponent>()->material.colour = {232/255.f, 205/255.f, 136/255.f};
+        bunny.emplaceComponent<scene::physics::BoxShape>().halfSize({3, 3, 3});
+        bunny.emplaceComponent<scene::physics::RigidBody>();
 
         scene::SceneObject& chunkLoader = _scene.addSceneObject(std::make_unique<scene::SceneObject>("ChunkLoader"));
         auto& loader = chunkLoader.emplaceComponent<generator::ChunkLoader>(chunkLoader, _renderer, 5);
         loader.move(-6,-6);
         loader.transform().localScale(glm::vec3(30));
+
+        scene::SceneObject& light = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Light"));
+        light.emplaceComponent<render::DirectionalLightComponent>();
+
+        scene::SceneObject& camera = _scene.addSceneObject(std::make_unique<scene::SceneObject>("camera"));
+        camera.transform().localPosition({0, 15, 30});
+        camera.emplaceComponent<render::CameraComponent>();
 	}
 
 	void Application::internalDoRender(scene::Scene &) {
@@ -206,8 +208,6 @@ namespace infd {
 		// draw the model
 		if (_use_render_pipeline) {
 			_render_settings.screen_size = _window_size;
-			_render_settings.temp_view = view;
-			_render_settings.temp_proj = proj;
 			_renderer.setRenderSettings(_render_settings);
 			_renderer.render();
 		} else {
@@ -233,8 +233,8 @@ namespace infd {
 	void Application::internalRenderGUI() {
 		// setup the window
 		ImGui::SetNextWindowPos(ImVec2{5, 5}, ImGuiCond_Once);
-		ImGui::SetNextWindowSize(ImVec2{300, 380}, ImGuiCond_Once);
-		ImGui::Begin("Options", 0);
+		ImGui::SetNextWindowSize(ImVec2{300, 420}, ImGuiCond_Once);
+		ImGui::Begin("Options", nullptr);
 
 		// display current camera parameters
 		ImGui::Text("Application %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
@@ -254,6 +254,7 @@ namespace infd {
 		ImGui::Separator();
 
 		_renderer.gui();
+        ImGui::Checkbox("Dither with colour", &_render_settings.dither_colour);
 		ImGui::Checkbox("Render un-dithered scene", &_render_settings.render_original);
         ImGui::Checkbox("Render wireframe", &_render_settings.render_wireframe);
 
