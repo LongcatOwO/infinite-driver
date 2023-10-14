@@ -11,7 +11,7 @@ namespace infd::scene::physics {
 
 	void PhysicsContext::onPhysicsUpdate() {
 		for (RigidBodyLifeSpan& life_span : _rigid_body_life_spans) {
-			life_span.rigidBody().internalSyncMotionStateToTransform();
+			life_span.rigidBody().internalSyncPhysicsWorldToTransform();
 			life_span.rigidBody().collisionShape().syncCollisionShapeScaling();
 		}
 
@@ -26,7 +26,7 @@ namespace infd::scene::physics {
 		);
 
 		for (RigidBodyLifeSpan& life_span : _rigid_body_life_spans)
-			life_span.rigidBody().internalSyncTransformToMotionState();
+			life_span.rigidBody().internalSyncTransformToPhysicsWorld();
 	}
 
 	PhysicsContext::PhysicsContext() noexcept :

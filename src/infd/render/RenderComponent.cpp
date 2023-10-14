@@ -5,8 +5,11 @@
 #include <utility>
 
 namespace infd::render {
-    RenderComponent::RenderComponent(Renderer& renderer, GLMesh& mesh) : mesh(mesh), _hook(renderer.addRenderComponent(*this)) {}
-    RenderComponent::RenderComponent(Renderer& renderer, GLMesh mesh) : mesh(std::move(mesh)), _hook(renderer.addRenderComponent(*this)) {}
+    RenderComponent::RenderComponent(Renderer& renderer, const GLMesh& mesh) : 
+        mesh(mesh), _hook(renderer.addRenderComponent(*this)) {}
+
+    RenderComponent::RenderComponent(Renderer& renderer, GLMesh&& mesh) :
+        mesh(std::move(mesh)), _hook(renderer.addRenderComponent(*this)) {}
 
     void DirectionalLightComponent::onAttach() {
         Component::onAttach();
