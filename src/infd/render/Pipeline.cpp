@@ -48,7 +48,8 @@ infd::render::Pipeline::Pipeline() : _sky_sphere{loadWavefrontCases(CGRA_SRCDIR 
     }
 }
 
-void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items, const RenderSettings& settings, const DirectionalLightComponent& light, const CameraComponent& camera) {
+void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items, const RenderSettings& settings,
+                                    const DirectionalLightComponent& light, const CameraComponent& camera, const DitherSettingsComponent& dither) {
     using namespace glm;
     if (!(_scene_buf.valid() && _final_buf.valid())) {
         std::cerr << "Error: Buffers not initialised before render called (screen size not set?)" << std::endl;
@@ -130,7 +131,7 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
         auto sky_texture_guard = scopedBind(_dither_texture, GL_TEXTURE_2D);
         sendUniform(_sky_shader, "uTex", 1);
         sendUniform(_sky_shader, "uScreenSize", (glm::vec2 {width, height}) * 1.f);
-        sendUniform(_sky_shader, "uPatternAngle", settings.pattern_angle);
+        sendUniform(_sky_shader, "uPatternAngle", dither.pattern_angle);
         sendUniform(_sky_shader, "uFov", camera.fov);
         sendUniform(_sky_shader, "uProjectionMatrix", proj);
         sendUniform(_sky_shader, "uViewMatrix", sphere_view);
@@ -153,7 +154,7 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
         glActiveTexture(GL_TEXTURE1);
         auto dither_texture_guard = scopedBind(_dither_dome_buf.colour, GL_TEXTURE_2D);
         sendUniform(_dither_shader, "uDitherPattern", 1);
-        sendUniform(_dither_shader, "uDitherColour", settings.dither_colour);
+        sendUniform(_dither_shader, "uDitherColour", dither.dither_colour);
 
         _scene_buf.renderToOther(_dither_shader, _final_buf, _fullscreen_mesh);
     }
@@ -173,6 +174,7 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
             _scene_buf.renderToScreen(_blit_shader, _fullscreen_mesh, settings.screen_size);
         } else {
             auto program_guard = scopedProgram(_threshold_blit_shader);
+            sendUniform(_threshold_blit_shader, "uThreshold", dither.threshold);
             _final_buf.renderToScreen(_threshold_blit_shader, _fullscreen_mesh, settings.screen_size);
 //            auto program_guard = scopedProgram(_blit_shader);
 //            _scene_buf.renderToScreen(_blit_shader, _fullscreen_mesh, settings.screen_size);
