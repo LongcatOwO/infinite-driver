@@ -164,6 +164,7 @@ namespace infd {
         scene::SceneObject& camera = _scene.addSceneObject(std::make_unique<scene::SceneObject>("camera"));
         camera.transform().localPosition({0, 15, 30});
         camera.emplaceComponent<render::CameraComponent>();
+        camera.emplaceComponent<render::DitherSettingsComponent>();
 	}
 
 	void Application::internalDoRender(scene::Scene &) {
@@ -253,7 +254,6 @@ namespace infd {
 		ImGui::Separator();
 
 		_renderer.gui();
-        ImGui::Checkbox("Dither with colour", &_render_settings.dither_colour);
 		ImGui::Checkbox("Render un-dithered scene", &_render_settings.render_original);
         ImGui::Checkbox("Render wireframe", &_render_settings.render_wireframe);
 

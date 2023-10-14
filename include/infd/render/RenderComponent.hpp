@@ -75,4 +75,16 @@ namespace infd::render {
         glm::vec3 euler_rot {0, 0, 0};
         void onAttach() override;
     };
+
+    class DitherSettingsComponent : public scene::Component {
+      public:
+        float threshold = 0.45;
+        float pattern_angle = 0;
+        bool dither_colour = true;
+        Dithers dither_pattern = Dithers::Ordered;
+
+        void gui();
+      protected:
+        void onAttach() override;
+    };
 }

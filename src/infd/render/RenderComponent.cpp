@@ -54,4 +54,20 @@ namespace infd::render {
         ImGui::SliderFloat2("Camera rot", glm::value_ptr(euler_rot), -glm::pi<float>(), glm::pi<float>());
         transform().localRotation(euler_rot);
     }
+
+    void DitherSettingsComponent::onAttach() {
+        Component::onAttach();
+        if (Renderer::_dither == nullptr) {
+            Renderer::_dither = this;
+        } else {
+            throw infd::util::InvalidStateException("Attempted to attach dither settings but renderer already has dither settings");
+        }
+    }
+
+    void DitherSettingsComponent::gui() {
+        ImGui::SliderInt("Dither pattern", reinterpret_cast<int*>(&dither_pattern), 0, (int)Dithers::Count - 1);
+        ImGui::SliderFloat("Pattern angle", &pattern_angle, 0, glm::pi<float>());
+        ImGui::SliderFloat("Dither threshold", &threshold, 0, 1);
+        ImGui::Checkbox("Colour dither", &dither_colour);
+    }
 }
