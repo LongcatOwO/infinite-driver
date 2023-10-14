@@ -21,9 +21,7 @@ namespace infd::generator {
         auto& render_component = 
             chunkSceneObject.emplaceComponent<render::RenderComponent>(renderer, std::move(mesh));
 
-        constexpr float adjust_scaling = 30;
-        render_component.transform().localPosition(glm::vec3{generator.x, 0, generator.y} * adjust_scaling);
-        render_component.transform().localScale(glm::vec3{adjust_scaling});
+        render_component.transform().localPosition({generator.x, 0, generator.y});
 
         chunkSceneObject.emplaceComponent<scene::physics::BvhTriangleMeshShape>(std::move(tri_mesh));
         chunkSceneObject.emplaceComponent<scene::physics::RigidBody>().mass(0);

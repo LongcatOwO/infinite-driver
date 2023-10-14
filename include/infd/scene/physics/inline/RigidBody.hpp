@@ -69,4 +69,24 @@ namespace infd::scene::physics {
 		_rigid_body->setMassProps(mass, math::toBullet(inertia));
 	}
 
+	inline bool RigidBody::isKinematic() const noexcept {
+		return !!(_rigid_body->getCollisionFlags() & btCollisionObject::CF_KINEMATIC_OBJECT);
+	}
+
+	inline void RigidBody::isKinematic(bool value) noexcept {
+		if (value) {
+			_rigid_body->setCollisionFlags(
+				_rigid_body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT
+			);
+		} else {
+			_rigid_body->setCollisionFlags(
+				_rigid_body->getCollisionFlags() & ~btCollisionObject::CF_KINEMATIC_OBJECT
+			);
+		}
+	}
+
+	inline bool RigidBody::isStatic() const noexcept {
+		return !!(_rigid_body->getCollisionFlags() & btCollisionObject::CF_STATIC_OBJECT);
+	}
+
 } // namespace infd::scene::physics

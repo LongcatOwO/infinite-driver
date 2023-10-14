@@ -142,7 +142,7 @@ namespace infd {
 		teapot.emplaceComponent<scene::physics::RigidBody>();
 
         scene::SceneObject& bunny = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Bunny"));
-		bunny.transform().localPosition({8, 1000, -1.5});
+		bunny.transform().localPosition({8, 30, -1.5});
 		scene::SceneObject& bunny_mesh = bunny.addChild("Bunny Mesh");
 		bunny_mesh.emplaceComponent<render::RenderComponent>(
 			_renderer,
@@ -159,10 +159,10 @@ namespace infd {
 		// test_tri.emplaceComponent<scene::physics::RigidBody>().mass(0);
 
 
-        // scene::SceneObject& chunkLoader = _scene.addSceneObject(std::make_unique<scene::SceneObject>("ChunkLoader"));
-        // auto& loader = chunkLoader.emplaceComponent<generator::ChunkLoader>(chunkLoader, _renderer, 5);
-        // loader.move(-6,-6);
-        // loader.transform().localScale(glm::vec3(30));
+        scene::SceneObject& chunkLoader = _scene.addSceneObject(std::make_unique<scene::SceneObject>("ChunkLoader"));
+        auto& loader = chunkLoader.emplaceComponent<generator::ChunkLoader>(chunkLoader, _renderer, 5);
+        loader.move(-6,-6);
+        loader.transform().localScale(glm::vec3(30));
 	}
 
 	void Application::internalDoRender(scene::Scene &) {
