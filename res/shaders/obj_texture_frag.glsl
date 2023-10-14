@@ -35,10 +35,8 @@ void main() {
         s,  c
     );
 
-    // assumes fov == 1rad, R-TR p.549
-    vec2 wanted_res = (uScreenSize*1) / tan(uFov/2.f);
-    // this is fov==90deg
-//    vec2 wanted_res = uScreenSize / 1;
+    // R-TR p.549
+    vec2 wanted_res = (uScreenSize * 2) / tan(uFov/2.f);
     vec2 reps = wanted_res / tex_size;
     vec2 scale = reps;
 

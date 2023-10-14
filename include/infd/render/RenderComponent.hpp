@@ -31,8 +31,8 @@ namespace infd::render {
      *
      * direction is the direction of the light lol
      *
-     * NOTE: Global position is used as the centre of the shadow map so parent it to the player or
-     * something in the middle of the screen
+     * NOTE:    Global position is used as the centre of the shadow map so parent it to the player or
+     *          something in the middle of the screen
      */
 
     class DirectionalLightComponent : public scene::Component {
