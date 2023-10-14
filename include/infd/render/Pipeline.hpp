@@ -37,7 +37,7 @@ namespace infd::render {
         GLTexture _temp_sphere_texture;
      public:
         Pipeline();
-        void render(util::handle_vector<RenderComponent*>&, const RenderSettings& settings);
+        void render(util::handle_vector<RenderComponent*>&, const RenderSettings& settings, const DirectionalLightComponent& light, const CameraComponent& camera);
         void loadShaders();
         // MUST be called before draw with proper args to init
         void screenSizeChanged(glm::ivec2 new_size);

@@ -157,6 +157,13 @@ namespace infd {
         auto& loader = chunkLoader.emplaceComponent<generator::ChunkLoader>(chunkLoader, _renderer, 5);
         loader.move(-6,-6);
         loader.transform().localScale(glm::vec3(30));
+
+        scene::SceneObject& light = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Light"));
+        light.emplaceComponent<render::DirectionalLightComponent>();
+
+        scene::SceneObject& camera = _scene.addSceneObject(std::make_unique<scene::SceneObject>("camera"));
+        camera.transform().localPosition({0, 15, 30});
+        camera.emplaceComponent<render::CameraComponent>();
 	}
 
 	void Application::internalDoRender(scene::Scene &) {
@@ -200,8 +207,6 @@ namespace infd {
 		// draw the model
 		if (_use_render_pipeline) {
 			_render_settings.screen_size = _window_size;
-			_render_settings.temp_view = view;
-			_render_settings.temp_proj = proj;
 			_renderer.setRenderSettings(_render_settings);
 			_renderer.render();
 		} else {
@@ -227,8 +232,8 @@ namespace infd {
 	void Application::internalRenderGUI() {
 		// setup the window
 		ImGui::SetNextWindowPos(ImVec2{5, 5}, ImGuiCond_Once);
-		ImGui::SetNextWindowSize(ImVec2{300, 380}, ImGuiCond_Once);
-		ImGui::Begin("Options", 0);
+		ImGui::SetNextWindowSize(ImVec2{300, 420}, ImGuiCond_Once);
+		ImGui::Begin("Options", nullptr);
 
 		// display current camera parameters
 		ImGui::Text("Application %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
