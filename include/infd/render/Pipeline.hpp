@@ -11,6 +11,12 @@
 #include "infd/GLObject.hpp"
 
 namespace infd::render {
+    enum class Dithers {
+        BlueNoise,
+        Ordered,
+        Count
+    };
+
     const int shadow_res = 1024;
     // forward declare to avoid recursive inclusion hellscape
     struct RenderSettings;
@@ -33,7 +39,7 @@ namespace infd::render {
 
         GLMesh _fullscreen_mesh = build_fullscreen_texture_mesh();
         GLMesh _sky_sphere;
-        GLTexture _dither_texture;
+        GLTexture _dithers[(unsigned long)Dithers::Count];
         GLTexture _temp_sphere_texture;
      public:
         Pipeline();

@@ -18,11 +18,16 @@ infd::render::Pipeline::Pipeline() : _sky_sphere{loadWavefrontCases(CGRA_SRCDIR 
     loadShaders();
     // load dither texture
     {
-        {
-            auto texture_guard = scopedBind(_dither_texture, GL_TEXTURE_2D);
+        std::string texture_paths[] = {
+                "/res/textures/dithers/64x64-blue-noise.png",
+                "/res/textures/dithers/16x16-ordered-dither.png"
+        };
 
-            auto tex = cgra::rgba_image{CGRA_SRCDIR + std::string("/res/textures/dithers/16x16-ordered-dither.png")};
-//        auto tex = cgra::rgba_image {CGRA_SRCDIR + std::string("/res/textures/dithers/64x64-blue-noise.png")};
+
+        for (int i = 0; i < (int)Dithers::Count; i++) {
+            auto texture_guard = scopedBind(_dithers[i], GL_TEXTURE_2D);
+
+            auto tex = cgra::rgba_image{CGRA_SRCDIR + texture_paths[i]};
 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -128,7 +133,7 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
         auto sphere_view = glm::lookAt({0, 0, 0}, camera.forward(), {0, 1, 0});
 
         glActiveTexture(GL_TEXTURE1);
-        auto sky_texture_guard = scopedBind(_dither_texture, GL_TEXTURE_2D);
+        auto sky_texture_guard = scopedBind(_dithers[(int)dither.dither_pattern], GL_TEXTURE_2D);
         sendUniform(_sky_shader, "uTex", 1);
         sendUniform(_sky_shader, "uScreenSize", (glm::vec2 {width, height}) * 1.f);
         sendUniform(_sky_shader, "uPatternAngle", dither.pattern_angle);
