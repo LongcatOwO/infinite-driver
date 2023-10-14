@@ -74,6 +74,7 @@ namespace infd::scene::physics {
 			math::toBullet(transform().localPosition())
 		});
 		_rigid_body->setCollisionShape(shape);
+		_rigid_body->setMassProps(mass, inertia);
 	}
 
 	void RigidBody::internalSyncTransformToPhysicsWorld() noexcept {

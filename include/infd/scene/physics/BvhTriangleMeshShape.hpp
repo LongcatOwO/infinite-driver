@@ -12,10 +12,6 @@
 #include <infd/scene/physics/physics.hpp>
 
 
-#include <iostream>
-#include <infd/debug/glm.hpp>
-
-
 namespace infd::scene::physics {
 
 	class BvhTriangleMeshShape : public CollisionShape {
