@@ -233,7 +233,7 @@ namespace infd {
 	void Application::internalRenderGUI() {
 		// setup the window
 		ImGui::SetNextWindowPos(ImVec2{5, 5}, ImGuiCond_Once);
-		ImGui::SetNextWindowSize(ImVec2{300, 420}, ImGuiCond_Once);
+		ImGui::SetNextWindowSize(ImVec2{300, 480}, ImGuiCond_Once);
 		ImGui::Begin("Options", nullptr);
 
 		// display current camera parameters

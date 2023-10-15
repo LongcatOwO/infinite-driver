@@ -81,6 +81,7 @@ namespace infd::render {
         float threshold = 0.45;
         float pattern_angle = 0;
         bool dither_colour = true;
+        glm::vec3 sky_colour {0, 0, 0};
         Dithers dither_pattern = Dithers::Ordered;
 
         void gui();

@@ -97,11 +97,12 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
     if (settings.render_wireframe) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     }
+
     // draw scene to buffer
     {
         auto program_guard = scopedProgram(_main_shader);
         auto fb_guard = scopedBind(_scene_buf.buffer, GL_FRAMEBUFFER);
-        _scene_buf.setupDraw();
+        _scene_buf.setupDraw(dither.sky_colour);
 
         sendUniform(_main_shader, "uLightDir", light.direction);
         sendUniform(_main_shader, "uCameraPos", camera.transform().globalPosition());
@@ -120,6 +121,7 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
             item->mesh.draw();
         }
     }
+
     if (settings.render_wireframe) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
