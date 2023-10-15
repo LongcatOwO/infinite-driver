@@ -14,6 +14,7 @@ namespace infd::render {
     enum class Dithers {
         BlueNoise,
         Ordered,
+        Halftone,
         Count
     };
 

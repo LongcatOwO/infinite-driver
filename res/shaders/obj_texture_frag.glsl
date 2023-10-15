@@ -24,12 +24,15 @@ in VertexData {
 out vec4 fb_color;
 
 void main() {
-    float aspect_ratio = uScreenSize.x / uScreenSize.y;
+    float aspect_ratio = uScreenSize.y / uScreenSize.x;
     ivec2 tex_size = textureSize(uTex, 0);
 
 
     vec2 uv = f_in.textureCoord;
+    // compensate for aspect ratio/spherical distortion
+    uv.y /= 2;
     float c = cos(uPatternAngle), s = sin(uPatternAngle);
+
     uv = uv * mat2(
         c, -s,
         s,  c
@@ -38,9 +41,8 @@ void main() {
     // R-TR p.549
     vec2 wanted_res = (uScreenSize * 2) / tan(uFov/2.f);
     vec2 reps = wanted_res / tex_size;
-    vec2 scale = reps;
 
-    vec4 colour = texture(uTex, uv * scale);
+    vec4 colour = texture(uTex, uv * reps);
 
     // output to the frambuffer
     fb_color = colour;

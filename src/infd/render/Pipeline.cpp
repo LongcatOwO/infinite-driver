@@ -20,7 +20,8 @@ infd::render::Pipeline::Pipeline() : _sky_sphere{loadWavefrontCases(CGRA_SRCDIR 
     {
         std::string texture_paths[] = {
                 "/res/textures/dithers/64x64-blue-noise.png",
-                "/res/textures/dithers/16x16-ordered-dither.png"
+                "/res/textures/dithers/16x16-ordered-dither.png",
+                "/res/textures/dithers/8x8-halftone-dot.png"
         };
 
 
@@ -135,7 +136,7 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
         glActiveTexture(GL_TEXTURE1);
         auto sky_texture_guard = scopedBind(_dithers[(int)dither.dither_pattern], GL_TEXTURE_2D);
         sendUniform(_sky_shader, "uTex", 1);
-        sendUniform(_sky_shader, "uScreenSize", (glm::vec2 {width, height}) * 1.f);
+        sendUniform(_sky_shader, "uScreenSize", glm::vec2 {(float)width, (float)height});
         sendUniform(_sky_shader, "uPatternAngle", dither.pattern_angle);
         sendUniform(_sky_shader, "uFov", camera.fov);
         sendUniform(_sky_shader, "uProjectionMatrix", proj);
@@ -180,6 +181,7 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
         } else {
             auto program_guard = scopedProgram(_threshold_blit_shader);
             sendUniform(_threshold_blit_shader, "uThreshold", dither.threshold);
+            sendUniform(_dither_shader, "uDitherColour", dither.dither_colour);
             _final_buf.renderToScreen(_threshold_blit_shader, _fullscreen_mesh, settings.screen_size);
 //            auto program_guard = scopedProgram(_blit_shader);
 //            _scene_buf.renderToScreen(_blit_shader, _fullscreen_mesh, settings.screen_size);
