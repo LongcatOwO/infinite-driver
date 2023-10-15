@@ -21,7 +21,9 @@ infd::render::Pipeline::Pipeline() : _sky_sphere{loadWavefrontCases(CGRA_SRCDIR 
         std::string texture_paths[] = {
                 "/res/textures/dithers/64x64-blue-noise.png",
                 "/res/textures/dithers/16x16-ordered-dither.png",
-                "/res/textures/dithers/8x8-halftone-dot.png"
+                "/res/textures/dithers/8x8-halftone-dot.png",
+                "/res/textures/dithers/8x8-funny-lines.png",
+                "/res/textures/dithers/8x8-square-halftone.png"
         };
 
 

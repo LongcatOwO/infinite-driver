@@ -15,6 +15,8 @@ namespace infd::render {
         BlueNoise,
         Ordered,
         Halftone,
+        ExperimentalLines,
+        ExperimentalHalftone,
         Count
     };
 
