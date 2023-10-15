@@ -187,8 +187,6 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
             sendUniform(_threshold_blit_shader, "uThreshold", dither.threshold);
             sendUniform(_dither_shader, "uDitherColour", dither.dither_colour);
             _final_buf.renderToScreen(_threshold_blit_shader, _fullscreen_mesh, settings.screen_size);
-//            auto program_guard = scopedProgram(_blit_shader);
-//            _scene_buf.renderToScreen(_blit_shader, _fullscreen_mesh, settings.screen_size);
         }
     }
 }
