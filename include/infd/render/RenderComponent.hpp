@@ -8,9 +8,9 @@
 
 namespace infd::render {
     class RenderComponent : public scene::Component {
-      public:
-        RenderComponent(Renderer& renderer, GLMesh& mesh);
-        RenderComponent(Renderer& renderer, GLMesh mesh);
+    public:
+        RenderComponent(Renderer& renderer, const GLMesh& mesh);
+        RenderComponent(Renderer& renderer, GLMesh&& mesh);
 
         GLMesh mesh;
 

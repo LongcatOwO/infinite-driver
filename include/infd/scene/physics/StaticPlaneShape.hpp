@@ -17,11 +17,11 @@ namespace infd::scene::physics {
 	class StaticPlaneShape : public CollisionShape {
 		btStaticPlaneShape _static_plane_shape;
 
-		[[nodiscard]] btCollisionShape& getBtCollisionShape() override {
+		[[nodiscard]] btCollisionShape& getBtCollisionShape() noexcept override {
 			return _static_plane_shape;
 		}
 
-		[[nodiscard]] const btCollisionShape& getBtCollisionShape() const override {
+		[[nodiscard]] const btCollisionShape& getBtCollisionShape() const noexcept override {
 			return _static_plane_shape;
 		}
 

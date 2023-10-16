@@ -46,6 +46,8 @@ namespace infd::scene {
 		util::Event<void (unsigned int c)> _char_event;
 
 		std::vector<std::unique_ptr<SceneObject>> _scene_objects;
+
+		bool _is_awaken = false;
 		
 		// TODO faster object identity lookup
 		// std::unordered_map<SceneObject *, std::size_t> _scene_objects_index;
@@ -60,6 +62,7 @@ namespace infd::scene {
 		Scene& operator=(const Scene &) = delete;
 
 		void awake();
+		bool isAwaken() const noexcept;
 
 		template <typename Period = std::ratio<1>, std::floating_point Rep = double>
 		[[nodiscard]] Rep frameRate() const noexcept;
