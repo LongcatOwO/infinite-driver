@@ -107,6 +107,25 @@ namespace infd::scene::physics {
 
 		bool isStatic() const noexcept;
 
+		btScalar friction() const noexcept;
+		void friction(btScalar value) noexcept;
+
+		btScalar restitution() const noexcept;
+		void restitution(btScalar value) noexcept;
+
+		glm::vec<3, Float> gravity() const noexcept;
+		void gravity(const glm::vec<3, Float>& value) noexcept;
+
+		btScalar linearDamping() const noexcept;
+		void linearDamping(btScalar value) noexcept;
+
+		btScalar angularDamping() const noexcept;
+		void angularDamping(btScalar value) noexcept;
+
+		auto damping() const noexcept;
+		void damping(btScalar linear, btScalar angular) noexcept;
+
+
 	}; // class Rigidbody
 
 } // namespace infd::scene::physics
