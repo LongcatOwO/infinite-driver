@@ -89,4 +89,53 @@ namespace infd::scene::physics {
 		return !!(_rigid_body->getCollisionFlags() & btCollisionObject::CF_STATIC_OBJECT);
 	}
 
+	inline btScalar RigidBody::friction() const noexcept {
+		return _rigid_body->getFriction();
+	}
+
+	inline void RigidBody::friction(btScalar value) noexcept {
+		_rigid_body->setFriction(value);
+	}
+
+	inline btScalar RigidBody::restitution() const noexcept {
+		return _rigid_body->getRestitution();
+	}
+
+	inline void RigidBody::restitution(btScalar value) noexcept {
+		_rigid_body->setRestitution(value);
+	}
+
+	inline glm::vec<3, Float> RigidBody::gravity() const noexcept {
+		return math::toGlm(_rigid_body->getGravity());
+	}
+
+	inline void RigidBody::gravity(const glm::vec<3, Float>& value) noexcept {
+		_rigid_body->setGravity(math::toBullet(value));
+	}
+
+	inline btScalar RigidBody::linearDamping() const noexcept {
+		return _rigid_body->getLinearDamping();
+	}
+
+	inline void RigidBody::linearDamping(btScalar value) noexcept {
+		_rigid_body->setDamping(value, angularDamping());
+	}
+
+	inline btScalar RigidBody::angularDamping() const noexcept {
+		return _rigid_body->getAngularDamping();
+	}
+
+	inline void RigidBody::angularDamping(btScalar value) noexcept {
+		_rigid_body->setDamping(linearDamping(), value);
+	}
+
+	inline auto RigidBody::damping() const noexcept {
+		struct Result { btScalar linear; btScalar angular; };
+		return Result{linearDamping(), angularDamping()};
+	}
+
+	inline void RigidBody::damping(btScalar linear, btScalar angular) noexcept {
+		_rigid_body->setDamping(linear, angular);
+	}
+
 } // namespace infd::scene::physics
