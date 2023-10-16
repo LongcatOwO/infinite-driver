@@ -91,6 +91,12 @@ set(CLIPPER2_USINGZ OFF CACHE STRING "Build Clipper2Z")
 add_subdirectory("${PROJECT_LIB_DIR}/Clipper2")
 
 
+# poly2tri
+set(P2T_BUILD_TESTS OFF CACHE BOOL "Build tests for poly2tri")
+set(P2T_BUILD_TESTBED OFF CACHE BOOL "Build testbed for poly2tri")
+add_subdirectory("${PROJECT_LIB_DIR}/poly2tri")
+
+
 #########################################################
 # Project Compile Settings Aggregate
 #########################################################
@@ -189,6 +195,7 @@ PUBLIC
 	Bullet
 	Clipper2
 	Clipper2utils
+	poly2tri
 )
 
 if (OPENMP_FOUND)
