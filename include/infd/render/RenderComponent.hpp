@@ -77,15 +77,28 @@ namespace infd::render {
     };
 
     class DitherSettingsComponent : public scene::Component {
+        friend class Pipeline;
+        enum class Preset {
+            Ordered1Bit,
+            Noise1Bit,
+            OrderedColour,
+            NoiseColour,
+            Halftone,
+            ExperimentalLines,
+            ExperimentalSquares,
+            Custom
+        };
       public:
+        void gui();
+        void changePreset(Preset p);
+      protected:
+        Preset _preset = Preset::Ordered1Bit;
+        Dithers dither_pattern = Dithers::Ordered;
+        bool dither_colour = true;
         float threshold = 0.45;
         float pattern_angle = 0;
-        bool dither_colour = true;
         glm::vec3 sky_colour {0, 0, 0};
-        Dithers dither_pattern = Dithers::Ordered;
 
-        void gui();
-      protected:
         void onAttach() override;
     };
 }
