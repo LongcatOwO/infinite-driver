@@ -13,6 +13,7 @@
 namespace infd::render {
     DirectionalLightComponent* Renderer::_light = nullptr;
     CameraComponent* Renderer::_camera = nullptr;
+    DitherSettingsComponent* Renderer::_dither = nullptr;
 
     void Renderer::render() {
         if (_light == nullptr) {
@@ -21,9 +22,11 @@ namespace infd::render {
         if (_camera == nullptr) {
             throw infd::util::InvalidStateException("Attempted to render but renderer knows no camera");
         }
+        if (_dither == nullptr) {
+            throw infd::util::InvalidStateException("Attempted to render but renderer has no dither settings");
+        }
 
-        _render_settings.pattern_angle = _test_camera.pattern_angle;
-        _pipeline.render(_render_components, _render_settings, *_light, *_camera);
+        _pipeline.render(_render_components, _render_settings, *_light, *_camera, *_dither);
     }
 
     void Renderer::reloadShaders() {
@@ -42,7 +45,8 @@ namespace infd::render {
             reloadShaders();
         }
 
-        ImGui::SliderFloat("Pattern angle", &_test_camera.pattern_angle, 0, glm::pi<float>());
+        ImGui::Separator();
+        _dither->gui();
         ImGui::Separator();
         _light->gui();
         ImGui::Separator();

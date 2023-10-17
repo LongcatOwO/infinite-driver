@@ -28,7 +28,7 @@ namespace infd::render {
         void renderToScreen(const GLProgram& shader, const GLMesh& display, glm::ivec2 screen_size, bool clear = true, Kind kind = Kind::Colour) const;
         void renderToOther(const GLProgram& shader, const Framebuffer& other, const GLMesh& display, bool clear = true, Kind kind = Kind::Colour) const;
         // call after framebuffer is bound
-        void setupDraw() const;
+        void setupDraw(glm::vec3 clear_colour = {0, 0, 0}) const;
 
 
     };

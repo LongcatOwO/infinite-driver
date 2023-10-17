@@ -31,8 +31,8 @@ namespace infd::render {
      *
      * direction is the direction of the light lol
      *
-     * NOTE: Global position is used as the centre of the shadow map so parent it to the player or
-     * something in the middle of the screen
+     * NOTE:    Global position is used as the centre of the shadow map so parent it to the player or
+     *          something in the middle of the screen
      */
 
     class DirectionalLightComponent : public scene::Component {
@@ -73,6 +73,32 @@ namespace infd::render {
 
       protected:
         glm::vec3 euler_rot {0, 0, 0};
+        void onAttach() override;
+    };
+
+    class DitherSettingsComponent : public scene::Component {
+        friend class Pipeline;
+        enum class Preset {
+            Ordered1Bit,
+            Noise1Bit,
+            OrderedColour,
+            NoiseColour,
+            Halftone,
+            ExperimentalLines,
+            ExperimentalSquares,
+            Custom
+        };
+      public:
+        void gui();
+        void changePreset(Preset p);
+      protected:
+        Preset _preset = Preset::Ordered1Bit;
+        Dithers dither_pattern = Dithers::Ordered;
+        bool dither_colour = true;
+        float threshold = 0.45;
+        float pattern_angle = 0;
+        glm::vec3 sky_colour {0, 0, 0};
+
         void onAttach() override;
     };
 }
