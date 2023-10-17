@@ -155,8 +155,8 @@ namespace infd {
         bunny.emplaceComponent<scene::physics::RigidBody>();
 
         scene::SceneObject& chunkLoader = _scene.addSceneObject(std::make_unique<scene::SceneObject>("ChunkLoader"));
-        auto& loader = chunkLoader.emplaceComponent<generator::ChunkLoader>(chunkLoader, _renderer, 5);
-        loader.move(-6,-6);
+        auto& loader = chunkLoader.emplaceComponent<generator::ChunkLoader>(chunkLoader, _renderer, 2);
+        loader.move(-3,-3);
         loader.transform().localScale(glm::vec3(30));
 
         scene::SceneObject& light = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Light"));

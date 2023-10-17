@@ -17,42 +17,18 @@
 // project - generator
 #include <infd/generator/ChunkGenerator.hpp>
 #include <infd/generator/PerlinNoise.hpp>
+#include <infd/generator/meshbuilding/Triangle.hpp>
 
 // project - math
 #include <infd/math/glm_bullet.hpp>
 
 
 namespace infd::generator::meshbuilding {
-    inline void generateBasicTri(GLMeshBuilder& mb, btTriangleMesh& tri_mesh, std::vector<glm::vec3> nodes, unsigned int& index) {
-        MeshVertex a, b, c;
-
-        a.pos = nodes.at(0);
-        b.pos = nodes.at(1);
-        c.pos = nodes.at(2);
-
-        glm::vec3 normal = glm::normalize(glm::cross(a.pos - b.pos, a.pos - c.pos));
-        a.norm = normal;
-        b.norm = normal;
-        c.norm = normal;
-
-        mb.vertices.push_back(a);
-        mb.vertices.push_back(b);
-        mb.vertices.push_back(c);
-
-        mb.indices.push_back(index++);
-        mb.indices.push_back(index++);
-        mb.indices.push_back(index++);
-
-        tri_mesh.addTriangle(math::toBullet(a.pos), math::toBullet(b.pos), math::toBullet(c.pos));
-    }
-
     /**
      * Constructs a unit mesh based off the values from the given perlin noise
      */
-    inline auto generatePerlinMesh(int offsetX, int offsetY, PerlinNoise& noise, unsigned int subdivisions = 5) {
+    inline auto generatePerlinMesh(int offsetX, int offsetY, PerlinNoise& noise, unsigned int subdivisions = 20) {
         GLMeshBuilder meshBuilder;
-
-        float scale = 1;
 
         float subdivisionSize = 1.f/static_cast<float>(subdivisions);
 
@@ -69,27 +45,33 @@ namespace infd::generator::meshbuilding {
 
                 glm::vec3 xy1 = glm::vec3(
                         relX,
-                        subdivisionSize * ChunkGenerator::scaledPerlin(noiseX, noiseY, noise),
+                        PERLIN_TERRAIN_FACTOR * ChunkGenerator::scaledPerlin(noiseX, noiseY, noise),
                         relY
-                ) * scale;
+                );
                 glm::vec3 xy2 = glm::vec3(
                         relX+subdivisionSize,
-                        subdivisionSize * ChunkGenerator::scaledPerlin(noiseX+subdivisionSize, noiseY, noise),
+                        PERLIN_TERRAIN_FACTOR * ChunkGenerator::scaledPerlin(noiseX+subdivisionSize, noiseY, noise),
                         relY
-                ) * scale;
+                );
                 glm::vec3 xy3 = glm::vec3(
                         relX,
-                        subdivisionSize * ChunkGenerator::scaledPerlin(noiseX, noiseY+subdivisionSize, noise),
+                        PERLIN_TERRAIN_FACTOR * ChunkGenerator::scaledPerlin(noiseX, noiseY+subdivisionSize, noise),
                         relY+subdivisionSize
-                ) * scale;
+                );
                 glm::vec3 xy4 = glm::vec3(
                         relX+subdivisionSize,
-                        subdivisionSize * ChunkGenerator::scaledPerlin(noiseX+subdivisionSize, noiseY+subdivisionSize, noise),
+                        PERLIN_TERRAIN_FACTOR * ChunkGenerator::scaledPerlin(noiseX+subdivisionSize, noiseY+subdivisionSize, noise),
                         relY+subdivisionSize
-                ) * scale;
+                );
 
-                generateBasicTri(meshBuilder, *tri_mesh, {xy3, xy2, xy1}, index);
-                generateBasicTri(meshBuilder, *tri_mesh, {xy2, xy3, xy4}, index);
+                Triangle t1(xy3, xy2, xy1);
+                Triangle t2(xy2, xy3, xy4);
+
+                t1.addToMesh(meshBuilder, index);
+                t2.addToMesh(meshBuilder, index);
+
+                t1.addToCollision(*tri_mesh);
+                t2.addToCollision(*tri_mesh);
             }
         }
 

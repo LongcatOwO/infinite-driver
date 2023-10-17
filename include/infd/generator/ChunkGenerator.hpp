@@ -10,11 +10,15 @@
 
 namespace infd::generator {
     static const float ROAD_LENGTH = 0.05f;
+    static const float ROAD_WIDTH = 0.005f;
+    static const float ROAD_HEIGHT = 0.001f;
     static const float PERLIN_DEPTH = 1.f;
     static const float MAX_BORDER_ROOTS = 3.2f;
     static const float BORDER_ROOT_PADDING = ROAD_LENGTH * 2;
     static const float BORDER_ROOT_ANGLE = glm::half_pi<float>() / 32;
     static const float BORDER_PADDING = 0.05f;
+
+    static const float PERLIN_TERRAIN_FACTOR = 0.03f;
 
     //TODO: replace with dynamic based on perlin noise?
     static const unsigned int GENERATION_DEPTH = 25;
