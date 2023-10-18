@@ -156,8 +156,9 @@ namespace infd {
 
         scene::SceneObject& chunkLoader = _scene.addSceneObject(std::make_unique<scene::SceneObject>("ChunkLoader"));
         auto& loader = chunkLoader.emplaceComponent<generator::ChunkLoader>(chunkLoader, _renderer, 2);
-        loader.move(-3,-3);
-        loader.transform().localScale(glm::vec3(30));
+        loader.transform().localScale(glm::vec3(WORLD_SCALE));
+
+        _chunk_loader = &loader;
 
         scene::SceneObject& light = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Light"));
         light.emplaceComponent<render::DirectionalLightComponent>();

@@ -17,6 +17,7 @@
 #include <infd/scene/Scene.hpp>
 #include <infd/render/RenderComponent.hpp>
 #include "Wavefront.hpp"
+#include "infd/generator/ChunkLoader.hpp"
 
 
 namespace infd {
@@ -31,11 +32,14 @@ namespace infd {
 	using GLFWWindowPtr = std::unique_ptr<GLFWwindow, GLFWWindowDeleter>;
 
 	class Application {
+        constexpr static const float WORLD_SCALE = 30.f;
+
 		// window
 		GLFWWindowPtr _window;
 		glm::vec2 _window_size;
 
 		scene::Scene _scene;
+        infd::generator::ChunkLoader* _chunk_loader;
 
 		// orbital camera
 		float _pitch = .86;

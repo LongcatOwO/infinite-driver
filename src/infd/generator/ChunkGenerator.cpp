@@ -70,20 +70,20 @@ namespace infd::generator {
             if (node->depth > depth) continue;
 
             if (probabilityDist(random) < BRANCH_ROAD_CHANCE && node->neighbours.size() < MAX_NEIGHBOURS) {
-                addNode(node, nodeQueue, random, -glm::half_pi<float>());
+                addNode(node, nodeQueue, random, -glm::half_pi<float>(), 1);
             }
 
             if (node->neighbours.size() < MAX_NEIGHBOURS) {
-                addNode(node, nodeQueue, random, 0.f);
+                addNode(node, nodeQueue, random, 0.f, 0);
             }
 
             if (probabilityDist(random) < BRANCH_ROAD_CHANCE && node->neighbours.size() < MAX_NEIGHBOURS) {
-                addNode(node, nodeQueue, random, glm::half_pi<float>());
+                addNode(node, nodeQueue, random, glm::half_pi<float>(), 1);
             }
         }
     }
 
-    void ChunkGenerator::addNode(Node* parent, std::deque<Node*> &nodeQueue, helpers::RandomType random, float angleOffset) {
+    void ChunkGenerator::addNode(Node* parent, std::deque<Node*> &nodeQueue, helpers::RandomType random, float angleOffset, unsigned int offset = 0) {
         float angle = parent->angle + angleDist(random) + angleOffset;
 
         float x_ = parent->x + ROAD_LENGTH * cosf(angle);
@@ -93,7 +93,7 @@ namespace infd::generator {
             return;
         }
 
-        Node neighbour(x_, y_, angle, false, parent->depth+1);
+        Node neighbour(x_, y_, angle, false, parent->depth+1, parent->depth+offset);
 
         Node* nearest = neighbour.findNearest(parent, nodes);
 
@@ -180,6 +180,8 @@ namespace infd::generator {
                 }
 
                 if (cycle.size() < MIN_CYCLE || cycle.size() > MAX_CYCLE) continue;
+
+                cycles.push_back(cycle);
             }
         }
     }

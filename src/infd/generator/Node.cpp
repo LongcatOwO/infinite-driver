@@ -1,4 +1,5 @@
 #include "infd/generator/Node.hpp"
+#include "infd/generator/ChunkGenerator.hpp"
 
 #include <algorithm>
 #include <memory>
@@ -9,8 +10,8 @@ namespace infd::generator {
         return (x - other.x) * (x - other.x) + (y - other.y) * (y - other.y);
     }
 
-    Node::Node(float x, float y, float angle, bool isRoot, unsigned int depth) : x(x), y(y), angle(angle),
-                                                                                 isRoot(isRoot), depth(depth) {}
+    Node::Node(float x, float y, float angle, bool isRoot, unsigned int depth, unsigned int category) : x(x), y(y), angle(angle),
+                                                                                 isRoot(isRoot), depth(depth), category(std::min(category, MAX_DEPTH)) {}
 
     Node* Node::findNearest(Node* initial, std::vector<std::shared_ptr<Node>> &pool) const {
         Node* nearest = initial;
