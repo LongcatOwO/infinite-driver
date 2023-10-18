@@ -235,6 +235,18 @@ namespace infd::scene {
 		  * glm::mat4_cast(_local_rotation);
 	}
 
+	inline glm::vec<3, Float> Transform::localFront() const noexcept {
+		return localRotation() * glm::vec<3, Float>{0, 0, -1};
+	}
+
+	inline glm::vec<3, Float> Transform::localUp() const noexcept {
+		return localRotation() * glm::vec<3, Float>{0, 1, 0};
+	}
+
+	inline glm::vec<3, Float> Transform::localRight() const noexcept {
+		return localRotation() * glm::vec<3, Float>{1, 0, 0};
+	}
+
 	inline void Transform::localPosition(const glm::vec<3, Float> &value) noexcept {
 		_local_position = value;
 		visitAllChildren([](Transform &child) { child._parent_global_transform_updated = false; });

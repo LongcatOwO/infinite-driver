@@ -19,13 +19,13 @@
 
 // project - scene::physics
 #include <infd/scene/physics/physics.hpp>
+#include <infd/scene/physics/TransformMotionState.hpp>
 
 
 namespace infd::scene::physics {
 
 	RigidBody::RigidBody() : 
-		_motion_state(new btDefaultMotionState()), 
-		_rigid_body(new btRigidBody(btRigidBody::btRigidBodyConstructionInfo(1, _motion_state.get(), nullptr))) {
+		_rigid_body(new btRigidBody(btRigidBody::btRigidBodyConstructionInfo(1, nullptr, nullptr))) {
 	}
 
 	void RigidBody::internalFindPhysicsContext() {
@@ -54,6 +54,9 @@ namespace infd::scene::physics {
 				));
 		}
 
+		_motion_state.reset(new TransformMotionState(transform()));
+		_rigid_body->setMotionState(_motion_state.get());
+
 		btCollisionShape* shape = &_collision_shape->getBtCollisionShape();
 		btScalar mass = _rigid_body->getMass();
 		btVector3 inertia;
@@ -75,24 +78,6 @@ namespace infd::scene::physics {
 		});
 		_rigid_body->setCollisionShape(shape);
 		_rigid_body->setMassProps(mass, inertia);
-	}
-
-	void RigidBody::internalSyncTransformToPhysicsWorld() noexcept {
-		if (!isStatic()) {
-			btTransform t;
-			_motion_state->getWorldTransform(t);
-			transform().localPosition(math::toGlm(t.getOrigin()));
-			transform().localRotation(math::toGlm(t.getRotation()));
-		}
-	}
-
-	void RigidBody::internalSyncPhysicsWorldToTransform() noexcept {
-		if (isKinematic()) {
-			_rigid_body->proceedToTransform(btTransform{
-				math::toBullet(transform().localRotation()),
-				math::toBullet(transform().localPosition())
-			});
-		}
 	}
 
 	void RigidBody::onAwake() {

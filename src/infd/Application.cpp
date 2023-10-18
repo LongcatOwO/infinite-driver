@@ -20,11 +20,13 @@
 
 // project - infd
 #include <infd/Application.hpp>
+#include <infd/debug/geometry.hpp>
 #include <infd/debug/glm.hpp>
 #include <infd/Shader.hpp>
 #include <infd/Wavefront.hpp>
 #include <infd/util/Function.hpp>
 #include <infd/util/StaticCastOutPtr.hpp>
+#include <infd/scene/KeyboardInputRigidBodyController.hpp>
 #include <infd/scene/Scene.hpp>
 #include <infd/scene/physics/BoxShape.hpp>
 #include <infd/scene/physics/physics.hpp>
@@ -132,15 +134,19 @@ namespace infd {
 		// plane.emplaceComponent<scene::physics::RigidBody>().mass(0);
 
         scene::SceneObject& teapot = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Teapot"));
-        // teapot.transform().localPosition(glm::vec3(-5, 3, 2));
 		teapot.transform().localPosition({-5, 30, 2});
 		teapot.emplaceComponent<render::RenderComponent>(
 			_renderer, 
 			infd::loadWavefrontCases(CGRA_SRCDIR "//res//assets//teapot.obj").build()
 		);
         teapot.getComponent<render::RenderComponent>()->material.colour = {47/255.f, 196/255.f, 94/255.f};
-        teapot.emplaceComponent<scene::physics::BoxShape>().halfSize({3, 3, 3});
+		{
+			auto& box_shape = teapot.emplaceComponent<scene::physics::BoxShape>();
+			box_shape.halfSize({3, 3, 3});
+			box_shape.createOutlineMesh(_renderer);
+		}
         teapot.emplaceComponent<scene::physics::RigidBody>();
+		teapot.emplaceComponent<scene::KeyboardInputRigidBodyController>();
 
         scene::SceneObject& bunny = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Bunny"));
 		bunny.transform().localPosition({8, 30, -1.5});
@@ -151,7 +157,11 @@ namespace infd {
 		);
 		bunny_mesh.transform().localScale(glm::vec3{75});
         bunny_mesh.getComponent<render::RenderComponent>()->material.colour = {232/255.f, 205/255.f, 136/255.f};
-        bunny.emplaceComponent<scene::physics::BoxShape>().halfSize({3, 3, 3});
+		{
+			auto& box_shape = bunny.emplaceComponent<scene::physics::BoxShape>();
+			box_shape.halfSize({3, 3, 3});
+			box_shape.createOutlineMesh(_renderer);
+		}
         bunny.emplaceComponent<scene::physics::RigidBody>();
 
         scene::SceneObject& chunkLoader = _scene.addSceneObject(std::make_unique<scene::SceneObject>("ChunkLoader"));
