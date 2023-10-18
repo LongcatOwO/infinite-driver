@@ -174,27 +174,27 @@ namespace {
 			}
 
 			static void cursorPosCallback(GLFWwindow *window, double x_pos, double y_pos) {
-				if (ImGui::GetIO().WantCaptureMouse) return;
+				// if (ImGui::GetIO().WantCaptureMouse) return;
 				getWindowApplication(window).cursorPosCallback(x_pos, y_pos);
 			}
 			
 			static void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods) {
-				if (ImGui::GetIO().WantCaptureMouse) return;
+				// if (ImGui::GetIO().WantCaptureMouse) return;
 				getWindowApplication(window).mouseButtonCallback(button, action, mods);
 			}
 
 			static void scrollCallback(GLFWwindow *window, double x_offset, double y_offset) {
-				if (ImGui::GetIO().WantCaptureMouse) return;
+				// if (ImGui::GetIO().WantCaptureMouse) return;
 				getWindowApplication(window).scrollCallback(x_offset, y_offset);
 			}
 
 			static void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) {
-				if (ImGui::GetIO().WantCaptureKeyboard) return;
+				// if (ImGui::GetIO().WantCaptureKeyboard) return;
 				getWindowApplication(window).keyCallback(key, scancode, action, mods);
 			}
 
 			static void charCallback(GLFWwindow *window, unsigned int c) {
-				if (ImGui::GetIO().WantTextInput) return;
+				// if (ImGui::GetIO().WantTextInput) return;
 				getWindowApplication(window).charCallback(c);
 			}
 		};
