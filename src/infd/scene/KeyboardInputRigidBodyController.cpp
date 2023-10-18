@@ -13,11 +13,12 @@ namespace infd::scene {
 		updateAccelerationForce();
 		updateTurnAccelerationForce();
 		
-		scene().keyEvent() += util::BindedMemberFunc(&KeyboardInputRigidBodyController::keyCallback, *this);
+		_scene = &scene();
+		_scene->keyEvent() += util::BindedMemberFunc(&KeyboardInputRigidBodyController::keyCallback, *this);
 	}
 
 	void KeyboardInputRigidBodyController::onDetach() {
-		scene().keyEvent() -= util::BindedMemberFunc(&KeyboardInputRigidBodyController::keyCallback, *this);
+		_scene->keyEvent() -= util::BindedMemberFunc(&KeyboardInputRigidBodyController::keyCallback, *this);
 	}
 
 	void KeyboardInputRigidBodyController::onPhysicsUpdate() {

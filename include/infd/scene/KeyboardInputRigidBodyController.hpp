@@ -22,6 +22,8 @@ namespace infd::scene {
 	class KeyboardInputRigidBodyController : public scene::Component {
 		using RigidBody = physics::RigidBody;
 
+		Scene* _scene = nullptr;
+
 		RigidBody* _rigid_body = nullptr;
 		Float _acceleration = 50;
 		Float _turn_acceleration = 50;

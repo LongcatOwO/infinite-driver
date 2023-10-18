@@ -8,6 +8,7 @@ namespace infd::scene {
 		Float _distance_from_parent = 50.f;
 		Float _yaw = 0;
 		Float _pitch = 0;
+		Scene* _scene = nullptr;
 		double _last_x, _last_y;
 		double _cursor_pos_init = false;
 		double _sensitivity_x = 0.001;

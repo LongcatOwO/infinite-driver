@@ -23,17 +23,18 @@ namespace infd::scene {
 				"[LookAtParent(\"{}\")::onAwake()]: SceneObject must have parent",
 				sceneObject().name()
 			));
+		_scene = &scene();
 
-		scene().cursorPosEvent() += util::BindedMemberFunc(&LookAtParent::cursorPosCallback, *this);
-		scene().mouseButtonEvent() += util::BindedMemberFunc(&LookAtParent::mouseButtonCallback, *this);
-		scene().scrollEvent() += util::BindedMemberFunc(&LookAtParent::scrollCallback, *this);
+		_scene->cursorPosEvent() += util::BindedMemberFunc(&LookAtParent::cursorPosCallback, *this);
+		_scene->mouseButtonEvent() += util::BindedMemberFunc(&LookAtParent::mouseButtonCallback, *this);
+		_scene->scrollEvent() += util::BindedMemberFunc(&LookAtParent::scrollCallback, *this);
 		updateTransform();
 	}
 
 	void LookAtParent::onDetach() {
-		scene().cursorPosEvent() -= util::BindedMemberFunc(&LookAtParent::cursorPosCallback, *this);
-		scene().mouseButtonEvent() -= util::BindedMemberFunc(&LookAtParent::mouseButtonCallback, *this);
-		scene().scrollEvent() -= util::BindedMemberFunc(&LookAtParent::scrollCallback, *this);
+		_scene->cursorPosEvent() -= util::BindedMemberFunc(&LookAtParent::cursorPosCallback, *this);
+		_scene->mouseButtonEvent() -= util::BindedMemberFunc(&LookAtParent::mouseButtonCallback, *this);
+		_scene->scrollEvent() -= util::BindedMemberFunc(&LookAtParent::scrollCallback, *this);
 	}
 
 	void LookAtParent::onFrameUpdate() {
