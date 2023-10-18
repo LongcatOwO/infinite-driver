@@ -26,7 +26,9 @@
 #include <infd/Wavefront.hpp>
 #include <infd/util/Function.hpp>
 #include <infd/util/StaticCastOutPtr.hpp>
+#include <infd/scene/FollowTransform.hpp>
 #include <infd/scene/KeyboardInputRigidBodyController.hpp>
+#include <infd/scene/LookAtParent.hpp>
 #include <infd/scene/Scene.hpp>
 #include <infd/scene/physics/BoxShape.hpp>
 #include <infd/scene/physics/physics.hpp>
@@ -147,6 +149,12 @@ namespace infd {
 		}
         teapot.emplaceComponent<scene::physics::RigidBody>();
 		teapot.emplaceComponent<scene::KeyboardInputRigidBodyController>();
+		scene::SceneObject& camera_target = 
+			_scene.addSceneObject(std::make_unique<scene::SceneObject>("Camera Target"));
+		camera_target.emplaceComponent<scene::FollowTransform>().toFollow(&teapot.transform());
+		scene::SceneObject& camera = camera_target.addChild("camera");
+		camera.emplaceComponent<render::CameraComponent>();
+		camera.emplaceComponent<scene::LookAtParent>();
 
         scene::SceneObject& bunny = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Bunny"));
 		bunny.transform().localPosition({8, 30, -1.5});
@@ -172,9 +180,9 @@ namespace infd {
         scene::SceneObject& light = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Light"));
         light.emplaceComponent<render::DirectionalLightComponent>();
 
-        scene::SceneObject& camera = _scene.addSceneObject(std::make_unique<scene::SceneObject>("camera"));
-        camera.transform().localPosition({0, 15, 30});
-        camera.emplaceComponent<render::CameraComponent>();
+        // scene::SceneObject& camera = _scene.addSceneObject(std::make_unique<scene::SceneObject>("camera"));
+        // camera.transform().localPosition({0, 15, 30});
+        // camera.emplaceComponent<render::CameraComponent>();
 	}
 
 	void Application::internalDoRender(scene::Scene &) {
