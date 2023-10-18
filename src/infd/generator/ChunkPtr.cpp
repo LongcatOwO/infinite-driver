@@ -8,6 +8,7 @@
 
 #include <infd/debug/glm.hpp>
 #include <iostream>
+#include "infd/generator/meshbuilding/BuildingMeshBuilder.hpp"
 
 namespace infd::generator {
     ChunkPtr::ChunkPtr(scene::Component &parent, render::Renderer &renderer, ChunkGenerator &generator) :
@@ -34,6 +35,23 @@ namespace infd::generator {
         
         roadSceneObject.emplaceComponent<scene::physics::BvhTriangleMeshShape>(std::move(road_collision_mesh));
         roadSceneObject.emplaceComponent<scene::physics::RigidBody>().mass(0);
+
+        helpers::RandomType random(generator.seed);
+
+        for (Clipper2Lib::PathD& path : generator.cycles) {
+            auto [building_mesh, building_collision_mesh] = meshbuilding::BuildingMeshBuilder(generator, path, random).build();
+
+            auto& buildingSceneObject = chunkSceneObject.addChild((std::stringstream() << "Building: " << &path).str());
+
+            auto& buildingObj = roadSceneObject.emplaceComponent<render::RenderComponent>(renderer, std::move(building_mesh));
+
+            buildingObj.material.colour = glm::vec3(buildingColourDist(random), buildingColourDist(random), buildingColourDist(random));
+
+            if (building_collision_mesh->getNumTriangles() > 0) {
+                buildingSceneObject.emplaceComponent<scene::physics::BvhTriangleMeshShape>(std::move(building_collision_mesh));
+                buildingSceneObject.emplaceComponent<scene::physics::RigidBody>().mass(0);
+            }
+        }
 
         _chunkScenePointer = &chunkSceneObject;
     }

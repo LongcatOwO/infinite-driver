@@ -247,6 +247,7 @@ PRIVATE
 	"${PROJECT_SOURCE_DIR}/src/infd/generator/meshbuilding/Triangle.cpp"
 	"${PROJECT_SOURCE_DIR}/src/infd/generator/meshbuilding/Polygon.cpp"
 	"${PROJECT_SOURCE_DIR}/src/infd/generator/meshbuilding/RoadMeshBuilder.cpp"
+	"${PROJECT_SOURCE_DIR}/src/infd/generator/meshbuilding/BuildingMeshBuilder.cpp"
 	"${PROJECT_SOURCE_DIR}/src/infd/scene/physics/CollisionShape.cpp"
 	"${PROJECT_SOURCE_DIR}/src/infd/scene/physics/PhysicsContext.cpp"
 	"${PROJECT_SOURCE_DIR}/src/infd/scene/physics/RigidBody.cpp"
