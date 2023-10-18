@@ -117,23 +117,8 @@ namespace infd {
 
 		_scene.addSceneObject(std::make_unique<scene::SceneObject>("Physics Context"));
 
-        // TODO: REMOVE
-        // Create Demo Objects:
 		scene::SceneObject& physicsContext = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Physics Context"));
 		physicsContext.emplaceComponent<scene::physics::PhysicsContext>();
-
-        // scene::SceneObject& plane = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Plane"));
-		// plane.transform().localPosition({0, 0, 0});
-        // plane.transform().localScale(glm::vec3(5,0.01,5));
-        // plane.addComponent(
-        //         std::make_unique<render::RenderComponent>(
-        //                 _renderer,
-        //                 infd::loadWavefrontCases(CGRA_SRCDIR + std::string("/res//assets//plane.obj")).build()
-        //         )
-        // );
-
-		// plane.emplaceComponent<scene::physics::StaticPlaneShape>(glm::vec3(0, 1, 0), 0);
-		// plane.emplaceComponent<scene::physics::RigidBody>().mass(0);
 
         scene::SceneObject& teapot = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Teapot"));
 		teapot.transform().localPosition({-5, 30, 2});
@@ -154,6 +139,7 @@ namespace infd {
 		camera_target.emplaceComponent<scene::FollowTransform>().toFollow(&teapot.transform());
 		scene::SceneObject& camera = camera_target.addChild("camera");
 		camera.emplaceComponent<render::CameraComponent>();
+		camera.emplaceComponent<render::DitherSettingsComponent>();
 		camera.emplaceComponent<scene::LookAtParent>();
 
         scene::SceneObject& bunny = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Bunny"));
@@ -173,16 +159,13 @@ namespace infd {
         bunny.emplaceComponent<scene::physics::RigidBody>();
 
         scene::SceneObject& chunkLoader = _scene.addSceneObject(std::make_unique<scene::SceneObject>("ChunkLoader"));
-        auto& loader = chunkLoader.emplaceComponent<generator::ChunkLoader>(chunkLoader, _renderer, 5);
-        loader.move(-6,-6);
-        loader.transform().localScale(glm::vec3(30));
+        auto& loader = chunkLoader.emplaceComponent<generator::ChunkLoader>(chunkLoader, _renderer, 2);
+        loader.transform().localScale(glm::vec3(WORLD_SCALE));
+
+        _chunk_loader = &loader;
 
         scene::SceneObject& light = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Light"));
         light.emplaceComponent<render::DirectionalLightComponent>();
-
-        // scene::SceneObject& camera = _scene.addSceneObject(std::make_unique<scene::SceneObject>("camera"));
-        // camera.transform().localPosition({0, 15, 30});
-        // camera.emplaceComponent<render::CameraComponent>();
 	}
 
 	void Application::internalDoRender(scene::Scene &) {
@@ -251,7 +234,7 @@ namespace infd {
 	void Application::internalRenderGUI() {
 		// setup the window
 		ImGui::SetNextWindowPos(ImVec2{5, 5}, ImGuiCond_Once);
-		ImGui::SetNextWindowSize(ImVec2{300, 420}, ImGuiCond_Once);
+		ImGui::SetNextWindowSize(ImVec2{300, 480}, ImGuiCond_Once);
 		ImGui::Begin("Options", nullptr);
 
 		// display current camera parameters
@@ -272,7 +255,6 @@ namespace infd {
 		ImGui::Separator();
 
 		_renderer.gui();
-        ImGui::Checkbox("Dither with colour", &_render_settings.dither_colour);
 		ImGui::Checkbox("Render un-dithered scene", &_render_settings.render_original);
         ImGui::Checkbox("Render wireframe", &_render_settings.render_wireframe);
 

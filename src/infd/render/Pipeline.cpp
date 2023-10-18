@@ -18,11 +18,19 @@ infd::render::Pipeline::Pipeline() : _sky_sphere{loadWavefrontCases(CGRA_SRCDIR 
     loadShaders();
     // load dither texture
     {
-        {
-            auto texture_guard = scopedBind(_dither_texture, GL_TEXTURE_2D);
+        std::string texture_paths[] = {
+                "/res/textures/dithers/64x64-blue-noise.png",
+                "/res/textures/dithers/16x16-ordered-dither.png",
+                "/res/textures/dithers/8x8-halftone-dot.png",
+                "/res/textures/dithers/8x8-funny-lines.png",
+                "/res/textures/dithers/8x8-square-halftone.png"
+        };
 
-            auto tex = cgra::rgba_image{CGRA_SRCDIR + std::string("/res/textures/dithers/16x16-ordered-dither.png")};
-//        auto tex = cgra::rgba_image {CGRA_SRCDIR + std::string("/res/textures/dithers/64x64-blue-noise.png")};
+
+        for (int i = 0; i < (int)Dithers::Count; i++) {
+            auto texture_guard = scopedBind(_dithers[i], GL_TEXTURE_2D);
+
+            auto tex = cgra::rgba_image{CGRA_SRCDIR + texture_paths[i]};
 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -48,7 +56,8 @@ infd::render::Pipeline::Pipeline() : _sky_sphere{loadWavefrontCases(CGRA_SRCDIR 
     }
 }
 
-void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items, const RenderSettings& settings, const DirectionalLightComponent& light, const CameraComponent& camera) {
+void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items, const RenderSettings& settings,
+                                    const DirectionalLightComponent& light, const CameraComponent& camera, const DitherSettingsComponent& dither) {
     using namespace glm;
     if (!(_scene_buf.valid() && _final_buf.valid())) {
         std::cerr << "Error: Buffers not initialised before render called (screen size not set?)" << std::endl;
@@ -88,11 +97,12 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
     if (settings.render_wireframe) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     }
+
     // draw scene to buffer
     {
         auto program_guard = scopedProgram(_main_shader);
         auto fb_guard = scopedBind(_scene_buf.buffer, GL_FRAMEBUFFER);
-        _scene_buf.setupDraw();
+        _scene_buf.setupDraw(dither.sky_colour);
 
         sendUniform(_main_shader, "uLightDir", light.direction);
         sendUniform(_main_shader, "uCameraPos", camera.transform().globalPosition());
@@ -111,6 +121,7 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
             item->mesh.draw();
         }
     }
+
     if (settings.render_wireframe) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
@@ -127,10 +138,10 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
         auto sphere_view = glm::lookAt({0, 0, 0}, camera.forward(), {0, 1, 0});
 
         glActiveTexture(GL_TEXTURE1);
-        auto sky_texture_guard = scopedBind(_dither_texture, GL_TEXTURE_2D);
+        auto sky_texture_guard = scopedBind(_dithers[(int)dither.dither_pattern], GL_TEXTURE_2D);
         sendUniform(_sky_shader, "uTex", 1);
-        sendUniform(_sky_shader, "uScreenSize", (glm::vec2 {width, height}) * 1.f);
-        sendUniform(_sky_shader, "uPatternAngle", settings.pattern_angle);
+        sendUniform(_sky_shader, "uScreenSize", glm::vec2 {(float)width, (float)height});
+        sendUniform(_sky_shader, "uPatternAngle", dither.pattern_angle);
         sendUniform(_sky_shader, "uFov", camera.fov);
         sendUniform(_sky_shader, "uProjectionMatrix", proj);
         sendUniform(_sky_shader, "uViewMatrix", sphere_view);
@@ -153,7 +164,7 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
         glActiveTexture(GL_TEXTURE1);
         auto dither_texture_guard = scopedBind(_dither_dome_buf.colour, GL_TEXTURE_2D);
         sendUniform(_dither_shader, "uDitherPattern", 1);
-        sendUniform(_dither_shader, "uDitherColour", settings.dither_colour);
+        sendUniform(_dither_shader, "uDitherColour", dither.dither_colour);
 
         _scene_buf.renderToOther(_dither_shader, _final_buf, _fullscreen_mesh);
     }
@@ -173,9 +184,9 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
             _scene_buf.renderToScreen(_blit_shader, _fullscreen_mesh, settings.screen_size);
         } else {
             auto program_guard = scopedProgram(_threshold_blit_shader);
+            sendUniform(_threshold_blit_shader, "uThreshold", dither.threshold);
+            sendUniform(_dither_shader, "uDitherColour", dither.dither_colour);
             _final_buf.renderToScreen(_threshold_blit_shader, _fullscreen_mesh, settings.screen_size);
-//            auto program_guard = scopedProgram(_blit_shader);
-//            _scene_buf.renderToScreen(_blit_shader, _fullscreen_mesh, settings.screen_size);
         }
     }
 }

@@ -12,6 +12,8 @@
 namespace infd::generator {
 class ChunkLoader : public infd::scene::Component {
     private:
+        int _radius;
+
         int _x = 0;
         int _y = 0;
 
@@ -29,11 +31,13 @@ class ChunkLoader : public infd::scene::Component {
         void regenAll();
 
         void replace(int x, int y, int xOffset, int yOffset);
+
     public:
-        ChunkLoader(scene::SceneObject& scene, render::Renderer& renderer, int radius, unsigned int seed = 0);
+        ChunkLoader(scene::SceneObject& scene, render::Renderer& renderer, int radius, unsigned int seed = 0, int x = 0, int y = 0);
         ChunkPtr& operator()(int x, int y);
         void move(int x, int y);
-
+        void center(float x, float y);
         void detachAll();
+        void onFrameUpdate() override;
     };
 }

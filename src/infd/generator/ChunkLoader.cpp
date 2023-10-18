@@ -3,8 +3,8 @@
 #include "infd/generator/ChunkGenerator.hpp"
 
 namespace infd::generator {
-    ChunkLoader::ChunkLoader(scene::SceneObject& scene, render::Renderer& renderer, int radius, unsigned int seed) :
-    _diameter(radius+radius+1), _seed(seed), _perlinNoise(PerlinNoise(seed)), _renderer(renderer)
+    ChunkLoader::ChunkLoader(scene::SceneObject& scene, render::Renderer& renderer, int radius, unsigned int seed, int x, int y) :
+        _radius(radius), _x(x-radius), _y(y-radius), _diameter(radius+radius+1), _seed(seed), _perlinNoise(PerlinNoise(seed)), _renderer(renderer)
     {
         _chunks.reserve(_diameter * _diameter);
         for (int x = 0; x < _diameter; x++) {
@@ -90,5 +90,19 @@ namespace infd::generator {
         for (ChunkPtr& ptr : _chunks) {
             ptr.detach();
         }
+    }
+
+    void ChunkLoader::center(float x, float y) {
+        int xTransform = std::floor(x) - _radius;
+        int yTransform = std::floor(y) - _radius;
+        if (xTransform != _x || yTransform != y) {
+            move(xTransform, yTransform);
+        }
+    }
+
+    void ChunkLoader::onFrameUpdate() {
+        glm::vec3 cameraPosition = _renderer._camera->transform().globalPosition();
+        glm::vec3 scale = transform().localScale();
+        center(cameraPosition.x / scale.x, cameraPosition.z / scale.z);
     }
 }

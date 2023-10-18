@@ -80,10 +80,10 @@ namespace infd::render {
         glDisable(GL_BLEND);
     }
 
-    void Framebuffer::setupDraw() const {
+    void Framebuffer::setupDraw(glm::vec3 clear_colour) const {
         glViewport(0, 0, _size.x, _size.y); // set the viewport to draw to the entire window
 
-        glClearColor(0, 0, 0, 1.0f);
+        glClearColor(clear_colour.r, clear_colour.g, clear_colour.b, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);

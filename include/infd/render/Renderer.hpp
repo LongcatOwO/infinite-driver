@@ -13,22 +13,18 @@ namespace infd::render {
 
     struct RenderSettings {
         glm::ivec2 screen_size;
-        float pattern_angle;
         bool render_original = false;
         bool render_wireframe = false;
-        bool dither_colour = true;
     };
 
     class Renderer {
         Pipeline _pipeline;
         RenderSettings _render_settings;
         util::handle_vector<RenderComponent*> _render_components;
-        struct {
-            float pattern_angle = 0;
-        } _test_camera;
      public:
         static DirectionalLightComponent* _light;
         static CameraComponent* _camera;
+        static DitherSettingsComponent* _dither;
 
         RenderComponentHandler addRenderComponent(RenderComponent& component);
         void render();
