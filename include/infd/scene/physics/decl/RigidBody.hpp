@@ -8,6 +8,7 @@
 
 // glm
 #include <glm/detail/qualifier.hpp>
+#include <glm/gtc/quaternion.hpp>
 #include <glm/vec3.hpp>
 
 // project - scene
@@ -36,7 +37,7 @@ namespace infd::scene::physics {
 		PhysicsContext* _physics_context = nullptr;
 		CollisionShape* _collision_shape = nullptr;
 
-		std::unique_ptr<btMotionState> _motion_state;
+		std::unique_ptr<btMotionState> _motion_state{nullptr};
 		std::unique_ptr<btRigidBody> _rigid_body;
 		LifeSpanHandle _life_span_handle;
 
@@ -53,9 +54,6 @@ namespace infd::scene::physics {
 		void internalFindCollisionBound();
 
 		void internalInitializeRigidBody();
-
-		void internalSyncTransformToPhysicsWorld() noexcept;
-		void internalSyncPhysicsWorldToTransform() noexcept;
 
 		/*
 		 * @throws MissingRootSceneObjectException if no root scene object is found with 
@@ -125,6 +123,14 @@ namespace infd::scene::physics {
 		auto damping() const noexcept;
 		void damping(btScalar linear, btScalar angular) noexcept;
 
+		void applyCentralForce(const glm::vec<3, Float>& force) noexcept;
+		void applyCentralImpulse(const glm::vec<3, Float>& impulse) noexcept;
+
+		void applyForce(const glm::vec<3, Float>& force, const glm::vec<3, Float>& relative_position) noexcept;
+		void applyImpulse(const glm::vec<3, Float>& impulse, const glm::vec<3, Float>& relative_position) noexcept;
+
+		void applyTorque(const glm::vec<3, Float>& torque) noexcept;
+		void applyTorqueImpulse(const glm::vec<3, Float>& torque_impulse) noexcept;
 
 	}; // class Rigidbody
 

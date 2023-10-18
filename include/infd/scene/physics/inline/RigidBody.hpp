@@ -138,4 +138,28 @@ namespace infd::scene::physics {
 		_rigid_body->setDamping(linear, angular);
 	}
 
+	inline void RigidBody::applyCentralForce(const glm::vec<3, Float>& force) noexcept {
+		_rigid_body->applyCentralForce(math::toBullet(force));
+	}
+
+	inline void RigidBody::applyCentralImpulse(const glm::vec<3, Float>& impulse) noexcept {
+		_rigid_body->applyCentralImpulse(math::toBullet(impulse));
+	}
+
+	inline void RigidBody::applyForce(const glm::vec<3, Float>& force, const glm::vec<3, Float>& relative_position) noexcept {
+		_rigid_body->applyForce(math::toBullet(force), math::toBullet(relative_position));
+	}
+
+	inline void RigidBody::applyImpulse(const glm::vec<3, Float>& impulse, const glm::vec<3, Float>& relative_position) noexcept {
+		_rigid_body->applyImpulse(math::toBullet(impulse), math::toBullet(relative_position));
+	}
+
+	inline void RigidBody::applyTorque(const glm::vec<3, Float>& torque) noexcept {
+		_rigid_body->applyTorque(math::toBullet(torque));
+	}
+
+	inline void RigidBody::applyTorqueImpulse(const glm::vec<3, Float>& torque_impulse) noexcept {
+		_rigid_body->applyTorqueImpulse(math::toBullet(torque_impulse));
+	}
+
 } // namespace infd::scene::physics

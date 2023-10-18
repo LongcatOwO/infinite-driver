@@ -111,6 +111,9 @@ namespace infd::scene {
 		[[nodiscard]] glm::qua<Float> localRotation() const noexcept;
 		[[nodiscard]] glm::vec<3, Float> localScale() const noexcept;
 		[[nodiscard]] glm::mat<4, 4, Float> localTransform() const noexcept;
+		[[nodiscard]] glm::vec<3, Float> localFront() const noexcept;
+		[[nodiscard]] glm::vec<3, Float> localUp() const noexcept;
+		[[nodiscard]] glm::vec<3, Float> localRight() const noexcept;
 
 		void localPosition(const glm::vec<3, Float> &value) noexcept;
 		void localRotation(const glm::qua<Float> &value) noexcept;

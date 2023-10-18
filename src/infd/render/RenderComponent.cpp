@@ -50,12 +50,12 @@ namespace infd::render {
     void CameraComponent::gui() {
         ImGui::SliderFloat("FOV", &fov, 1, 2);
 
-        glm::vec3 v = transform().localPosition();
-        ImGui::SliderFloat3("Camera pos", glm::value_ptr(v), -50, 50);
-        transform().localPosition(v);
+        // glm::vec3 v = transform().localPosition();
+        // ImGui::SliderFloat3("Camera pos", glm::value_ptr(v), -50, 50);
+        // transform().localPosition(v);
 
-        ImGui::SliderFloat2("Camera rot", glm::value_ptr(euler_rot), -glm::pi<float>(), glm::pi<float>());
-        transform().localRotation(euler_rot);
+        // ImGui::SliderFloat2("Camera rot", glm::value_ptr(euler_rot), -glm::pi<float>(), glm::pi<float>());
+        // transform().localRotation(euler_rot);
     }
 
     void DitherSettingsComponent::onAttach() {

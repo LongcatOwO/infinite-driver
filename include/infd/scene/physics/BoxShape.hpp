@@ -6,11 +6,17 @@
 // glm
 #include <glm/vec3.hpp>
 
+// project - debug
+#include <infd/debug/geometry.hpp>
+
 // project - math
 #include <infd/math/glm_bullet.hpp>
 
 // project - scene::physics
 #include <infd/scene/physics/physics.hpp>
+
+// project - render
+#include <infd/render/RenderComponent.hpp>
 
 namespace infd::scene::physics {
 
@@ -21,6 +27,7 @@ namespace infd::scene::physics {
 	private:
 		btBoxShape _box_shape;
 		glm::vec<3, Float> _half_size;
+		Transform* _outline_mesh = nullptr;
 
 		[[nodiscard]] btCollisionShape& getBtCollisionShape() noexcept override {
 			return _box_shape;
@@ -47,6 +54,18 @@ namespace infd::scene::physics {
 
 		void halfSize(const glm::vec<3, Float>& value) noexcept {
 			_half_size = value;
+			if (_outline_mesh)
+				_outline_mesh->localScale(_half_size);
+		}
+
+		void createOutlineMesh(render::Renderer &renderer) override {
+			if (!_outline_mesh) {
+				_outline_mesh = &transform().addChild("outline");
+				_outline_mesh
+					->emplaceComponent<render::RenderComponent>(renderer, debug::generateBoxOutline())
+					.material.colour = default_outline_color;
+				_outline_mesh->localScale(_half_size);
+			}
 		}
 	};
 
