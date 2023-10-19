@@ -89,6 +89,9 @@ namespace infd::render {
             Custom
         };
       public:
+        DitherSettingsComponent() {
+            changePreset(_preset);
+        }
         void gui();
         void changePreset(Preset p);
       protected:
