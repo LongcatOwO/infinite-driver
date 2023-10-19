@@ -89,6 +89,7 @@ namespace {
 		);
 		RigidBody& rigid_body = car->emplaceComponent<RigidBody>();
 		rigid_body.angularDamping(0.1);
+		rigid_body.centerOfMassPosition({0, -1.f, 0});
 
 		return car;
 	}
@@ -180,6 +181,7 @@ namespace infd {
 		scene::SceneObject& car = _scene.addSceneObject(createCar(_renderer));
 		car.transform().localPosition({-5, 30, 2});
 		car.emplaceComponent<scene::KeyboardInputRigidBodyController>();
+		car.emplaceComponent<render::DirectionalLightComponent>();
 		
 		scene::SceneObject& camera_target =
 			_scene.addSceneObject(std::make_unique<scene::SceneObject>("Camera Target"));
@@ -195,8 +197,8 @@ namespace infd {
 
         _chunk_loader = &loader;
 
-        scene::SceneObject& light = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Light"));
-        light.emplaceComponent<render::DirectionalLightComponent>();
+        // scene::SceneObject& light = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Light"));
+        // light.emplaceComponent<render::DirectionalLightComponent>();
 	}
 
 	void Application::internalDoRender(scene::Scene &) {

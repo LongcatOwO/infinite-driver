@@ -14,6 +14,9 @@
 // project - infd::scene
 #include <infd/scene/Scene.hpp>
 
+// project - infd::scene::render
+#include <infd/render/RenderComponent.hpp>
+
 // project - infd::scene::physics
 #include <infd/scene/physics/physics.hpp>
 
@@ -23,6 +26,7 @@ namespace infd::scene {
 		using RigidBody = physics::RigidBody;
 
 		Scene* _scene = nullptr;
+		render::CameraComponent* _camera = nullptr;
 
 		RigidBody* _rigid_body = nullptr;
 		Float _acceleration = 30;
@@ -37,8 +41,11 @@ namespace infd::scene {
 
 		std::bitset<4> _moving{};
 
-		char _stabilize_key = 'e';
-		bool _is_stabilizing = false;
+		int _stabilize_roll_key = GLFW_KEY_E;
+		bool _is_stabilizing_roll = false;
+		int _stabilize_direction_key = GLFW_KEY_Q;
+		bool _is_stabilizing_direction = false;
+
 		Float _stabilizing_velocity = 20;
 
 		void onAwake() override;
@@ -48,6 +55,8 @@ namespace infd::scene {
 		void onPhysicsUpdate() override;
 
 		void keyCallback(int key, int scancode, int action, int mods);
+		
+		void stabilizeRoll();
 
 	private:
 		Float acceleration() const noexcept {
@@ -66,12 +75,20 @@ namespace infd::scene {
 			_turn_acceleration = turn_acceleration;
 		}
 
-		char stabilizeKey() const noexcept {
-			return _stabilize_key;
+		int stabilizeRollKey() const noexcept {
+			return _stabilize_roll_key;
 		}
 
-		void stabilizeKey(char value) noexcept {
-			_stabilize_key = value;
+		void stabilizeRollKey(int value) noexcept {
+			_stabilize_roll_key = value;
+		}
+
+		int stabilizeDirectionKey() const noexcept {
+			return _stabilize_direction_key;
+		}
+
+		void stabilizeDirectionKey(int value) noexcept {
+			_stabilize_direction_key = value;
 		}
 
 		Float stabilizingVelocity() const noexcept {

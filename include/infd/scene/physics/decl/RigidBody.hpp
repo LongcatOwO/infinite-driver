@@ -138,6 +138,9 @@ namespace infd::scene::physics {
 		[[nodiscard]] glm::vec<3, Float> angularVelocity() const noexcept;
 		void angularVelocity(const glm::vec<3, Float>& value) noexcept;
 
+		[[nodiscard]] glm::vec<3, Float> centerOfMassPosition() const noexcept;
+		void centerOfMassPosition(const glm::vec<3, Float>& value) noexcept;
+
 	}; // class Rigidbody
 
 } // namespace infd::scene::physics
