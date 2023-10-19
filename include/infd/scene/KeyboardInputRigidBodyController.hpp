@@ -29,7 +29,11 @@ namespace infd::scene {
 		render::CameraComponent* _camera = nullptr;
 
 		RigidBody* _rigid_body = nullptr;
-		Float _acceleration = 30;
+		Float _min_speed_to_turn = 5;
+		Float _max_speed = 50;
+		Float _max_turning_loss = 0.3;
+
+		Float _acceleration = 50;
 		Float _turn_acceleration = 10;
 		
 		enum Direction {

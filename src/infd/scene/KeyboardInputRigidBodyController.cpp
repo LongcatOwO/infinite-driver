@@ -1,4 +1,5 @@
 // glm
+#include <glm/common.hpp>
 #include <glm/geometric.hpp>
 #include <glm/vec3.hpp>
 #include <glm/gtx/vector_angle.hpp>
@@ -33,17 +34,47 @@ namespace infd::scene {
 	}
 
 	void KeyboardInputRigidBodyController::onPhysicsUpdate() {
-		if (_moving[Direction::Forward])
-			_rigid_body->applyCentralForce(transform().localFront() * _acceleration * _rigid_body->mass());
+		if (_moving[Direction::Forward]) {
+			Float acceleration_factor = glm::max(
+				0.f,
+				1.f - glm::dot(_rigid_body->linearVelocity(), transform().localFront()) / _max_speed
+			);
+			_rigid_body->applyCentralForce(
+				transform().localFront() * _acceleration * acceleration_factor * _rigid_body->mass()
+			);
+		}
 
-		if (_moving[Direction::Backward])
-			_rigid_body->applyCentralForce(-transform().localFront() * _acceleration * _rigid_body->mass());
+		if (_moving[Direction::Backward]) {
+			Float acceleration_factor = glm::max(
+				0.f,
+				1.f - glm::dot(_rigid_body->linearVelocity(), -transform().localFront()) / _max_speed
+			);
+			_rigid_body->applyCentralForce(
+				-transform().localFront() * _acceleration * acceleration_factor * _rigid_body->mass()
+			);
+		}
 
-		if (_moving[Direction::Leftward])
-			_rigid_body->applyTorque(transform().localUp() * _turn_acceleration * _rigid_body->mass());
+		if (_moving[Direction::Leftward]) {
+			Float speed = glm::length(_rigid_body->linearVelocity());
+			if (speed >= _min_speed_to_turn) {
+				Float speed_ratio = glm::clamp(speed / _max_speed, 0.f, 1.f);
+				Float acceleration_ratio = glm::mix(1.f, 1.f - _max_turning_loss, speed_ratio);
+				_rigid_body->applyTorque(
+					transform().localUp() * _turn_acceleration * acceleration_ratio * _rigid_body->mass()
+				);
+			}
+		}
 
-		if (_moving[Direction::RightWard])
-			_rigid_body->applyTorque(-transform().localUp() * _turn_acceleration * _rigid_body->mass());
+		if (_moving[Direction::RightWard]) {
+			Float speed = glm::length(_rigid_body->linearVelocity());
+			if (speed >= _min_speed_to_turn) {
+				Float speed_ratio = glm::clamp(speed / _max_speed, 0.f, 1.f);
+				Float acceleration_ratio = glm::mix(1.f, 1.f - _max_turning_loss, speed_ratio);
+				_rigid_body->applyTorque(
+					-transform().localUp() * _turn_acceleration * acceleration_ratio * _rigid_body->mass()
+				);
+			}
+		}
 
 		stabilizeRoll();
 	}

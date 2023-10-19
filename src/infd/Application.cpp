@@ -62,13 +62,13 @@ namespace {
 			.material.colour = {0.8f, 0.8f, 0.f};
 		SceneObject& car_front_wheel = car->addChild("Front Wheel");
 		car_front_wheel.transform().localRotation(glm::angleAxis(glm::half_pi<Float>(), glm::vec3{0, 0, 1}));
-		car_front_wheel.transform().localPosition({0.f, -1.f, -1.5f});
+		car_front_wheel.transform().localPosition({0.f, -0.5f, -1.5f});
 		car_front_wheel.emplaceComponent<RenderComponent>(renderer, generateCapsuleMesh(0.5f, 1.f))
 			.material.colour = {0, 1, 0};
 
 		SceneObject& car_back_wheel = car->addChild("Back Wheel");
 		car_back_wheel.transform().localRotation(glm::angleAxis(glm::half_pi<Float>(), glm::vec3{0, 0, 1}));
-		car_back_wheel.transform().localPosition({0.f, -1.f, 1.5f});
+		car_back_wheel.transform().localPosition({0.f, -0.5f, 1.5f});
 		car_back_wheel.emplaceComponent<RenderComponent>(renderer, generateCapsuleMesh(0.5f, 1.f))
 			.material.colour = {1, 0, 0};
 
@@ -78,13 +78,13 @@ namespace {
 		// front wheel collision shape
 		collision_shape.addChildShape(
 			std::make_unique<btCapsuleShape>(0.5f, 1.f),
-			{0.f, -1.f, -1.5f},
+			{0.f, -0.5f, -1.5f},
 			glm::angleAxis(glm::half_pi<Float>(), glm::vec3{0, 0, 1})
 		);
 		// back wheel collision shape
 		collision_shape.addChildShape(
 			std::make_unique<btCapsuleShape>(0.5f, 1.f),
-			{0.f, -1.f, 1.5f},
+			{0.f, -0.5f, 1.5f},
 			glm::angleAxis(glm::half_pi<Float>(), glm::vec3{0, 0, 1})
 		);
 		RigidBody& rigid_body = car->emplaceComponent<RigidBody>();
