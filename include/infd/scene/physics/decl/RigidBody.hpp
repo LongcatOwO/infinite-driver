@@ -100,24 +100,24 @@ namespace infd::scene::physics {
 		template <glm::qualifier Q = glm::defaultp>
 		void setMassProperties(btScalar mass, const glm::vec<3, btScalar, Q>& inertia) noexcept;
 
-		bool isKinematic() const noexcept;
+		[[nodiscard]] bool isKinematic() const noexcept;
 		void isKinematic(bool value) noexcept;
 
-		bool isStatic() const noexcept;
+		[[nodiscard]] bool isStatic() const noexcept;
 
-		btScalar friction() const noexcept;
+		[[nodiscard]] btScalar friction() const noexcept;
 		void friction(btScalar value) noexcept;
 
-		btScalar restitution() const noexcept;
+		[[nodiscard]] btScalar restitution() const noexcept;
 		void restitution(btScalar value) noexcept;
 
-		glm::vec<3, Float> gravity() const noexcept;
+		[[nodiscard]] glm::vec<3, Float> gravity() const noexcept;
 		void gravity(const glm::vec<3, Float>& value) noexcept;
 
-		btScalar linearDamping() const noexcept;
+		[[nodiscard]] btScalar linearDamping() const noexcept;
 		void linearDamping(btScalar value) noexcept;
 
-		btScalar angularDamping() const noexcept;
+		[[nodiscard]] btScalar angularDamping() const noexcept;
 		void angularDamping(btScalar value) noexcept;
 
 		auto damping() const noexcept;
@@ -131,6 +131,12 @@ namespace infd::scene::physics {
 
 		void applyTorque(const glm::vec<3, Float>& torque) noexcept;
 		void applyTorqueImpulse(const glm::vec<3, Float>& torque_impulse) noexcept;
+
+		[[nodiscard]] glm::vec<3, Float> linearVelocity() const noexcept;
+		void linearVelocity(const glm::vec<3, Float>& value) noexcept;
+
+		[[nodiscard]] glm::vec<3, Float> angularVelocity() const noexcept;
+		void angularVelocity(const glm::vec<3, Float>& value) noexcept;
 
 	}; // class Rigidbody
 

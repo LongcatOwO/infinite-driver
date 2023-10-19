@@ -1,7 +1,12 @@
 // std
 #include <iostream>
+#include <memory>
 #include <string>
 #include <utility>
+
+// bullet
+#include <BulletCollision/CollisionShapes/btBoxShape.h>
+#include <BulletCollision/CollisionShapes/btCapsuleShape.h>
 
 // glm
 #include <glm/gtc/constants.hpp>
@@ -31,11 +36,63 @@
 #include <infd/scene/LookAtParent.hpp>
 #include <infd/scene/Scene.hpp>
 #include <infd/scene/physics/BoxShape.hpp>
+#include <infd/scene/physics/BvhTriangleMeshShape.hpp>
+#include <infd/scene/physics/CompoundShape.hpp>
 #include <infd/scene/physics/physics.hpp>
 #include <infd/scene/physics/StaticPlaneShape.hpp>
-#include <infd/scene/physics/BvhTriangleMeshShape.hpp>
 #include "infd/generator/ChunkLoader.hpp"
 
+
+namespace {
+	std::unique_ptr<infd::scene::SceneObject> createCar(infd::render::Renderer& renderer) {
+		using namespace ::infd::debug;
+		using namespace ::infd::render;
+		using namespace ::infd::scene;
+		using namespace ::infd::scene::physics;
+
+		/*
+		 * 0.5H 2L 1W
+		 *
+		 * 0.5H = 0.25R * 2 + 0.5L
+		 */
+		std::unique_ptr<SceneObject> car = std::make_unique<SceneObject>("Car");
+		SceneObject& car_body = car->addChild("Body");
+		car_body.transform().localScale({1.f, 0.5f, 2.f});
+		car_body.emplaceComponent<RenderComponent>(renderer, generateBoxMesh())
+			.material.colour = {0.8f, 0.8f, 0.f};
+		SceneObject& car_front_wheel = car->addChild("Front Wheel");
+		car_front_wheel.transform().localRotation(glm::angleAxis(glm::half_pi<Float>(), glm::vec3{0, 0, 1}));
+		car_front_wheel.transform().localPosition({0.f, -1.f, -1.5f});
+		car_front_wheel.emplaceComponent<RenderComponent>(renderer, generateCapsuleMesh(0.5f, 1.f))
+			.material.colour = {0, 1, 0};
+
+		SceneObject& car_back_wheel = car->addChild("Back Wheel");
+		car_back_wheel.transform().localRotation(glm::angleAxis(glm::half_pi<Float>(), glm::vec3{0, 0, 1}));
+		car_back_wheel.transform().localPosition({0.f, -1.f, 1.5f});
+		car_back_wheel.emplaceComponent<RenderComponent>(renderer, generateCapsuleMesh(0.5f, 1.f))
+			.material.colour = {1, 0, 0};
+
+		CompoundShape& collision_shape = car->emplaceComponent<CompoundShape>();
+		// body collision shape
+		collision_shape.addChildShape(std::make_unique<btBoxShape>(btVector3{1.f, 0.5f, 2.f}));
+		// front wheel collision shape
+		collision_shape.addChildShape(
+			std::make_unique<btCapsuleShape>(0.5f, 1.f),
+			{0.f, -1.f, -1.5f},
+			glm::angleAxis(glm::half_pi<Float>(), glm::vec3{0, 0, 1})
+		);
+		// back wheel collision shape
+		collision_shape.addChildShape(
+			std::make_unique<btCapsuleShape>(0.5f, 1.f),
+			{0.f, -1.f, 1.5f},
+			glm::angleAxis(glm::half_pi<Float>(), glm::vec3{0, 0, 1})
+		);
+		RigidBody& rigid_body = car->emplaceComponent<RigidBody>();
+		rigid_body.angularDamping(0.1);
+
+		return car;
+	}
+}
 
 namespace infd {
 	void Application::internalCursorPosCallback(double x_pos, double y_pos) {
@@ -120,44 +177,18 @@ namespace infd {
 		scene::SceneObject& physicsContext = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Physics Context"));
 		physicsContext.emplaceComponent<scene::physics::PhysicsContext>();
 
-        scene::SceneObject& teapot = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Teapot"));
-		teapot.transform().localPosition({-5, 30, 2});
-		teapot.emplaceComponent<render::RenderComponent>(
-			_renderer, 
-			infd::loadWavefrontCases(CGRA_SRCDIR "//res//assets//teapot.obj").build()
-		);
-        teapot.getComponent<render::RenderComponent>()->material.colour = {47/255.f, 196/255.f, 94/255.f};
-		{
-			auto& box_shape = teapot.emplaceComponent<scene::physics::BoxShape>();
-			box_shape.halfSize({3, 3, 3});
-			box_shape.createOutlineMesh(_renderer);
-		}
-        teapot.emplaceComponent<scene::physics::RigidBody>();
-		teapot.emplaceComponent<scene::KeyboardInputRigidBodyController>();
-		scene::SceneObject& camera_target = 
+		scene::SceneObject& car = _scene.addSceneObject(createCar(_renderer));
+		car.transform().localPosition({-5, 30, 2});
+		car.emplaceComponent<scene::KeyboardInputRigidBodyController>();
+		
+		scene::SceneObject& camera_target =
 			_scene.addSceneObject(std::make_unique<scene::SceneObject>("Camera Target"));
-		camera_target.emplaceComponent<scene::FollowTransform>().toFollow(&teapot.transform());
-		scene::SceneObject& camera = camera_target.addChild("camera");
+		camera_target.emplaceComponent<scene::FollowTransform>().toFollow(&car.transform());
+
+		scene::SceneObject& camera = camera_target.addChild("Camera");
 		camera.emplaceComponent<render::CameraComponent>();
 		camera.emplaceComponent<render::DitherSettingsComponent>();
 		camera.emplaceComponent<scene::LookAtParent>();
-
-        scene::SceneObject& bunny = _scene.addSceneObject(std::make_unique<scene::SceneObject>("Bunny"));
-		bunny.transform().localPosition({8, 30, -1.5});
-		scene::SceneObject& bunny_mesh = bunny.addChild("Bunny Mesh");
-		bunny_mesh.emplaceComponent<render::RenderComponent>(
-			_renderer,
-			infd::loadWavefrontCases(CGRA_SRCDIR "//res//assets//bunny.obj").build()
-		);
-		bunny_mesh.transform().localScale(glm::vec3{75});
-        bunny_mesh.getComponent<render::RenderComponent>()->material.colour = {232/255.f, 205/255.f, 136/255.f};
-		{
-			auto& box_shape = bunny.emplaceComponent<scene::physics::BoxShape>();
-			box_shape.halfSize({3, 3, 3});
-			box_shape.createOutlineMesh(_renderer);
-		}
-        bunny.emplaceComponent<scene::physics::RigidBody>();
-
         scene::SceneObject& chunkLoader = _scene.addSceneObject(std::make_unique<scene::SceneObject>("ChunkLoader"));
         auto& loader = chunkLoader.emplaceComponent<generator::ChunkLoader>(chunkLoader, _renderer, 2);
         loader.transform().localScale(glm::vec3(WORLD_SCALE));

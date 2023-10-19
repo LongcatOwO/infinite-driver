@@ -25,18 +25,21 @@ namespace infd::scene {
 		Scene* _scene = nullptr;
 
 		RigidBody* _rigid_body = nullptr;
-		Float _acceleration = 50;
-		Float _turn_acceleration = 50;
-		Float _acceleration_force;
-		Float _turn_acceleration_force;
+		Float _acceleration = 30;
+		Float _turn_acceleration = 10;
 		
-		std::bitset<4> _moving{};
 		enum Direction {
 			Forward = 0,
 			Backward,
 			Leftward,
 			RightWard,
 		};
+
+		std::bitset<4> _moving{};
+
+		char _stabilize_key = 'e';
+		bool _is_stabilizing = false;
+		Float _stabilizing_velocity = 20;
 
 		void onAwake() override;
 
@@ -46,14 +49,6 @@ namespace infd::scene {
 
 		void keyCallback(int key, int scancode, int action, int mods);
 
-		void updateAccelerationForce() {
-			_acceleration_force = _acceleration * _rigid_body->mass();
-		}
-
-		void updateTurnAccelerationForce() {
-			_turn_acceleration_force = _turn_acceleration * _rigid_body->mass();
-		}
-
 	private:
 		Float acceleration() const noexcept {
 			return _acceleration;
@@ -61,7 +56,6 @@ namespace infd::scene {
 
 		void acceleration(const Float& value) noexcept {
 			_acceleration = value;
-			updateAccelerationForce();
 		}
 
 		Float turn_acceleration() const noexcept {
@@ -70,7 +64,22 @@ namespace infd::scene {
 
 		void turn_acceleration(const Float& turn_acceleration) noexcept {
 			_turn_acceleration = turn_acceleration;
-			updateTurnAccelerationForce();
+		}
+
+		char stabilizeKey() const noexcept {
+			return _stabilize_key;
+		}
+
+		void stabilizeKey(char value) noexcept {
+			_stabilize_key = value;
+		}
+
+		Float stabilizingVelocity() const noexcept {
+			return _stabilizing_velocity;
+		}
+
+		void stabilizationVelocity(const Float& value) noexcept {
+			_stabilizing_velocity = value;
 		}
 	}; // class KeyboardInputRigidBodyController
 
