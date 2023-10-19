@@ -8,3 +8,10 @@ This project uses recent C++ library and language features and so needs an up-to
 
 Dither pattern generated in https://seansleblanc.itch.io/ordered-dither-maker
 Blue noise from http://momentsingraphics.de/BlueNoise.html
+
+## Controls
+
+WASD - Move
+E - Flip Car
+Right Click - Move Camera
+Scroll Wheel - Zoom Camera
