@@ -267,27 +267,27 @@ namespace infd {
 	void Application::internalRenderGUI() {
 		// setup the window
 		ImGui::SetNextWindowPos(ImVec2{5, 5}, ImGuiCond_Once);
-		ImGui::SetNextWindowSize(ImVec2{300, 480}, ImGuiCond_Once);
+		ImGui::SetNextWindowSize(ImVec2{300, 350}, ImGuiCond_Once);
 		ImGui::Begin("Options", nullptr);
 
 		// display current camera parameters
 		ImGui::Text("Application %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-		ImGui::SliderFloat("Pitch", &_pitch, -glm::half_pi<float>(), glm::half_pi<float>(), "%.2f");
-		ImGui::SliderFloat("Yaw", &_yaw, -glm::pi<float>(), glm::pi<float>(), "%.2f");
-		ImGui::SliderFloat("Distance", &_distance, 0, 100, "%.2f", ImGuiSliderFlags_Logarithmic);
-
-		// helpful drawing options
-		ImGui::Checkbox("Show axis", &_show_axis);
-		ImGui::SameLine();
-		ImGui::Checkbox("Show grid", &_show_grid);
-		ImGui::Checkbox("Wireframe", &_show_wireframe);
-		ImGui::SameLine();
+//		ImGui::SliderFloat("Pitch", &_pitch, -glm::half_pi<float>(), glm::half_pi<float>(), "%.2f");
+//		ImGui::SliderFloat("Yaw", &_yaw, -glm::pi<float>(), glm::pi<float>(), "%.2f");
+//		ImGui::SliderFloat("Distance", &_distance, 0, 100, "%.2f", ImGuiSliderFlags_Logarithmic);
+//
+//		// helpful drawing options
+//		ImGui::Checkbox("Show axis", &_show_axis);
+//		ImGui::SameLine();
+//		ImGui::Checkbox("Show grid", &_show_grid);
+//		ImGui::Checkbox("Wireframe", &_show_wireframe);
 		if (ImGui::Button("Screenshot")) cgra::rgba_image::screenshot(true);
-		ImGui::Checkbox("Use render pipeline", &_use_render_pipeline);
+//		ImGui::Checkbox("Use render pipeline", &_use_render_pipeline);
 
 		ImGui::Separator();
 
 		_renderer.gui();
+        ImGui::Separator();
 		ImGui::Checkbox("Render un-dithered scene", &_render_settings.render_original);
         ImGui::Checkbox("Render wireframe", &_render_settings.render_wireframe);
 

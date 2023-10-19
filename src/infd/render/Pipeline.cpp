@@ -72,7 +72,7 @@ void infd::render::Pipeline::render(util::handle_vector<RenderComponent*>& items
     vec3 shadow_cam = light.transform().globalPosition() - (normalize(light.direction) * shadow_cam_offset);
 
     vec3 up_vec = normalize(shadow_cam) != vec3{0, 1, 0} ? vec3{0, 1, 0} : vec3{0, 0, 1} ;
-    auto shadow_view = lookAt(shadow_cam, {0, 0, 0}, up_vec);
+    auto shadow_view = lookAt(shadow_cam, light.transform().globalPosition(), up_vec);
 
     auto shadow_proj = ortho(-shadow_size, shadow_size, -shadow_size, shadow_size, -0.f, 100.f);
 
