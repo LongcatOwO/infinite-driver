@@ -5,7 +5,7 @@
 namespace infd::scene {
 
 	class LookAtParent : public Component {
-		Float _distance_from_parent = 50.f;
+		Float _distance_from_parent = 7.5f;
 		Float _yaw = 0;
 		Float _pitch = 0;
 		Scene* _scene = nullptr;

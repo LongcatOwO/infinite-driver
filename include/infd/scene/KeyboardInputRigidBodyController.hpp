@@ -14,6 +14,9 @@
 // project - infd::scene
 #include <infd/scene/Scene.hpp>
 
+// project - infd::scene::render
+#include <infd/render/RenderComponent.hpp>
+
 // project - infd::scene::physics
 #include <infd/scene/physics/physics.hpp>
 
@@ -23,20 +26,31 @@ namespace infd::scene {
 		using RigidBody = physics::RigidBody;
 
 		Scene* _scene = nullptr;
+		render::CameraComponent* _camera = nullptr;
 
 		RigidBody* _rigid_body = nullptr;
+		Float _min_speed_to_turn = 5;
+		Float _max_speed = 50;
+		Float _max_turning_loss = 0.3;
+
 		Float _acceleration = 50;
-		Float _turn_acceleration = 50;
-		Float _acceleration_force;
-		Float _turn_acceleration_force;
+		Float _turn_acceleration = 10;
 		
-		std::bitset<4> _moving{};
 		enum Direction {
 			Forward = 0,
 			Backward,
 			Leftward,
 			RightWard,
 		};
+
+		std::bitset<4> _moving{};
+
+		int _stabilize_roll_key = GLFW_KEY_E;
+		bool _is_stabilizing_roll = false;
+		int _stabilize_direction_key = GLFW_KEY_Q;
+		bool _is_stabilizing_direction = false;
+
+		Float _stabilizing_velocity = 20;
 
 		void onAwake() override;
 
@@ -45,14 +59,8 @@ namespace infd::scene {
 		void onPhysicsUpdate() override;
 
 		void keyCallback(int key, int scancode, int action, int mods);
-
-		void updateAccelerationForce() {
-			_acceleration_force = _acceleration * _rigid_body->mass();
-		}
-
-		void updateTurnAccelerationForce() {
-			_turn_acceleration_force = _turn_acceleration * _rigid_body->mass();
-		}
+		
+		void stabilizeRoll();
 
 	private:
 		Float acceleration() const noexcept {
@@ -61,7 +69,6 @@ namespace infd::scene {
 
 		void acceleration(const Float& value) noexcept {
 			_acceleration = value;
-			updateAccelerationForce();
 		}
 
 		Float turn_acceleration() const noexcept {
@@ -70,7 +77,30 @@ namespace infd::scene {
 
 		void turn_acceleration(const Float& turn_acceleration) noexcept {
 			_turn_acceleration = turn_acceleration;
-			updateTurnAccelerationForce();
+		}
+
+		int stabilizeRollKey() const noexcept {
+			return _stabilize_roll_key;
+		}
+
+		void stabilizeRollKey(int value) noexcept {
+			_stabilize_roll_key = value;
+		}
+
+		int stabilizeDirectionKey() const noexcept {
+			return _stabilize_direction_key;
+		}
+
+		void stabilizeDirectionKey(int value) noexcept {
+			_stabilize_direction_key = value;
+		}
+
+		Float stabilizingVelocity() const noexcept {
+			return _stabilizing_velocity;
+		}
+
+		void stabilizationVelocity(const Float& value) noexcept {
+			_stabilizing_velocity = value;
 		}
 	}; // class KeyboardInputRigidBodyController
 

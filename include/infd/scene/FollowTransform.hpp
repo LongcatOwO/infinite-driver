@@ -9,7 +9,7 @@
 namespace infd::scene {
 
 	class FollowTransform : public Component {
-		glm::vec<3, Float> _position_offset{0, 15.f, 0};
+		glm::vec<3, Float> _position_offset{0, 2, 0};
 
 		Transform* _to_follow = nullptr;
 

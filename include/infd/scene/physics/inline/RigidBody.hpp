@@ -162,4 +162,30 @@ namespace infd::scene::physics {
 		_rigid_body->applyTorqueImpulse(math::toBullet(torque_impulse));
 	}
 
+	inline glm::vec<3, Float> RigidBody::linearVelocity() const noexcept {
+		return math::toGlm(_rigid_body->getLinearVelocity());
+	}
+
+	inline void RigidBody::linearVelocity(const glm::vec<3, Float>& value) noexcept {
+		_rigid_body->setLinearVelocity(math::toBullet(value));
+	}
+
+	inline glm::vec<3, Float> RigidBody::angularVelocity() const noexcept {
+		return math::toGlm(_rigid_body->getAngularVelocity());
+	}
+
+	inline void RigidBody::angularVelocity(const glm::vec<3, Float>& value) noexcept {
+		_rigid_body->setAngularVelocity(math::toBullet(value));
+	}
+
+	inline glm::vec<3, Float> RigidBody::centerOfMassPosition() const noexcept {
+		return math::toGlm(_rigid_body->getCenterOfMassPosition());
+	}
+
+	inline void RigidBody::centerOfMassPosition(const glm::vec<3, Float>& value) noexcept {
+		btTransform t = _rigid_body->getCenterOfMassTransform();
+		t.setOrigin(math::toBullet(value));
+		_rigid_body->setCenterOfMassTransform(t);
+	}
+
 } // namespace infd::scene::physics

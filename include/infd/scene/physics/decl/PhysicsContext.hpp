@@ -51,7 +51,7 @@ namespace infd::scene::physics {
 		using Float = float;
 		using RigidBodyLifeSpanHandle = util::handle_vector<RigidBodyLifeSpan>::element_handler;
 
-		static constexpr glm::vec<3, Float> default_gravity{0, -9.8, 0};
+		static constexpr glm::vec<3, Float> default_gravity{0, -20, 0};
 
 		std::unique_ptr<btCollisionConfiguration> _collision_configuration;
 		std::unique_ptr<btDispatcher> _dispatcher;

@@ -78,7 +78,7 @@ namespace infd::scene {
 
 	void LookAtParent::scrollCallback(double x_offset, double y_offset) noexcept {
 		(void) x_offset;
-		_distance_from_parent *= glm::pow(_zoom_factor, y_offset);
+		_distance_from_parent *= glm::pow(_zoom_factor, -y_offset);
 	}
 
 } // namespace infd::scene

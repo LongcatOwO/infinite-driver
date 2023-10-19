@@ -32,7 +32,7 @@ namespace infd {
 	using GLFWWindowPtr = std::unique_ptr<GLFWwindow, GLFWWindowDeleter>;
 
 	class Application {
-        constexpr static const float WORLD_SCALE = 30.f;
+        constexpr static const float WORLD_SCALE = 300.f;
 
 		// window
 		GLFWWindowPtr _window;
